@@ -1,6 +1,6 @@
 # MITA 4.0 State Self-Assessment Tool
 
-A Progressive Web App (PWA) enabling State Medicaid Agencies (SMAs) to self-assess their Medicaid Enterprise maturity using the **MITA 4.0 Maturity Model**.
+A Progressive Web App (PWA) enabling State Medicaid Agencies (SMAs) to self-assess their Medicaid Enterprise maturity using the **MITA 4.0 Maturity Model**.TEST
 
 ## Overview
 
