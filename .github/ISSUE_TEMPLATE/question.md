@@ -42,4 +42,3 @@ Which part of the project does this relate to?
 ## Additional Information
 
 Any other details that might help answer your question.
-
