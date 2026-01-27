@@ -80,7 +80,7 @@ describe('exportService', () => {
       const data = JSON.parse(json);
 
       expect(data.exportVersion).toBe('1.0');
-      expect(data.appVersion).toBe('0.1.0');
+      expect(data.appVersion).toBe(__APP_VERSION__);
       expect(data.scope).toBe('full');
       expect(data.data.assessments).toEqual([]);
       expect(data.data.ratings).toEqual([]);

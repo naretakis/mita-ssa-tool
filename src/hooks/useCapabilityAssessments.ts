@@ -9,6 +9,8 @@ import { useLiveQuery } from 'dexie-react-hooks';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../services/db';
 import { getAreaWithDomain } from '../services/capabilities';
+import { createHistorySnapshot as createSnapshot } from '../services/history';
+import { incrementTagUsage } from '../services/tags';
 import type { CapabilityAssessment, AssessmentStatus } from '../types';
 
 /**
@@ -76,9 +78,9 @@ export function useCapabilityAssessments(): UseCapabilityAssessmentsReturn {
 
     await db.capabilityAssessments.add(assessment);
 
-    // Update tag usage
+    // Update tag usage via shared service
     for (const tag of initialTags) {
-      await updateTagUsage(tag);
+      await incrementTagUsage(tag);
     }
 
     return assessmentId;
@@ -99,14 +101,17 @@ export function useCapabilityAssessments(): UseCapabilityAssessmentsReturn {
     }
 
     // Create history snapshot before editing
-    await createHistorySnapshot(assessmentId);
-
-    // Convert ratings to carry-forward mode (set previousLevel)
     const ratings = await db.orbitRatings
       .where('capabilityAssessmentId')
       .equals(assessmentId)
       .toArray();
 
+    if (assessment.overallScore !== undefined) {
+      const snapshot = createSnapshot(assessment, ratings, assessment.overallScore);
+      await db.assessmentHistory.add(snapshot);
+    }
+
+    // Convert ratings to carry-forward mode (set previousLevel)
     const now = new Date();
     for (const rating of ratings) {
       if (rating.currentLevel !== 0) {
@@ -159,9 +164,9 @@ export function useCapabilityAssessments(): UseCapabilityAssessmentsReturn {
       overallScore: overallScore ? Math.round(overallScore * 10) / 10 : undefined,
     });
 
-    // Update tag usage
+    // Update tag usage via shared service
     for (const tag of assessment.tags) {
-      await updateTagUsage(tag);
+      await incrementTagUsage(tag);
     }
   };
 
@@ -174,8 +179,9 @@ export function useCapabilityAssessments(): UseCapabilityAssessmentsReturn {
       updatedAt: new Date(),
     });
 
+    // Update tag usage via shared service
     for (const tag of tags) {
-      await updateTagUsage(tag);
+      await incrementTagUsage(tag);
     }
   };
 
@@ -348,81 +354,4 @@ export function useCapabilityAssessment(
   );
 
   return { assessment };
-}
-
-/**
- * Create a history snapshot of an assessment
- * @internal
- */
-async function createHistorySnapshot(assessmentId: string): Promise<void> {
-  const assessment = await db.capabilityAssessments.get(assessmentId);
-  if (!assessment || assessment.overallScore === undefined) return;
-
-  const ratings = await db.orbitRatings
-    .where('capabilityAssessmentId')
-    .equals(assessmentId)
-    .toArray();
-
-  // Calculate dimension scores
-  const dimensionScores: Record<string, number> = {};
-  const ratingsByDimension = new Map<string, number[]>();
-
-  for (const rating of ratings) {
-    if (rating.currentLevel > 0) {
-      const key = rating.subDimensionId
-        ? `${rating.dimensionId}:${rating.subDimensionId}`
-        : rating.dimensionId;
-      const levels = ratingsByDimension.get(key) ?? [];
-      levels.push(rating.currentLevel);
-      ratingsByDimension.set(key, levels);
-    }
-  }
-
-  for (const [key, levels] of ratingsByDimension) {
-    dimensionScores[key] = levels.reduce((a, b) => a + b, 0) / levels.length;
-  }
-
-  await db.assessmentHistory.add({
-    id: uuidv4(),
-    capabilityAssessmentId: assessmentId,
-    capabilityAreaId: assessment.capabilityAreaId,
-    snapshotDate: assessment.finalizedAt ?? assessment.updatedAt,
-    tags: assessment.tags,
-    overallScore: assessment.overallScore,
-    dimensionScores,
-    ratings: ratings.map((r) => ({
-      dimensionId: r.dimensionId,
-      subDimensionId: r.subDimensionId,
-      aspectId: r.aspectId,
-      currentLevel: r.currentLevel,
-      questionResponses: r.questionResponses,
-      evidenceResponses: r.evidenceResponses,
-      notes: r.notes,
-      barriers: r.barriers,
-      plans: r.plans,
-    })),
-  });
-}
-
-/**
- * Update tag usage count
- * @internal
- */
-async function updateTagUsage(tagName: string): Promise<void> {
-  const existing = await db.tags.where('name').equals(tagName).first();
-  const now = new Date();
-
-  if (existing) {
-    await db.tags.update(existing.id, {
-      usageCount: existing.usageCount + 1,
-      lastUsed: now,
-    });
-  } else {
-    await db.tags.add({
-      id: uuidv4(),
-      name: tagName,
-      usageCount: 1,
-      lastUsed: now,
-    });
-  }
 }

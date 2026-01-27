@@ -10,14 +10,9 @@
 import JSZip from 'jszip';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db';
+import { createHistorySnapshot, calculateDimensionScores, toHistoricalRatings } from '../history';
 import type { ExportData, ImportResult, ImportItemResult, ImportProgressCallback } from './types';
-import type {
-  CapabilityAssessment,
-  OrbitRating,
-  AssessmentHistory,
-  HistoricalRating,
-  Attachment,
-} from '../../types';
+import type { CapabilityAssessment, Attachment } from '../../types';
 
 /** Current supported export version */
 const SUPPORTED_VERSIONS = ['1.0'];
@@ -39,58 +34,6 @@ function validateExportData(data: unknown): data is ExportData {
   if (!Array.isArray(dataObj.ratings)) return false;
 
   return true;
-}
-
-/**
- * Creates a history snapshot from an assessment and its ratings
- */
-async function createHistorySnapshot(
-  assessment: CapabilityAssessment,
-  ratings: OrbitRating[],
-  score: number
-): Promise<AssessmentHistory> {
-  const historicalRatings: HistoricalRating[] = ratings.map((r) => ({
-    dimensionId: r.dimensionId,
-    subDimensionId: r.subDimensionId,
-    aspectId: r.aspectId,
-    currentLevel: r.currentLevel,
-    targetLevel: r.targetLevel,
-    questionResponses: r.questionResponses,
-    evidenceResponses: r.evidenceResponses,
-    notes: r.notes,
-    barriers: r.barriers,
-    plans: r.plans,
-  }));
-
-  // Calculate dimension scores
-  const dimensionScores: Record<string, number> = {};
-  const dimensionRatings = new Map<string, number[]>();
-
-  for (const rating of ratings) {
-    if (rating.currentLevel > 0) {
-      const key = rating.subDimensionId
-        ? `${rating.dimensionId}:${rating.subDimensionId}`
-        : rating.dimensionId;
-      const existing = dimensionRatings.get(key) ?? [];
-      existing.push(rating.currentLevel);
-      dimensionRatings.set(key, existing);
-    }
-  }
-
-  for (const [key, scores] of dimensionRatings) {
-    dimensionScores[key] = scores.reduce((a, b) => a + b, 0) / scores.length;
-  }
-
-  return {
-    id: uuidv4(),
-    capabilityAssessmentId: assessment.id,
-    capabilityAreaId: assessment.capabilityAreaId,
-    snapshotDate: assessment.finalizedAt ?? assessment.updatedAt,
-    tags: [...assessment.tags],
-    overallScore: score,
-    dimensionScores,
-    ratings: historicalRatings,
-  };
 }
 
 /**
@@ -469,7 +412,7 @@ async function processAssessmentImport(
 
     // Create history snapshot of existing
     if (existingAssessment.status === 'finalized' && existingAssessment.overallScore) {
-      const historySnapshot = await createHistorySnapshot(
+      const historySnapshot = createHistorySnapshot(
         existingAssessment,
         existingRatings,
         existingAssessment.overallScore
@@ -533,38 +476,9 @@ async function processAssessmentImport(
         };
       }
 
-      // Create history entry from imported data
-      const historicalRatings: HistoricalRating[] = importedRatings.map((r) => ({
-        dimensionId: r.dimensionId,
-        subDimensionId: r.subDimensionId,
-        aspectId: r.aspectId,
-        currentLevel: r.currentLevel,
-        targetLevel: r.targetLevel,
-        questionResponses: r.questionResponses,
-        evidenceResponses: r.evidenceResponses,
-        notes: r.notes,
-        barriers: r.barriers,
-        plans: r.plans,
-      }));
-
-      const dimensionScores: Record<string, number> = {};
-      const dimensionRatings = new Map<string, number[]>();
-
-      for (const rating of importedRatings) {
-        if (rating.currentLevel > 0) {
-          const key = rating.subDimensionId
-            ? `${rating.dimensionId}:${rating.subDimensionId}`
-            : rating.dimensionId;
-          const existing = dimensionRatings.get(key) ?? [];
-          existing.push(rating.currentLevel);
-          dimensionRatings.set(key, existing);
-        }
-      }
-
-      for (const [key, scores] of dimensionRatings) {
-        dimensionScores[key] = scores.reduce((a, b) => a + b, 0) / scores.length;
-      }
-
+      // Create history entry from imported data using shared utilities
+      // Note: We construct a temporary assessment object with the imported date
+      // since the imported assessment has a different ID than the existing one
       await db.assessmentHistory.add({
         id: uuidv4(),
         capabilityAssessmentId: existingAssessment.id,
@@ -572,8 +486,8 @@ async function processAssessmentImport(
         snapshotDate: importedDate,
         tags: importedAssessment.tags,
         overallScore: importedAssessment.overallScore,
-        dimensionScores,
-        ratings: historicalRatings,
+        dimensionScores: calculateDimensionScores(importedRatings),
+        ratings: toHistoricalRatings(importedRatings),
       });
 
       return {

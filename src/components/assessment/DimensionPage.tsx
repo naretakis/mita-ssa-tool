@@ -8,6 +8,7 @@
 import { JSX, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Box, Typography, Chip, Paper, alpha, useTheme } from '@mui/material';
 import { AspectCard } from './AspectCard';
+import { calculateAverageScore } from '../../services/scoring';
 import type {
   OrbitAspect,
   OrbitRating,
@@ -101,15 +102,16 @@ export function DimensionPage({
     };
   }, [aspects, ratings]);
 
-  // Calculate average score
+  // Calculate average score using shared scoring utility
   const averageScore = useMemo(() => {
-    const scoredRatings = aspects
-      .map((a) => ratings.get(a.id))
-      .filter((r): r is OrbitRating => r !== undefined && r.currentLevel > 0);
-
-    if (scoredRatings.length === 0) return null;
-    const sum = scoredRatings.reduce((acc, r) => acc + r.currentLevel, 0);
-    return Math.round((sum / scoredRatings.length) * 10) / 10;
+    const levels: number[] = [];
+    for (const aspect of aspects) {
+      const level = ratings.get(aspect.id)?.currentLevel;
+      if (level !== undefined && level > 0) {
+        levels.push(level);
+      }
+    }
+    return calculateAverageScore(levels);
   }, [aspects, ratings]);
 
   return (
