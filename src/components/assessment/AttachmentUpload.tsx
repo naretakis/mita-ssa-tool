@@ -5,7 +5,7 @@
  * Files are stored locally in IndexedDB.
  */
 
-import { JSX, useCallback, useState } from 'react';
+import React, { JSX, useCallback, useState } from 'react';
 import {
   Box,
   Button,
@@ -40,6 +40,8 @@ interface AttachmentUploadProps {
   onDownload: (attachment: Attachment) => void;
   disabled?: boolean;
   maxFileSize?: number; // in bytes, default 10MB
+  /** Unique identifier for this upload component (used for input ID) */
+  uploadId?: string;
 }
 
 const ALLOWED_TYPES = [
@@ -88,6 +90,7 @@ export function AttachmentUpload({
   onDownload,
   disabled = false,
   maxFileSize = DEFAULT_MAX_SIZE,
+  uploadId,
 }: AttachmentUploadProps): JSX.Element {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,6 +99,11 @@ export function AttachmentUpload({
     file: File | null;
   }>({ open: false, file: null });
   const [description, setDescription] = useState('');
+
+  // Generate a unique ID for the file input to avoid conflicts when multiple
+  // AttachmentUpload components are rendered on the same page
+  const generatedId = React.useId();
+  const inputId = uploadId ? `attachment-upload-${uploadId}` : `attachment-upload-${generatedId}`;
 
   const handleFileSelect = useCallback(
     async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -194,14 +202,14 @@ export function AttachmentUpload({
       >
         <input
           type="file"
-          id="attachment-upload"
+          id={inputId}
           accept={ALLOWED_TYPES.join(',')}
           onChange={handleFileSelect}
           disabled={disabled || uploading}
           style={{ display: 'none' }}
           aria-label="Upload file"
         />
-        <label htmlFor="attachment-upload">
+        <label htmlFor={inputId}>
           <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
             {uploading ? (
               <CircularProgress size={24} aria-label="Uploading file" />

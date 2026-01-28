@@ -1,260 +1,105 @@
+#!/usr/bin/env node
 /**
  * Generate Test Import ZIP
  *
  * Creates synthetic ZIP files for testing import functionality.
- * Generates realistic assessment data matching the export format.
+ * Uses the actual data files (capabilities.json, orbit-model.json) to ensure
+ * generated data matches the exact structure expected by the import service.
  *
- * Usage: 
+ * Usage:
  *   node scripts/generate-test-import.js          # Generate both files
  *   node scripts/generate-test-import.js small    # Generate small file only
  *   node scripts/generate-test-import.js large    # Generate large file only
  */
 
 import JSZip from 'jszip';
-import { writeFileSync, readFileSync } from 'fs';
+import { writeFileSync, readFileSync, mkdirSync, existsSync } from 'fs';
 import { randomUUID } from 'crypto';
 
 // ============================================================================
-// Configuration
+// Load actual data files
+// ============================================================================
+
+const capabilitiesData = JSON.parse(readFileSync('src/data/capabilities.json', 'utf-8'));
+const orbitModel = JSON.parse(readFileSync('src/data/orbit-model.json', 'utf-8'));
+
+// ============================================================================
+// Constants (matching exportService.ts)
 // ============================================================================
 
 const EXPORT_VERSION = '1.0';
 const APP_VERSION = '0.1.0';
 
-// Load actual capabilities from the data file
-const capabilitiesData = JSON.parse(
-  readFileSync('src/data/capabilities.json', 'utf-8')
-);
+// ============================================================================
+// Sample content for realistic data
+// ============================================================================
 
-/**
- * Extract all domains and areas from capabilities data
- */
-function getAllDomainsAndAreas() {
-  const result = [];
-  
-  for (const domain of capabilitiesData.domains) {
-    const domainEntry = {
-      id: domain.id,
-      name: domain.name,
-      areas: [],
-    };
-    
-    if (domain.areas) {
-      // Standard domain with direct areas
-      domainEntry.areas = domain.areas.map(a => ({
-        id: a.id,
-        name: a.name,
-      }));
-    } else if (domain.categories) {
-      // Categorized domain (Data Management, Technical)
-      for (const category of domain.categories) {
-        for (const area of category.areas) {
-          domainEntry.areas.push({
-            id: area.id,
-            name: area.name,
-          });
-        }
-      }
-    }
-    
-    result.push(domainEntry);
-  }
-  
-  return result;
-}
-
-// Get all domains/areas from actual data
-const ALL_DOMAINS = getAllDomainsAndAreas();
-
-// Small sample for quick testing (3 domains, 8 areas)
-const SAMPLE_DOMAINS = [
-  {
-    id: 'member-management',
-    name: 'Member Management',
-    areas: [
-      { id: 'member-eligibility-management', name: 'Member Eligibility Management' },
-      { id: 'member-enrollment-management', name: 'Member Enrollment Management' },
-      { id: 'member-support-management', name: 'Member Support Management' },
-    ],
-  },
-  {
-    id: 'provider-management',
-    name: 'Provider Management',
-    areas: [
-      { id: 'provider-enrollment', name: 'Provider Enrollment' },
-      { id: 'provider-screening', name: 'Provider Screening' },
-      { id: 'provider-monitoring', name: 'Provider Monitoring' },
-    ],
-  },
-  {
-    id: 'claims-encounter-management',
-    name: 'Claims and Encounter Management',
-    areas: [
-      { id: 'claims-encounter-submission', name: 'Claims and Encounter Submission Management' },
-      { id: 'claims-adjudication', name: 'Claims Adjudication' },
-    ],
-  },
-];
-
-// ORBIT dimensions with aspects
-const ORBIT_DIMENSIONS = {
-  outcomes: {
-    name: 'Outcomes',
-    required: false,
-    aspects: [
-      { id: 'culture-mindset', name: 'Culture & Mindset' },
-      { id: 'capability', name: 'Capability' },
-      { id: 'quality-consistency', name: 'Quality & Consistency' },
-    ],
-  },
-  roles: {
-    name: 'Roles',
-    required: false,
-    aspects: [
-      { id: 'technology-resources', name: 'Technology Resources' },
-      { id: 'organizational-goals-alignment', name: 'Organizational Goals Alignment' },
-      { id: 'governance-standardization', name: 'Governance & Standardization' },
-    ],
-  },
-  businessArchitecture: {
-    name: 'Business Architecture',
-    required: true,
-    aspects: [
-      { id: 'business-capability', name: 'Business Capability' },
-      { id: 'business-process', name: 'Business Process' },
-      { id: 'business-process-model', name: 'Business Process Model' },
-    ],
-  },
-  informationData: {
-    name: 'Information & Data',
-    required: true,
-    aspects: [
-      { id: 'data-governance', name: 'Data Governance' },
-      { id: 'data-quality', name: 'Data Quality' },
-      { id: 'data-architecture', name: 'Data Architecture' },
-    ],
-  },
-  technology: {
-    name: 'Technology',
-    required: true,
-    subDimensions: [
-      {
-        id: 'infrastructure',
-        name: 'Infrastructure',
-        aspects: [
-          { id: 'cloud-adoption', name: 'Cloud Adoption' },
-          { id: 'scalability', name: 'Scalability' },
-        ],
-      },
-      {
-        id: 'integration',
-        name: 'Integration',
-        aspects: [
-          { id: 'api-management', name: 'API Management' },
-          { id: 'data-exchange', name: 'Data Exchange' },
-        ],
-      },
-      {
-        id: 'securityIdentity',
-        name: 'Security & Identity',
-        aspects: [
-          { id: 'access-control', name: 'Access Control' },
-          { id: 'data-protection', name: 'Data Protection' },
-        ],
-      },
-    ],
-  },
-};
-
-// Sample notes, barriers, and plans for realistic content
 const SAMPLE_NOTES = [
-  'Current processes are documented but not consistently followed across all teams.',
-  'Staff training has been completed for core functions. Additional training planned for Q2.',
-  'Integration with state HIE is in progress. Expected completion by end of fiscal year.',
-  'Legacy system limitations require manual workarounds for some edge cases.',
-  'Recent audit identified areas for improvement in documentation practices.',
-  'Stakeholder feedback has been positive regarding recent process improvements.',
-  'Cross-functional team established to address identified gaps.',
-  'Vendor support contract renewed with enhanced SLA requirements.',
+  'Current processes are documented but not consistently followed across all teams. We have identified several areas where staff are using informal workarounds rather than following established procedures. A process improvement initiative is planned for Q3 to address these gaps and ensure consistent application of documented workflows.',
+  'Staff training has been completed for core functions, with over 85% of team members now certified on the new system. Additional training is planned for Q2 to cover advanced features and edge case handling. We are also developing a mentorship program to pair experienced staff with newer team members.',
+  'Integration with the state Health Information Exchange (HIE) is in progress and approximately 60% complete. Expected completion is by end of fiscal year. Current focus is on data mapping and validation rules. Initial testing has shown promising results with a 95% match rate on member demographics.',
+  'Legacy system limitations require manual workarounds for some edge cases, particularly around complex eligibility scenarios. The team has documented 23 specific scenarios that require manual intervention. We are working with the vendor to prioritize these for resolution in the next system update scheduled for Q4.',
+  'Recent internal audit identified several areas for improvement in documentation practices. Key findings included inconsistent version control, missing approval signatures, and outdated procedure manuals. A remediation plan has been developed with target completion dates for each finding.',
+  'Stakeholder feedback has been overwhelmingly positive regarding recent process improvements. Survey results show a 40% increase in satisfaction scores compared to last year. Key areas of improvement cited include faster turnaround times, clearer communication, and more intuitive system interfaces.',
+  'A cross-functional team has been established to address identified gaps in our current capabilities. The team includes representatives from IT, operations, policy, and compliance. Weekly meetings are held to track progress and remove blockers. Initial focus areas include data quality and system integration.',
+  'Vendor support contract has been renewed with enhanced SLA requirements including 99.9% uptime guarantee and 4-hour response time for critical issues. New contract also includes quarterly business reviews and dedicated account management. Cost increase of 12% was approved given the improved service levels.',
+  'Process automation initiative is underway to reduce manual effort and improve accuracy. Phase 1 focused on eligibility verification has reduced processing time by 35%. Phase 2 will target claims adjudication workflows. Full implementation expected by end of calendar year with projected annual savings of $2.1M.',
+  'Data quality improvements implemented over the past 6 months have resulted in a 45% reduction in processing errors. Key improvements include automated validation rules, duplicate detection algorithms, and enhanced data entry forms. Ongoing monitoring dashboards have been established to track quality metrics.',
 ];
 
 const SAMPLE_BARRIERS = [
-  'Limited staff capacity for implementing new processes.',
-  'Budget constraints affecting technology modernization timeline.',
-  'Legacy system integration challenges requiring custom development.',
-  'Competing priorities with other state initiatives.',
-  'Vendor dependency for critical system modifications.',
-  'Staff turnover impacting institutional knowledge retention.',
-  'Complex regulatory requirements requiring careful interpretation.',
-  'Data quality issues in source systems affecting downstream processes.',
+  'Limited staff capacity continues to be a significant challenge for implementing new processes. Current team is operating at 120% capacity due to ongoing modernization efforts combined with day-to-day operations. Hiring freeze has prevented backfilling two vacant positions. We are exploring contractor support as a short-term solution while advocating for permanent staffing increases.',
+  'Budget constraints are affecting the technology modernization timeline significantly. Originally planned for completion in FY2026, the project has been extended to FY2027 due to a 15% reduction in capital funding. We are prioritizing critical functionality and exploring phased implementation approaches to deliver value incrementally within available resources.',
+  'Legacy system integration challenges require custom development work that was not originally scoped. The 20-year-old mainframe system uses proprietary data formats that are not compatible with modern APIs. Estimated additional development effort is 6 months and $500K. We are evaluating whether to invest in integration or accelerate replacement.',
+  'Competing priorities with other state initiatives have diverted key resources from this project. The statewide ERP implementation and cybersecurity remediation efforts have taken precedence. We have escalated to leadership for prioritization guidance and are working to identify dedicated resources that can be protected from reassignment.',
+  'Vendor dependency for critical system modifications creates timeline and cost uncertainties. Current contract requires 90-day notice for change requests, and vendor capacity is limited. Recent change requests have taken 4-6 months to implement. We are exploring options to bring more development capability in-house or negotiate improved contract terms.',
+  'Staff turnover is impacting institutional knowledge retention and project continuity. Three senior team members have departed in the past year, taking critical system knowledge with them. Exit interviews indicate compensation and remote work flexibility as primary factors. Knowledge transfer protocols have been implemented but gaps remain.',
+  'Complex regulatory requirements require careful interpretation and often result in implementation delays. Recent CMS guidance on interoperability has required significant rework of planned approaches. We have engaged external consultants to assist with compliance interpretation and are participating in industry working groups to stay ahead of regulatory changes.',
+  'Data quality issues in source systems are affecting downstream processes and reporting accuracy. Analysis shows approximately 8% of member records have incomplete or inconsistent data. Root causes include manual data entry errors, system migration issues, and lack of validation rules. A comprehensive data cleansing initiative is needed but not currently funded.',
+  'Interoperability challenges with external partners continue to slow progress on data exchange initiatives. Each partner uses different data standards and formats, requiring custom mapping for each connection. Industry standards adoption is inconsistent. We are advocating for statewide data standards through the governance council.',
+  'Resource constraints are limiting training opportunities for staff, creating skill gaps in emerging technologies. Training budget was reduced by 30% this year. We are leveraging free online resources and peer learning sessions to supplement formal training. Key skill gaps exist in cloud technologies, API development, and data analytics.',
 ];
 
 const SAMPLE_PLANS = [
-  'Implement automated monitoring by Q3 2026.',
-  'Complete staff training program by end of fiscal year.',
-  'Migrate to cloud-based infrastructure within 18 months.',
-  'Establish formal governance committee by Q2 2026.',
-  'Deploy enhanced reporting dashboard by Q4 2026.',
-  'Complete vendor evaluation for system replacement.',
-  'Develop comprehensive documentation library.',
-  'Implement continuous improvement feedback loop.',
+  'Implement automated monitoring and alerting by Q3 2026. This will include real-time dashboards for key performance indicators, automated threshold alerts, and integration with the enterprise incident management system. Vendor has been selected and contract negotiations are in progress. Expected cost is $150K with ongoing annual maintenance of $30K.',
+  'Complete comprehensive staff training program by end of fiscal year. Program includes role-based curriculum for 150 staff members, hands-on lab exercises, and certification assessments. Training will be delivered in cohorts of 25 over 6 months. Success metrics include 90% certification rate and demonstrated proficiency in core workflows.',
+  'Migrate to cloud-based infrastructure within 18 months as part of the enterprise cloud-first initiative. Migration will follow a lift-and-shift approach for initial phase, followed by cloud-native optimization. Benefits include improved scalability, disaster recovery, and reduced data center costs. Estimated savings of $400K annually after migration.',
+  'Establish formal governance committee by Q2 2026 to provide oversight and strategic direction. Committee will include representatives from business, IT, compliance, and executive leadership. Monthly meetings will review project status, approve major decisions, and resolve escalated issues. Charter and operating procedures are being drafted.',
+  'Deploy enhanced reporting and analytics dashboard by Q4 2026. New platform will provide self-service reporting capabilities, interactive visualizations, and predictive analytics. Current manual reporting processes consume 200 staff hours monthly. New system expected to reduce this by 75% while improving data accuracy and timeliness.',
+  'Complete vendor evaluation for system replacement by end of Q2. RFP has been issued to 8 qualified vendors with responses due in 6 weeks. Evaluation criteria include functionality fit, total cost of ownership, implementation timeline, and vendor stability. Selection committee includes representatives from all stakeholder groups.',
+  'Develop comprehensive documentation library including process maps, system guides, and training materials. Project will inventory existing documentation, identify gaps, and create standardized templates. Target is to have complete documentation for all critical processes by end of fiscal year. Documentation will be maintained in SharePoint with version control.',
+  'Implement continuous improvement feedback loop with quarterly retrospectives and monthly metrics reviews. Process will include structured feedback collection from staff and stakeholders, root cause analysis for issues, and action item tracking. Goal is to achieve measurable improvement in at least 3 key metrics each quarter.',
+  'Establish data quality metrics and monitoring program with automated data profiling and exception reporting. Program will define quality dimensions, set thresholds, and create remediation workflows. Initial focus on member and provider data. Target is to achieve 98% data quality score within 12 months.',
+  'Create cross-training program for key staff roles to improve resilience and reduce single points of failure. Program will identify critical roles, develop training curricula, and establish rotation schedules. Each critical function will have at least 2 trained backups. Implementation over 9 months with ongoing maintenance.',
 ];
 
 const SAMPLE_TAGS = ['FY2026', 'Priority', 'In Review', 'Modernization', 'Compliance'];
 
-// Sample attachment templates
 const SAMPLE_ATTACHMENTS = [
-  {
-    fileName: 'process-documentation.pdf',
-    fileType: 'application/pdf',
-    description: 'Current state process documentation and workflow diagrams',
-  },
-  {
-    fileName: 'audit-findings-2025.pdf',
-    fileType: 'application/pdf',
-    description: 'Internal audit findings and recommendations',
-  },
-  {
-    fileName: 'training-materials.docx',
-    fileType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    description: 'Staff training materials and procedures',
-  },
-  {
-    fileName: 'system-architecture.png',
-    fileType: 'image/png',
-    description: 'Current system architecture diagram',
-  },
-  {
-    fileName: 'data-flow-diagram.png',
-    fileType: 'image/png',
-    description: 'Data flow between systems',
-  },
-  {
-    fileName: 'vendor-sla-agreement.pdf',
-    fileType: 'application/pdf',
-    description: 'Current vendor SLA agreement',
-  },
-  {
-    fileName: 'compliance-checklist.xlsx',
-    fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    description: 'Federal compliance requirements checklist',
-  },
-  {
-    fileName: 'performance-metrics.xlsx',
-    fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    description: 'Monthly performance metrics report',
-  },
-  {
-    fileName: 'stakeholder-feedback.docx',
-    fileType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-    description: 'Stakeholder feedback summary',
-  },
-  {
-    fileName: 'improvement-roadmap.pdf',
-    fileType: 'application/pdf',
-    description: 'Planned improvements and timeline',
-  },
+  { baseName: 'process-documentation', ext: 'pdf', fileType: 'application/pdf', description: 'Current state process documentation' },
+  { baseName: 'audit-findings', ext: 'pdf', fileType: 'application/pdf', description: 'Internal audit findings' },
+  { baseName: 'training-materials', ext: 'docx', fileType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', description: 'Staff training materials' },
+  { baseName: 'system-architecture', ext: 'png', fileType: 'image/png', description: 'System architecture diagram' },
+  { baseName: 'data-flow-diagram', ext: 'png', fileType: 'image/png', description: 'Data flow between systems' },
+  { baseName: 'compliance-checklist', ext: 'xlsx', fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', description: 'Compliance requirements checklist' },
+  { baseName: 'vendor-contract', ext: 'pdf', fileType: 'application/pdf', description: 'Vendor contract and SLA documentation' },
+  { baseName: 'policy-manual', ext: 'pdf', fileType: 'application/pdf', description: 'Policy and procedure manual' },
+  { baseName: 'security-assessment', ext: 'pdf', fileType: 'application/pdf', description: 'Security assessment report' },
+  { baseName: 'performance-metrics', ext: 'xlsx', fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', description: 'Performance metrics dashboard' },
+  { baseName: 'stakeholder-feedback', ext: 'docx', fileType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', description: 'Stakeholder feedback summary' },
+  { baseName: 'implementation-plan', ext: 'pdf', fileType: 'application/pdf', description: 'Implementation roadmap and timeline' },
+  { baseName: 'risk-assessment', ext: 'xlsx', fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', description: 'Risk assessment matrix' },
+  { baseName: 'integration-specs', ext: 'pdf', fileType: 'application/pdf', description: 'Integration specifications document' },
+  { baseName: 'user-guide', ext: 'docx', fileType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', description: 'End user guide and documentation' },
+  { baseName: 'test-results', ext: 'pdf', fileType: 'application/pdf', description: 'Testing results and validation report' },
+  { baseName: 'workflow-diagram', ext: 'png', fileType: 'image/png', description: 'Business workflow diagram' },
+  { baseName: 'gap-analysis', ext: 'xlsx', fileType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', description: 'Gap analysis findings' },
+  { baseName: 'meeting-notes', ext: 'docx', fileType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', description: 'Governance meeting notes' },
+  { baseName: 'budget-justification', ext: 'pdf', fileType: 'application/pdf', description: 'Budget justification document' },
 ];
+
+// Counter for unique filenames
+let attachmentCounter = 0;
 
 // ============================================================================
 // Helper Functions
@@ -281,87 +126,131 @@ function generateDate(daysAgo = 0) {
 }
 
 // ============================================================================
+// Data Structure Helpers (matching the app's structure)
+// ============================================================================
+
+/**
+ * Get all areas from a domain (handles both standard and categorized domains)
+ */
+function getAreasFromDomain(domain) {
+  if (domain.categories) {
+    return domain.categories.flatMap((c) => c.areas);
+  }
+  return domain.areas || [];
+}
+
+/**
+ * Get all aspects with their dimension/subdimension info from the ORBIT model
+ */
+function getAllAspects() {
+  const aspects = [];
+
+  // Standard dimensions: outcomes, roles, businessArchitecture, informationData
+  for (const dimId of ['outcomes', 'roles', 'businessArchitecture', 'informationData']) {
+    const dimension = orbitModel.dimensions[dimId];
+    if (dimension && dimension.aspects) {
+      for (const aspect of dimension.aspects) {
+        aspects.push({
+          dimensionId: dimId,
+          subDimensionId: undefined,
+          aspectId: aspect.id,
+          aspectName: aspect.name,
+        });
+      }
+    }
+  }
+
+  // Technology dimension has sub-dimensions
+  const techDimension = orbitModel.dimensions.technology;
+  if (techDimension && techDimension.subDimensions) {
+    for (const subDim of techDimension.subDimensions) {
+      for (const aspect of subDim.aspects) {
+        aspects.push({
+          dimensionId: 'technology',
+          subDimensionId: subDim.id,
+          aspectId: aspect.id,
+          aspectName: aspect.name,
+        });
+      }
+    }
+  }
+
+  return aspects;
+}
+
+// ============================================================================
 // Data Generators
 // ============================================================================
 
-function generateAssessment(domain, area, status = 'finalized') {
+/**
+ * Generate a capability assessment record
+ */
+function generateAssessment(domain, area) {
   const id = randomUUID();
   const createdDaysAgo = randomInt(30, 90);
   const updatedDaysAgo = randomInt(0, createdDaysAgo);
+  const overallScore = parseFloat((randomInt(20, 45) / 10).toFixed(1));
 
-  const assessment = {
+  return {
     id,
     capabilityDomainId: domain.id,
     capabilityDomainName: domain.name,
     capabilityAreaId: area.id,
     capabilityAreaName: area.name,
-    status,
+    status: 'finalized',
     tags: randomSubset(SAMPLE_TAGS, 1, 3),
     createdAt: generateDate(createdDaysAgo),
     updatedAt: generateDate(updatedDaysAgo),
+    finalizedAt: generateDate(updatedDaysAgo),
+    overallScore,
   };
-
-  if (status === 'finalized') {
-    assessment.finalizedAt = generateDate(updatedDaysAgo);
-    assessment.overallScore = parseFloat((randomInt(20, 45) / 10).toFixed(1));
-  }
-
-  return assessment;
 }
 
+/**
+ * Generate all ORBIT ratings for an assessment
+ * Creates one rating per aspect in the ORBIT model
+ */
 function generateRatings(assessmentId) {
+  const allAspects = getAllAspects();
   const ratings = [];
 
-  // Generate ratings for each dimension
-  for (const [dimId, dimConfig] of Object.entries(ORBIT_DIMENSIONS)) {
-    if (dimId === 'technology' && dimConfig.subDimensions) {
-      // Technology has sub-dimensions
-      for (const subDim of dimConfig.subDimensions) {
-        for (const aspect of subDim.aspects) {
-          ratings.push(generateRating(assessmentId, dimId, aspect.id, subDim.id));
-        }
-      }
-    } else if (dimConfig.aspects) {
-      // Regular dimension
-      for (const aspect of dimConfig.aspects) {
-        ratings.push(generateRating(assessmentId, dimId, aspect.id));
-      }
+  for (const aspectInfo of allAspects) {
+    const currentLevel = randomInt(1, 5);
+    // Target level should be >= current level (users wouldn't set a lower target)
+    const targetLevel = currentLevel === 5 ? 5 : randomInt(currentLevel, 5);
+
+    const rating = {
+      id: randomUUID(),
+      capabilityAssessmentId: assessmentId,
+      dimensionId: aspectInfo.dimensionId,
+      aspectId: aspectInfo.aspectId,
+      currentLevel,
+      targetLevel,
+      questionResponses: [],
+      evidenceResponses: [],
+      notes: Math.random() > 0.3 ? randomChoice(SAMPLE_NOTES) : '',
+      barriers: Math.random() > 0.5 ? randomChoice(SAMPLE_BARRIERS) : '',
+      plans: Math.random() > 0.4 ? randomChoice(SAMPLE_PLANS) : '',
+      carriedForward: false,
+      attachmentIds: [],
+      updatedAt: generateDate(randomInt(0, 30)),
+    };
+
+    // Add subDimensionId for technology aspects
+    if (aspectInfo.subDimensionId) {
+      rating.subDimensionId = aspectInfo.subDimensionId;
     }
+
+    ratings.push(rating);
   }
 
   return ratings;
 }
 
-function generateRating(assessmentId, dimensionId, aspectId, subDimensionId = undefined) {
-  const currentLevel = randomInt(1, 5);
-  const targetLevel = Math.min(5, currentLevel + randomInt(0, 2));
-
-  const rating = {
-    id: randomUUID(),
-    capabilityAssessmentId: assessmentId,
-    dimensionId,
-    aspectId,
-    currentLevel,
-    targetLevel,
-    questionResponses: [],
-    evidenceResponses: [],
-    notes: Math.random() > 0.3 ? randomChoice(SAMPLE_NOTES) : '',
-    barriers: Math.random() > 0.5 ? randomChoice(SAMPLE_BARRIERS) : '',
-    plans: Math.random() > 0.4 ? randomChoice(SAMPLE_PLANS) : '',
-    carriedForward: false,
-    attachmentIds: [],
-    updatedAt: generateDate(randomInt(0, 30)),
-  };
-
-  if (subDimensionId) {
-    rating.subDimensionId = subDimensionId;
-  }
-
-  return rating;
-}
-
+/**
+ * Generate a history snapshot for an assessment
+ */
 function generateHistory(assessment, ratings) {
-  const historyId = randomUUID();
   const snapshotDaysAgo = randomInt(60, 180);
 
   // Calculate dimension scores
@@ -369,58 +258,60 @@ function generateHistory(assessment, ratings) {
   const ratingsByDim = {};
 
   for (const rating of ratings) {
-    if (!ratingsByDim[rating.dimensionId]) {
-      ratingsByDim[rating.dimensionId] = [];
+    const key = rating.subDimensionId
+      ? `${rating.dimensionId}:${rating.subDimensionId}`
+      : rating.dimensionId;
+
+    if (!ratingsByDim[key]) {
+      ratingsByDim[key] = [];
     }
-    ratingsByDim[rating.dimensionId].push(rating.currentLevel);
+    if (rating.currentLevel > 0) {
+      ratingsByDim[key].push(rating.currentLevel);
+    }
   }
 
-  for (const [dimId, levels] of Object.entries(ratingsByDim)) {
-    const avg = levels.reduce((a, b) => a + b, 0) / levels.length;
-    dimensionScores[dimId] = parseFloat(avg.toFixed(2));
+  for (const [key, levels] of Object.entries(ratingsByDim)) {
+    if (levels.length > 0) {
+      dimensionScores[key] = levels.reduce((a, b) => a + b, 0) / levels.length;
+    }
   }
 
-  // Create historical ratings (simplified)
-  const historicalRatings = ratings.map((r) => ({
-    dimensionId: r.dimensionId,
-    subDimensionId: r.subDimensionId,
-    aspectId: r.aspectId,
-    currentLevel: Math.max(1, r.currentLevel - randomInt(0, 1)),
-    targetLevel: r.targetLevel,
-    questionResponses: [],
-    evidenceResponses: [],
-    notes: r.notes,
-    barriers: r.barriers,
-    plans: r.plans,
-  }));
+  // Create historical ratings (slightly lower scores to simulate progress)
+  const historicalRatings = ratings.map((r) => {
+    const historicalCurrentLevel = Math.max(1, r.currentLevel - randomInt(0, 1));
+    return {
+      dimensionId: r.dimensionId,
+      subDimensionId: r.subDimensionId,
+      aspectId: r.aspectId,
+      currentLevel: historicalCurrentLevel,
+      // Target level stays the same or is at least >= historical current level
+      targetLevel: Math.max(historicalCurrentLevel, r.targetLevel),
+      questionResponses: [],
+      evidenceResponses: [],
+      notes: r.notes,
+      barriers: r.barriers,
+      plans: r.plans,
+    };
+  });
 
   return {
-    id: historyId,
+    id: randomUUID(),
     capabilityAssessmentId: assessment.id,
     capabilityAreaId: assessment.capabilityAreaId,
     snapshotDate: generateDate(snapshotDaysAgo),
-    tags: assessment.tags,
+    tags: [...assessment.tags],
     overallScore: Math.max(1, (assessment.overallScore || 3) - 0.5),
     dimensionScores,
     ratings: historicalRatings,
   };
 }
 
-function generateTags() {
-  return SAMPLE_TAGS.map((name) => ({
-    id: randomUUID(),
-    name,
-    usageCount: randomInt(1, 10),
-    lastUsed: generateDate(randomInt(0, 30)),
-  }));
-}
-
 /**
- * Generate synthetic file content based on file type
+ * Generate synthetic file content
  */
 function generateSyntheticFileContent(fileType, fileName) {
   if (fileType === 'application/pdf') {
-    // Generate a minimal valid PDF
+    // Minimal valid PDF
     return Buffer.from(
       '%PDF-1.4\n' +
       '1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n' +
@@ -430,111 +321,143 @@ function generateSyntheticFileContent(fileType, fileName) {
       'trailer<</Size 4/Root 1 0 R>>\nstartxref\n178\n%%EOF'
     );
   } else if (fileType === 'image/png') {
-    // Generate a minimal valid 1x1 PNG (red pixel)
+    // Minimal valid 1x1 PNG
     return Buffer.from([
-      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, // PNG signature
-      0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52, // IHDR chunk
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+      0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
       0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
       0x08, 0x02, 0x00, 0x00, 0x00, 0x90, 0x77, 0x53,
-      0xde, 0x00, 0x00, 0x00, 0x0c, 0x49, 0x44, 0x41, // IDAT chunk
+      0xde, 0x00, 0x00, 0x00, 0x0c, 0x49, 0x44, 0x41,
       0x54, 0x08, 0xd7, 0x63, 0xf8, 0xcf, 0xc0, 0x00,
       0x00, 0x00, 0x03, 0x00, 0x01, 0x00, 0x18, 0xdd,
-      0x8d, 0xb4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45, // IEND chunk
+      0x8d, 0xb4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45,
       0x4e, 0x44, 0xae, 0x42, 0x60, 0x82
     ]);
   } else {
-    // For other file types, generate placeholder text content
-    const content = `
-=============================================================================
-SYNTHETIC TEST FILE: ${fileName}
-=============================================================================
-
-This is a synthetic file generated for testing the MITA 4.0 import functionality.
-
-File Type: ${fileType}
-Generated: ${new Date().toISOString()}
-
-This file contains placeholder content to simulate real attachments that would
-be included in an actual assessment export. In a real scenario, this would
-contain actual documentation, diagrams, or other supporting materials.
-
-=============================================================================
-SAMPLE CONTENT
-=============================================================================
-
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor
-incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis
-nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-
-Key Points:
-- Assessment documentation and evidence
-- Process workflows and procedures
-- Compliance requirements and checklists
-- Performance metrics and reports
-- Stakeholder feedback and recommendations
-
-=============================================================================
-END OF FILE
-=============================================================================
-`;
-    return Buffer.from(content);
+    // Text placeholder for other types
+    return Buffer.from(`Synthetic test file: ${fileName}\nGenerated: ${new Date().toISOString()}\n`);
   }
 }
 
 /**
  * Generate attachments for an assessment
+ * @param {boolean} forceAttachment - If true, always generate at least one attachment
+ * @param {boolean} isGuaranteedDomain - If true, place attachments in known dimensions
  */
-function generateAttachments(assessment, ratings) {
+function generateAttachments(assessment, ratings, forceAttachment = false, isGuaranteedDomain = false) {
   const attachments = [];
-  const attachmentFiles = []; // For ZIP file content
+  const attachmentFiles = [];
 
-  // Randomly select 1-3 attachments for this assessment
-  const numAttachments = randomInt(1, 3);
-  const selectedTemplates = randomSubset(SAMPLE_ATTACHMENTS, numAttachments, numAttachments);
+  // For guaranteed domains, ALWAYS add attachments to specific dimensions
+  if (isGuaranteedDomain) {
+    // Get ratings for the guaranteed dimensions
+    const guaranteedRatings = ratings.filter(r => 
+      GUARANTEED_ATTACHMENT_DIMENSIONS.includes(r.dimensionId)
+    );
+    
+    // Add 2-4 attachments per guaranteed dimension
+    for (const dimId of GUARANTEED_ATTACHMENT_DIMENSIONS) {
+      const dimRatings = guaranteedRatings.filter(r => r.dimensionId === dimId);
+      const numForDim = randomInt(2, 4);
+      const selectedRatings = randomSubset(dimRatings, numForDim, numForDim);
+      
+      for (const rating of selectedRatings) {
+        const template = randomChoice(SAMPLE_ATTACHMENTS);
+        const attachmentId = randomUUID();
+        // Generate unique filename with counter
+        const uniqueFileName = `${template.baseName}-${++attachmentCounter}.${template.ext}`;
+        const fileContent = generateSyntheticFileContent(template.fileType, uniqueFileName);
 
-  // Pick random ratings to attach files to
+        attachments.push({
+          id: attachmentId,
+          capabilityAssessmentId: assessment.id,
+          orbitRatingId: rating.id,
+          fileName: uniqueFileName,
+          fileType: template.fileType,
+          fileSize: fileContent.length,
+          description: template.description,
+          uploadedAt: generateDate(randomInt(0, 30)),
+        });
+
+        attachmentFiles.push({
+          domainId: assessment.capabilityDomainId,
+          areaId: assessment.capabilityAreaId,
+          fileName: uniqueFileName,
+          content: fileContent,
+        });
+
+        rating.attachmentIds.push(attachmentId);
+      }
+    }
+    
+    return { attachments, attachmentFiles };
+  }
+
+  // For non-guaranteed domains: 75% chance to have attachments (or 100% if forced)
+  if (!forceAttachment && Math.random() > 0.75) {
+    return { attachments, attachmentFiles };
+  }
+
+  // Generate attachments for 30-50% of ratings (15-26 out of 52 aspects)
+  const numAttachments = randomInt(15, 26);
   const ratingsWithAttachments = randomSubset(ratings, numAttachments, numAttachments);
 
-  for (let i = 0; i < selectedTemplates.length; i++) {
-    const template = selectedTemplates[i];
+  for (let i = 0; i < ratingsWithAttachments.length; i++) {
     const rating = ratingsWithAttachments[i];
+    // Pick a random template for each attachment
+    const template = randomChoice(SAMPLE_ATTACHMENTS);
     const attachmentId = randomUUID();
+    // Generate unique filename with counter
+    const uniqueFileName = `${template.baseName}-${++attachmentCounter}.${template.ext}`;
+    const fileContent = generateSyntheticFileContent(template.fileType, uniqueFileName);
 
-    // Generate file content
-    const fileContent = generateSyntheticFileContent(template.fileType, template.fileName);
-
-    // Create attachment metadata
-    const attachment = {
+    attachments.push({
       id: attachmentId,
       capabilityAssessmentId: assessment.id,
       orbitRatingId: rating.id,
-      fileName: template.fileName,
+      fileName: uniqueFileName,
       fileType: template.fileType,
       fileSize: fileContent.length,
       description: template.description,
       uploadedAt: generateDate(randomInt(0, 30)),
-    };
+    });
 
-    attachments.push(attachment);
-
-    // Store file content for ZIP
     attachmentFiles.push({
       domainId: assessment.capabilityDomainId,
       areaId: assessment.capabilityAreaId,
-      fileName: template.fileName,
+      fileName: uniqueFileName,
       content: fileContent,
     });
 
-    // Update rating with attachment ID
     rating.attachmentIds.push(attachmentId);
   }
 
   return { attachments, attachmentFiles };
 }
 
+/**
+ * Generate tags
+ */
+function generateTags() {
+  return SAMPLE_TAGS.map((name) => ({
+    id: randomUUID(),
+    name,
+    usageCount: randomInt(1, 10),
+    lastUsed: generateDate(randomInt(0, 30)),
+  }));
+}
+
 // ============================================================================
-// CSV Generation (matches csvExport.ts format)
+// CSV Generation (matching csvExport.ts format)
 // ============================================================================
+
+function escapeCSV(value) {
+  if (!value) return '';
+  if (value.includes(',') || value.includes('\n') || value.includes('"')) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
+}
 
 function generateMaturityProfileCsv(profile) {
   const lines = [];
@@ -548,10 +471,7 @@ function generateMaturityProfileCsv(profile) {
     lines.push('ORBIT,As Is,To Be,Notes,Barriers & Challenges,Advancement Plans');
 
     for (const row of area.rows) {
-      const notes = escapeCSV(row.notes);
-      const barriers = escapeCSV(row.barriers);
-      const plans = escapeCSV(row.plans);
-      lines.push(`${row.dimension},${row.asIs},${row.toBe},${notes},${barriers},${plans}`);
+      lines.push(`${row.dimension},${row.asIs},${row.toBe},${escapeCSV(row.notes)},${escapeCSV(row.barriers)},${escapeCSV(row.plans)}`);
     }
 
     lines.push(',,,,,');
@@ -560,55 +480,52 @@ function generateMaturityProfileCsv(profile) {
   return lines.join('\n');
 }
 
-function escapeCSV(value) {
-  if (!value) return '';
-  if (value.includes(',') || value.includes('\n') || value.includes('"')) {
-    return `"${value.replace(/"/g, '""')}"`;
-  }
-  return value;
-}
+/**
+ * Build maturity profile from assessment data (matching exportService.ts logic)
+ */
+function buildMaturityProfile(assessments, allRatings, stateName) {
+  const dimensionMap = {
+    outcomes: 'Outcomes',
+    roles: 'Roles',
+    businessArchitecture: 'Business Architecture',
+    informationData: 'Information & Data',
+    technology: 'Technology',
+  };
 
-function buildMaturityProfile(domain, assessments, ratings, stateName) {
   const areas = [];
 
   for (const assessment of assessments) {
-    const areaRatings = ratings.filter((r) => r.capabilityAssessmentId === assessment.id);
+    const ratings = allRatings.filter((r) => r.capabilityAssessmentId === assessment.id);
 
-    // Group by dimension and calculate averages
-    const dimData = {};
-    const DIMENSION_NAMES = [
-      'Outcomes',
-      'Roles',
-      'Business Architecture',
-      'Information & Data',
-      'Technology',
-    ];
-
-    for (const dimName of DIMENSION_NAMES) {
-      dimData[dimName] = { asIs: [], toBe: [], notes: [], barriers: [], plans: [] };
+    // Group by dimension
+    const dimensionData = {};
+    for (const dimName of Object.values(dimensionMap)) {
+      dimensionData[dimName] = { asIs: [], toBe: [], notes: [], barriers: [], plans: [] };
     }
 
-    const dimIdToName = {
-      outcomes: 'Outcomes',
-      roles: 'Roles',
-      businessArchitecture: 'Business Architecture',
-      informationData: 'Information & Data',
-      technology: 'Technology',
-    };
+    for (const rating of ratings) {
+      const dimName = dimensionMap[rating.dimensionId];
+      if (!dimName || !dimensionData[dimName]) continue;
 
-    for (const rating of areaRatings) {
-      const dimName = dimIdToName[rating.dimensionId];
-      if (!dimName || !dimData[dimName]) continue;
-
-      if (rating.currentLevel > 0) dimData[dimName].asIs.push(rating.currentLevel);
-      if (rating.targetLevel > 0) dimData[dimName].toBe.push(rating.targetLevel);
-      if (rating.notes) dimData[dimName].notes.push(rating.notes);
-      if (rating.barriers) dimData[dimName].barriers.push(rating.barriers);
-      if (rating.plans) dimData[dimName].plans.push(rating.plans);
+      if (rating.currentLevel > 0) {
+        dimensionData[dimName].asIs.push(rating.currentLevel);
+      }
+      if (rating.targetLevel && rating.targetLevel > 0) {
+        dimensionData[dimName].toBe.push(rating.targetLevel);
+      }
+      if (rating.notes && rating.notes.trim()) {
+        dimensionData[dimName].notes.push(rating.notes.trim());
+      }
+      if (rating.barriers && rating.barriers.trim()) {
+        dimensionData[dimName].barriers.push(rating.barriers.trim());
+      }
+      if (rating.plans && rating.plans.trim()) {
+        dimensionData[dimName].plans.push(rating.plans.trim());
+      }
     }
 
-    const rows = DIMENSION_NAMES.map((dimName) => {
-      const d = dimData[dimName];
+    const rows = Object.entries(dimensionMap).map(([, dimName]) => {
+      const d = dimensionData[dimName];
       return {
         dimension: dimName,
         asIs: d.asIs.length > 0 ? (d.asIs.reduce((a, b) => a + b, 0) / d.asIs.length).toFixed(1) : '',
@@ -626,44 +543,70 @@ function buildMaturityProfile(domain, assessments, ratings, stateName) {
     });
   }
 
-  return {
-    stateName,
-    domainName: domain.name,
-    areas,
-  };
+  return { stateName, areas };
 }
 
 // ============================================================================
 // Main Generation
 // ============================================================================
 
+// Domains that should ALWAYS be included with ALL their areas
+const GUARANTEED_DOMAINS = [
+  'claims-encounter-management',
+  'financial-management',
+];
+
+// Dimensions that should ALWAYS have attachments in guaranteed domains
+const GUARANTEED_ATTACHMENT_DIMENSIONS = [
+  'outcomes',
+  'businessArchitecture',
+  'informationData',
+  'technology',
+];
+
 /**
- * Select approximately targetPercent of areas from all domains
+ * Select domains and areas for export
+ * Ensures guaranteed domains are always fully included
  */
-function selectAreasForComprehensiveExport(targetPercent = 0.72) {
+function selectDomainsAndAreas(targetPercent) {
   const result = [];
-  
-  for (const domain of ALL_DOMAINS) {
-    // Calculate how many areas to include from this domain
-    const numToInclude = Math.round(domain.areas.length * targetPercent);
+
+  for (const domain of capabilitiesData.domains) {
+    const areas = getAreasFromDomain(domain);
     
-    if (numToInclude > 0) {
-      // Shuffle and select areas
-      const shuffled = [...domain.areas].sort(() => Math.random() - 0.5);
-      const selectedAreas = shuffled.slice(0, numToInclude);
-      
+    // Always include ALL areas for guaranteed domains
+    if (GUARANTEED_DOMAINS.includes(domain.id)) {
       result.push({
         id: domain.id,
         name: domain.name,
-        areas: selectedAreas,
+        layer: domain.layer,
+        areas: [...areas],
+        isGuaranteed: true,
+      });
+      continue;
+    }
+    
+    const numToInclude = Math.round(areas.length * targetPercent);
+
+    if (numToInclude > 0) {
+      const shuffled = [...areas].sort(() => Math.random() - 0.5);
+      result.push({
+        id: domain.id,
+        name: domain.name,
+        layer: domain.layer,
+        areas: shuffled.slice(0, numToInclude),
+        isGuaranteed: false,
       });
     }
   }
-  
+
   return result;
 }
 
 async function generateTestImportZip(domains, stateName, outputPath, description) {
+  // Reset attachment counter for each ZIP generation
+  attachmentCounter = 0;
+  
   console.log(`\n${'='.repeat(60)}`);
   console.log(`Generating: ${description}`);
   console.log(`State: ${stateName}`);
@@ -676,48 +619,42 @@ async function generateTestImportZip(domains, stateName, outputPath, description
   const allHistory = [];
   const allAttachments = [];
   const allAttachmentFiles = [];
-  const maturityProfiles = [];
 
-  // Generate data for each domain
+  // Generate data for each domain/area
   for (const domain of domains) {
-    console.log(`Generating data for domain: ${domain.name}`);
+    const isGuaranteed = domain.isGuaranteed || false;
+    console.log(`Generating data for domain: ${domain.name}${isGuaranteed ? ' [GUARANTEED]' : ''}`);
+    let domainHasAttachment = false;
 
-    const domainAssessments = [];
-
-    for (const area of domain.areas) {
-      // Generate finalized assessment
-      const assessment = generateAssessment(domain, area, 'finalized');
+    for (let i = 0; i < domain.areas.length; i++) {
+      const area = domain.areas[i];
+      const assessment = generateAssessment(domain, area);
       const ratings = generateRatings(assessment.id);
       const history = generateHistory(assessment, ratings);
+      
+      // Force attachment on first area if domain doesn't have one yet, or on last area if still none
+      const isLastArea = i === domain.areas.length - 1;
+      const forceAttachment = !domainHasAttachment && isLastArea;
+      const { attachments, attachmentFiles } = generateAttachments(assessment, ratings, forceAttachment, isGuaranteed);
 
-      // Generate attachments (50% chance per assessment)
-      if (Math.random() > 0.5) {
-        const { attachments, attachmentFiles } = generateAttachments(assessment, ratings);
-        allAttachments.push(...attachments);
-        allAttachmentFiles.push(...attachmentFiles);
-        console.log(`  - ${area.name}: ${ratings.length} ratings, score: ${assessment.overallScore}, ${attachments.length} attachments`);
-      } else {
-        console.log(`  - ${area.name}: ${ratings.length} ratings, score: ${assessment.overallScore}`);
+      if (attachments.length > 0) {
+        domainHasAttachment = true;
       }
 
       allAssessments.push(assessment);
       allRatings.push(...ratings);
       allHistory.push(history);
-      domainAssessments.push(assessment);
-    }
+      allAttachments.push(...attachments);
+      allAttachmentFiles.push(...attachmentFiles);
 
-    // Build maturity profile for this domain
-    const domainRatings = allRatings.filter((r) =>
-      domainAssessments.some((a) => a.id === r.capabilityAssessmentId)
-    );
-    const profile = buildMaturityProfile(domain, domainAssessments, domainRatings, stateName);
-    maturityProfiles.push(profile);
+      console.log(`  - ${area.name}: ${ratings.length} ratings, score: ${assessment.overallScore}${attachments.length > 0 ? `, ${attachments.length} attachments` : ''}`);
+    }
   }
 
   // Generate tags
   const tags = generateTags();
 
-  // Build export data structure
+  // Build export data structure (matching ExportData type)
   const exportData = {
     exportVersion: EXPORT_VERSION,
     exportDate: new Date().toISOString(),
@@ -747,16 +684,30 @@ async function generateTestImportZip(domains, stateName, outputPath, description
   console.log('Adding maturity profiles...');
   const csvFolder = zip.folder('maturity-profiles');
 
-  for (const profile of maturityProfiles) {
+  // Group assessments by domain for CSV generation
+  const assessmentsByDomain = new Map();
+  for (const assessment of allAssessments) {
+    const domainId = assessment.capabilityDomainId;
+    if (!assessmentsByDomain.has(domainId)) {
+      assessmentsByDomain.set(domainId, []);
+    }
+    assessmentsByDomain.get(domainId).push(assessment);
+  }
+
+  // Generate per-domain CSVs
+  for (const [domainId, domainAssessments] of assessmentsByDomain) {
+    const domainRatings = allRatings.filter((r) =>
+      domainAssessments.some((a) => a.id === r.capabilityAssessmentId)
+    );
+    const profile = buildMaturityProfile(domainAssessments, domainRatings, stateName);
     const csv = generateMaturityProfileCsv(profile);
-    const fileName = `${profile.domainName.toLowerCase().replace(/\s+/g, '-')}-maturity-profile.csv`;
+    const fileName = `${domainId}-maturity-profile.csv`;
     csvFolder.file(fileName, csv);
     console.log(`  - ${fileName}`);
   }
 
-  // Add combined CSV
-  const combinedAreas = maturityProfiles.flatMap((p) => p.areas);
-  const combinedProfile = { stateName, domainName: 'All Domains', areas: combinedAreas };
+  // Generate combined CSV
+  const combinedProfile = buildMaturityProfile(allAssessments, allRatings, stateName);
   csvFolder.file('all-domains-maturity-profile.csv', generateMaturityProfileCsv(combinedProfile));
   console.log('  - all-domains-maturity-profile.csv');
 
@@ -793,20 +744,29 @@ async function generateTestImportZip(domains, stateName, outputPath, description
   console.log('\nGenerating ZIP file...');
   const zipBuffer = await zip.generateAsync({ type: 'nodebuffer', compression: 'DEFLATE' });
 
+  // Ensure output directory exists
+  const outputDir = outputPath.substring(0, outputPath.lastIndexOf('/'));
+  if (outputDir && !existsSync(outputDir)) {
+    mkdirSync(outputDir, { recursive: true });
+  }
+
   // Write to file
   writeFileSync(outputPath, zipBuffer);
 
-  // Calculate total areas in all domains
-  const totalPossibleAreas = ALL_DOMAINS.reduce((sum, d) => sum + d.areas.length, 0);
+  // Calculate stats
+  const totalPossibleAreas = capabilitiesData.domains.reduce(
+    (sum, d) => sum + getAreasFromDomain(d).length,
+    0
+  );
   const completionPercent = ((allAssessments.length / totalPossibleAreas) * 100).toFixed(1);
+  const totalAspects = getAllAspects().length;
 
   console.log(`\n✓ Generated: ${outputPath}`);
   console.log(`  - ${allAssessments.length} assessments (${completionPercent}% of ${totalPossibleAreas} total areas)`);
-  console.log(`  - ${allRatings.length} ratings`);
+  console.log(`  - ${allRatings.length} ratings (${totalAspects} aspects per assessment)`);
   console.log(`  - ${allHistory.length} history records`);
   console.log(`  - ${allAttachments.length} attachments`);
-  console.log(`  - ${maturityProfiles.length} maturity profiles`);
-  
+
   return {
     assessments: allAssessments.length,
     ratings: allRatings.length,
@@ -814,35 +774,46 @@ async function generateTestImportZip(domains, stateName, outputPath, description
   };
 }
 
-// Main execution
+// ============================================================================
+// Main Execution
+// ============================================================================
+
 async function main() {
   const args = process.argv.slice(2);
   const mode = args[0] || 'both';
-  
+
+  const totalAreas = capabilitiesData.domains.reduce(
+    (sum, d) => sum + getAreasFromDomain(d).length,
+    0
+  );
+  const totalAspects = getAllAspects().length;
+
   console.log('MITA 4.0 Test Import Generator');
-  console.log(`Total capability areas in model: ${ALL_DOMAINS.reduce((sum, d) => sum + d.areas.length, 0)}`);
-  
+  console.log(`Total capability areas in model: ${totalAreas}`);
+  console.log(`Total ORBIT aspects per assessment: ${totalAspects}`);
+
   if (mode === 'small' || mode === 'both') {
+    // Small: ~20% coverage (about 15 areas)
+    const smallDomains = selectDomainsAndAreas(0.2);
     await generateTestImportZip(
-      SAMPLE_DOMAINS,
+      smallDomains,
       'Sample State',
       'test-data/test-import-small.zip',
-      'Small Test Import (3 domains, 8 areas)'
+      'Small Test Import (~20% coverage)'
     );
   }
-  
+
   if (mode === 'large' || mode === 'both') {
-    const comprehensiveDomains = selectAreasForComprehensiveExport(0.72);
-    const totalAreas = comprehensiveDomains.reduce((sum, d) => sum + d.areas.length, 0);
-    
+    // Large: ~70% coverage
+    const largeDomains = selectDomainsAndAreas(0.7);
     await generateTestImportZip(
-      comprehensiveDomains,
+      largeDomains,
       'Comprehensive State',
       'test-data/test-import-comprehensive.zip',
-      `Comprehensive Test Import (~72%, ${totalAreas} areas)`
+      'Comprehensive Test Import (~70% coverage)'
     );
   }
-  
+
   console.log('\n' + '='.repeat(60));
   console.log('Done! Test files generated in test-data/');
   console.log('='.repeat(60));
