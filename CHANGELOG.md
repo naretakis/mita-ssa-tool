@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.5] - 2026-01-28
+
+### Changed
+
+- Improved assessment sidebar layout with column headers (Dimension, Prog, Score) for better clarity
+- Technology dimension now displays as a parent row with rolled-up progress and score, with sub-dimensions indented underneath
+- Progress indicators now use color-coded chips: plain text for not started, amber for in progress, green with checkmark for complete
+- Streamlined dimension header in assessment view by removing redundant progress display (already shown in sidebar)
+- Dimension header now uses inline layout for more compact appearance
+
+### Removed
+
+- Removed "opt" labels from optional dimensions in sidebar (Outcomes, Roles) to reduce visual clutter
+
 ## [2.0.4] - 2026-01-28
 
 ### Changed
