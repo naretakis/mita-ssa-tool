@@ -373,7 +373,9 @@ export default function Assessment(): JSX.Element {
   const handleAttachmentUpload = useCallback(
     async (aspectId: string, file: File, description?: string) => {
       if (!currentNav || !assessmentId) return;
+
       const rating = ratingsMap.get(aspectId);
+
       if (!rating) {
         // Create a rating first if it doesn't exist
         await saveRating({
@@ -383,11 +385,24 @@ export default function Assessment(): JSX.Element {
           currentLevel: 0,
         });
       }
+
       // Get the rating ID (may have just been created)
-      const updatedRating = await db.orbitRatings
-        .where('[capabilityAssessmentId+dimensionId+aspectId]')
-        .equals([assessmentId, currentNav.dimensionId, aspectId])
-        .first();
+      // Use the appropriate compound index based on whether this is a technology sub-dimension
+      let updatedRating: OrbitRating | undefined;
+      if (currentNav.subDimensionId) {
+        // Technology sub-dimension - use 4-part compound index
+        updatedRating = await db.orbitRatings
+          .where('[capabilityAssessmentId+dimensionId+subDimensionId+aspectId]')
+          .equals([assessmentId, currentNav.dimensionId, currentNav.subDimensionId, aspectId])
+          .first();
+      } else {
+        // Non-technology dimension - use 3-part compound index and filter out any with subDimensionId
+        const candidates = await db.orbitRatings
+          .where('[capabilityAssessmentId+dimensionId+aspectId]')
+          .equals([assessmentId, currentNav.dimensionId, aspectId])
+          .toArray();
+        updatedRating = candidates.find((r) => !r.subDimensionId);
+      }
 
       if (updatedRating) {
         await uploadAttachment(updatedRating.id, file, description);

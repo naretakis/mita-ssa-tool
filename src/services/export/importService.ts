@@ -9,8 +9,10 @@
 
 import JSZip from 'jszip';
 import { v4 as uuidv4 } from 'uuid';
+
 import { db } from '../db';
 import { createHistorySnapshot, calculateDimensionScores, toHistoricalRatings } from '../history';
+import { extractAttachmentIdFromFileName } from './exportService';
 import type { ExportData, ImportResult, ImportItemResult, ImportProgressCallback } from './types';
 import type { CapabilityAssessment, Attachment } from '../../types';
 
@@ -173,9 +175,19 @@ export async function importFromZip(
 
     for (const { path, file } of attachmentFiles) {
       try {
-        // Find matching attachment metadata
+        // Extract attachment ID from the unique filename (format: {baseName}_{attachmentId}.{ext})
         const fileName = path.split('/').pop() ?? '';
-        const attachmentMeta = data.data.attachments.find((a) => a.fileName === fileName);
+        const attachmentId = extractAttachmentIdFromFileName(fileName);
+
+        // Find matching attachment metadata by ID (preferred) or fall back to filename match
+        let attachmentMeta = attachmentId
+          ? data.data.attachments.find((a) => a.id === attachmentId)
+          : null;
+
+        // Fallback for older exports that don't use unique filenames
+        if (!attachmentMeta) {
+          attachmentMeta = data.data.attachments.find((a) => a.fileName === fileName);
+        }
 
         if (attachmentMeta) {
           // Check if attachment already exists
