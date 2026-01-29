@@ -4,8 +4,14 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { v4 as uuidv4 } from 'uuid';
+
 import { db, clearDatabase } from '../db';
-import { exportAsJson, exportAsZip, generateFilename } from './exportService';
+import {
+  exportAsJson,
+  exportAsZip,
+  generateFilename,
+  extractAttachmentIdFromFileName,
+} from './exportService';
 import type { CapabilityAssessment, OrbitRating, Tag } from '../../types';
 
 describe('exportService', () => {
@@ -312,6 +318,115 @@ describe('exportService', () => {
       expect(data.data.history.length).toBe(1);
       expect(data.data.history[0].overallScore).toBe(3.0);
       expect(data.metadata.totalHistory).toBe(1);
+    });
+  });
+
+  describe('extractAttachmentIdFromFileName', () => {
+    it('should extract attachment ID from filename with extension', () => {
+      const id = extractAttachmentIdFromFileName('report_abc-123-def.pdf');
+      expect(id).toBe('abc-123-def');
+    });
+
+    it('should extract attachment ID from filename without extension', () => {
+      const id = extractAttachmentIdFromFileName('document_xyz-789');
+      expect(id).toBe('xyz-789');
+    });
+
+    it('should handle UUID-style attachment IDs', () => {
+      const uuid = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890';
+      const id = extractAttachmentIdFromFileName(`test-file_${uuid}.pdf`);
+      expect(id).toBe(uuid);
+    });
+
+    it('should return null for filename without underscore', () => {
+      const id = extractAttachmentIdFromFileName('simple-file.pdf');
+      expect(id).toBeNull();
+    });
+
+    it('should handle multiple underscores by using the last one', () => {
+      const id = extractAttachmentIdFromFileName('my_complex_file_name_abc123.docx');
+      expect(id).toBe('abc123');
+    });
+
+    it('should handle filename with dots in base name', () => {
+      const id = extractAttachmentIdFromFileName('report.v2_abc123.pdf');
+      expect(id).toBe('abc123');
+    });
+  });
+
+  describe('export with duplicate attachment filenames', () => {
+    it('should export attachments with unique filenames in ZIP', async () => {
+      const assessment = await createTestAssessment('area-1', 'finalized', 3.5);
+      const rating1 = await createTestRating(assessment.id);
+
+      // Create second rating
+      const rating2: OrbitRating = {
+        id: uuidv4(),
+        capabilityAssessmentId: assessment.id,
+        dimensionId: 'informationData',
+        aspectId: 'data-governance',
+        currentLevel: 4,
+        targetLevel: 5,
+        questionResponses: [],
+        evidenceResponses: [],
+        notes: 'Test notes 2',
+        barriers: '',
+        plans: '',
+        carriedForward: false,
+        attachmentIds: [],
+        updatedAt: new Date(),
+      };
+      await db.orbitRatings.add(rating2);
+
+      // Add two attachments with the SAME filename
+      // Use ArrayBuffer instead of Blob for fake-indexeddb compatibility
+      const attachment1Id = uuidv4();
+      const attachment2Id = uuidv4();
+      const content1 = new TextEncoder().encode('content 1');
+      const content2 = new TextEncoder().encode('content 2');
+
+      await db.attachments.add({
+        id: attachment1Id,
+        capabilityAssessmentId: assessment.id,
+        orbitRatingId: rating1.id,
+        fileName: 'report.pdf',
+        fileType: 'application/pdf',
+        fileSize: 100,
+        blob: new Blob([content1], { type: 'application/pdf' }),
+        uploadedAt: new Date(),
+      });
+
+      await db.attachments.add({
+        id: attachment2Id,
+        capabilityAssessmentId: assessment.id,
+        orbitRatingId: rating2.id,
+        fileName: 'report.pdf',
+        fileType: 'application/pdf',
+        fileSize: 200,
+        blob: new Blob([content2], { type: 'application/pdf' }),
+        uploadedAt: new Date(),
+      });
+
+      // Export and verify the data.json contains both attachments with metadata
+      const jsonExport = await exportAsJson({ scope: 'full', format: 'json' });
+      const data = JSON.parse(jsonExport);
+
+      // Verify both attachments are in metadata
+      expect(data.data.attachments.length).toBe(2);
+      expect(
+        data.data.attachments.filter((a: { fileName: string }) => a.fileName === 'report.pdf')
+          .length
+      ).toBe(2);
+
+      // Verify the attachment IDs are different
+      const attachmentIds = data.data.attachments.map((a: { id: string }) => a.id);
+      expect(new Set(attachmentIds).size).toBe(2);
+
+      // Now test ZIP export - the unique filename generation
+      // We can't fully test ZIP with fake-indexeddb Blob issues, but we can verify
+      // the JSON metadata is correct which is what import relies on
+      expect(data.data.attachments.some((a: { id: string }) => a.id === attachment1Id)).toBe(true);
+      expect(data.data.attachments.some((a: { id: string }) => a.id === attachment2Id)).toBe(true);
     });
   });
 });

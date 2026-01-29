@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.3] - 2026-01-28
+
+### Fixed
+
+- Fixed attachment upload bug where files would attach to the first aspect in a dimension instead of the selected aspect. The issue was caused by duplicate HTML element IDs across multiple AttachmentUpload components; now uses React's useId() hook to generate unique IDs.
+- Fixed duplicate attachment filename bug in export/import: when multiple attachments had the same filename, only one would be preserved after export/import cycle. Export now uses unique filenames with embedded attachment IDs, and import matches by ID with fallback to filename for backward compatibility.
+
 ## [2.0.2] - 2026-01-25
 
 ### Added
