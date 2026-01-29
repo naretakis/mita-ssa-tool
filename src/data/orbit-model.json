@@ -661,9 +661,9 @@
         }
       ]
     },
-    "informationData": {
-      "id": "informationData",
-      "name": "Information & Data",
+    "information": {
+      "id": "information",
+      "name": "Information",
       "description": "The information and the data management capabilities needed to deliver the capability.",
       "required": true,
       "aspects": [

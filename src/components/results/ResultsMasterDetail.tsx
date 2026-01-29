@@ -68,7 +68,7 @@ const SHORT_DIMENSION_LABELS: Record<string, string> = {
   Outcomes: 'Outcomes',
   Roles: 'Roles',
   'Business Architecture': 'Bus. Arch.',
-  'Information & Data': 'Info/Data',
+  Information: 'Info',
   Technology: 'Tech',
 };
 

@@ -58,7 +58,7 @@ export const DIMENSION_NAMES: Record<OrbitDimensionId, string> = {
   outcomes: 'Outcomes',
   roles: 'Roles',
   businessArchitecture: 'Business Architecture',
-  informationData: 'Information & Data',
+  information: 'Information',
   technology: 'Technology',
 } as const;
 

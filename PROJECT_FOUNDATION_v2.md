@@ -143,7 +143,7 @@ Defines **how** assessments are conducted. Contains standardized maturity criter
 | Outcomes              | No       | 6                            |
 | Roles                 | No       | 6                            |
 | Business Architecture | Yes      | 7                            |
-| Information & Data    | Yes      | 11                           |
+| Information           | Yes      | 11                           |
 | Technology            | Yes      | 22 (across 7 sub-dimensions) |
 | **Total**             |          | **52**                       |
 
@@ -156,6 +156,22 @@ Defines **how** assessments are conducted. Contains standardized maturity criter
 5. Security and Identity (4 aspects)
 6. Operations and Maintenance (2 aspects)
 7. Development and Release (3 aspects)
+
+**Enterprise Domains with Aggregate Dimensions:**
+
+Two domains have special aggregate dimension handling:
+
+| Domain                     | Assessment Model | Aggregate Dimension |
+| -------------------------- | ---------------- | ------------------- |
+| Enterprise Data Management | O-R-B-T          | Information         |
+| Enterprise Technology      | O-R-B-I          | Technology          |
+
+For these enterprise domains:
+
+- The aggregate dimension score is calculated from all finalized assessments in other domains
+- Users cannot manually assess the aggregate dimension
+- The aggregate score IS included in the overall capability score
+- Enterprise domains are excluded from each other's aggregate calculations
 
 **Maturity Levels:**
 
@@ -204,7 +220,7 @@ One record per aspect per capability assessment.
 interface OrbitRating {
   id: string; // UUID
   capabilityAssessmentId: string; // FK to CapabilityAssessment
-  dimensionId: OrbitDimensionId; // 'outcomes' | 'roles' | 'businessArchitecture' | 'informationData' | 'technology'
+  dimensionId: OrbitDimensionId; // 'outcomes' | 'roles' | 'businessArchitecture' | 'information' | 'technology'
   subDimensionId?: TechnologySubDimensionId; // Only for technology dimension
   aspectId: string; // e.g., "data-governance"
   currentLevel: MaturityLevelWithNA; // -1 (N/A), 0 (not assessed), 1-5
@@ -224,7 +240,7 @@ type OrbitDimensionId =
   | 'outcomes'
   | 'roles'
   | 'businessArchitecture'
-  | 'informationData'
+  | 'information'
   | 'technology';
 
 type TechnologySubDimensionId =
@@ -403,7 +419,7 @@ ORBIT,As Is,To Be,Notes:
 Outcomes,<level>,<target>,<notes>
 Roles,<level>,<target>,<notes>
 Business Architecture,<level>,<target>,<notes>
-Information & Data,<level>,<target>,<notes>
+Information,<level>,<target>,<notes>
 Technology,<level>,<target>,<notes>
 ```
 
@@ -447,14 +463,14 @@ export-2026-01-24.zip
 
 ## Key Terminology
 
-| Term                  | Definition                                                                                         |
-| --------------------- | -------------------------------------------------------------------------------------------------- |
-| **Capability Domain** | High-level capability grouping (e.g., "Provider Management")                                       |
-| **Capability Area**   | Specific capability being assessed (e.g., "Provider Enrollment")                                   |
-| **Dimension**         | ORBIT assessment category (Outcomes, Roles, Business Architecture, Information & Data, Technology) |
-| **Sub-Dimension**     | Only applies to Technology (e.g., "Infrastructure", "Integration")                                 |
-| **Aspect**            | Individual assessment criteria within a dimension (e.g., "Data Governance")                        |
-| **Maturity Level**    | Rating from 1 (Initial) to 5 (Optimized), or N/A                                                   |
+| Term                  | Definition                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------- |
+| **Capability Domain** | High-level capability grouping (e.g., "Provider Management")                                |
+| **Capability Area**   | Specific capability being assessed (e.g., "Provider Enrollment")                            |
+| **Dimension**         | ORBIT assessment category (Outcomes, Roles, Business Architecture, Information, Technology) |
+| **Sub-Dimension**     | Only applies to Technology (e.g., "Infrastructure", "Integration")                          |
+| **Aspect**            | Individual assessment criteria within a dimension (e.g., "Data Governance")                 |
+| **Maturity Level**    | Rating from 1 (Initial) to 5 (Optimized), or N/A                                            |
 
 ---
 
@@ -462,3 +478,4 @@ export-2026-01-24.zip
 
 - [MITA 4.0 Maturity Model List Format](docs/MITA_4.0_Maturity_Model_List_Format.md)
 - [MITA 4.0 Capability Reference Model](docs/MITA_4.0_Capability_Reference_Model.md)
+- [ORBIT Dimension & Domain Changes](docs/ORBIT_DIMENSION_CHANGES.md)

@@ -28,9 +28,21 @@ import {
   getTechnologySubDimensions,
   getAspectsForDimension,
   getAspectsForSubDimension,
+  getAggregatedDimensionForDomain,
 } from '../services/orbit';
-import { useOrbitRatings, useAttachments, useCapabilityAssessments, useTags } from '../hooks';
-import { AssessmentContextBar, AssessmentSidebar, DimensionPage } from '../components/assessment';
+import {
+  useOrbitRatings,
+  useAttachments,
+  useCapabilityAssessments,
+  useTags,
+  useScores,
+} from '../hooks';
+import {
+  AssessmentContextBar,
+  AssessmentSidebar,
+  DimensionPage,
+  AggregateDimensionView,
+} from '../components/assessment';
 import type {
   OrbitDimensionId,
   TechnologySubDimensionId,
@@ -51,38 +63,64 @@ interface NavItem {
   description: string;
   isRequired: boolean;
   aspectCount: number;
+  isAggregate?: boolean;
 }
 
 /**
  * Build navigation items from ORBIT model
+ * @param domainId - The domain ID to check for aggregate dimensions
  */
-function buildNavItems(): NavItem[] {
+function buildNavItems(domainId?: string): NavItem[] {
   const items: NavItem[] = [];
   const orbitModel = getOrbitModel();
 
+  // Get the aggregated dimension for this domain (if any)
+  const aggregatedDimension = domainId ? getAggregatedDimensionForDomain(domainId) : null;
+
   // Standard dimensions (non-Technology)
-  for (const dimId of ['outcomes', 'roles', 'businessArchitecture', 'informationData'] as const) {
+  for (const dimId of ['outcomes', 'roles', 'businessArchitecture', 'information'] as const) {
     const dim = orbitModel.dimensions[dimId];
+    const isAggregate = aggregatedDimension === dimId;
+
     items.push({
       dimensionId: dimId,
       name: dim.name,
-      description: dim.description,
+      description: isAggregate
+        ? `Aggregate ${dim.name} score from all finalized capability assessments`
+        : dim.description,
       isRequired: dim.required,
       aspectCount: dim.aspects.length,
+      isAggregate,
     });
   }
 
-  // Technology sub-dimensions
-  const techSubDims = getTechnologySubDimensions();
-  for (const subDim of techSubDims) {
+  // Technology dimension - check if it's aggregated
+  const isTechAggregate = aggregatedDimension === 'technology';
+
+  if (isTechAggregate) {
+    // For Enterprise Technology domain, Technology is a single aggregate item
+    const techDim = orbitModel.dimensions.technology;
     items.push({
       dimensionId: 'technology',
-      subDimensionId: subDim.id,
-      name: subDim.name,
-      description: subDim.description,
+      name: techDim.name,
+      description: 'Aggregate Technology score from all finalized capability assessments',
       isRequired: true,
-      aspectCount: subDim.aspects.length,
+      aspectCount: 0, // No aspects to assess - it's aggregate
+      isAggregate: true,
     });
+  } else {
+    // Standard Technology with sub-dimensions
+    const techSubDims = getTechnologySubDimensions();
+    for (const subDim of techSubDims) {
+      items.push({
+        dimensionId: 'technology',
+        subDimensionId: subDim.id,
+        name: subDim.name,
+        description: subDim.description,
+        isRequired: true,
+        aspectCount: subDim.aspects.length,
+      });
+    }
   }
 
   return items;
@@ -123,9 +161,19 @@ export default function Assessment(): JSX.Element {
 
   const { finalizeAssessment, updateTags } = useCapabilityAssessments();
   const { getAllTagNames } = useTags();
+  const { getAggregateDimensionScore } = useScores();
 
-  // Navigation state
-  const navItems = useMemo(() => buildNavItems(), []);
+  // Get capability info
+  const capabilityInfo = useMemo(() => {
+    if (!assessment) return null;
+    return getAreaWithDomain(assessment.capabilityAreaId);
+  }, [assessment]);
+
+  // Navigation state - depends on domain for aggregate dimensions
+  const navItems = useMemo(
+    () => buildNavItems(assessment?.capabilityDomainId),
+    [assessment?.capabilityDomainId]
+  );
   const [currentNavIndex, setCurrentNavIndex] = useState(0);
   const [isReviewSelected, setIsReviewSelected] = useState(false);
 
@@ -147,12 +195,6 @@ export default function Assessment(): JSX.Element {
 
   // Ensure currentNav is always defined
   const currentNav = navItems[currentNavIndex] ?? navItems[0];
-
-  // Get capability info
-  const capabilityInfo = useMemo(() => {
-    if (!assessment) return null;
-    return getAreaWithDomain(assessment.capabilityAreaId);
-  }, [assessment]);
 
   // Build ratings map for current dimension
   const ratingsMap = useMemo(() => {
@@ -197,6 +239,23 @@ export default function Assessment(): JSX.Element {
   // Calculate sidebar progress data
   const sidebarDimensions = useMemo(() => {
     return navItems.map((nav) => {
+      // For aggregate dimensions, get aggregate score data
+      if (nav.isAggregate) {
+        const aggregateData = getAggregateDimensionScore(nav.dimensionId);
+        return {
+          dimensionId: nav.dimensionId,
+          subDimensionId: nav.subDimensionId,
+          name: nav.name,
+          assessedCount: 0,
+          totalCount: 0,
+          averageScore: null,
+          isRequired: nav.isRequired,
+          isAggregate: true,
+          aggregateScore: aggregateData.score,
+          aggregateCount: aggregateData.contributingCount,
+        };
+      }
+
       let assessedCount = 0;
       const totalCount = nav.aspectCount;
       let avgScore: number | null = null;
@@ -224,9 +283,16 @@ export default function Assessment(): JSX.Element {
         totalCount,
         averageScore: avgScore,
         isRequired: nav.isRequired,
+        isAggregate: false,
       };
     });
-  }, [navItems, ratings, getAssessedCountForDimension, getAverageLevelForDimension]);
+  }, [
+    navItems,
+    ratings,
+    getAssessedCountForDimension,
+    getAverageLevelForDimension,
+    getAggregateDimensionScore,
+  ]);
 
   // Calculate overall progress
   const totalAspects = navItems.reduce((sum, nav) => sum + nav.aspectCount, 0);
@@ -528,27 +594,35 @@ export default function Assessment(): JSX.Element {
 
         {/* Main Content Area */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <DimensionPage
-            dimensionId={currentNav.dimensionId}
-            subDimensionId={currentNav.subDimensionId}
-            dimensionName={currentNav.name}
-            dimensionDescription={currentNav.description}
-            isRequired={currentNav.isRequired}
-            aspects={currentAspects}
-            ratings={ratingsMap}
-            attachments={attachmentsMap}
-            onLevelChange={handleLevelChange}
-            onTargetLevelChange={handleTargetLevelChange}
-            onQuestionChange={handleQuestionChange}
-            onEvidenceChange={handleEvidenceChange}
-            onNotesChange={handleNotesChange}
-            onBarriersChange={handleBarriersChange}
-            onPlansChange={handlePlansChange}
-            onAttachmentUpload={handleAttachmentUpload}
-            onAttachmentDelete={handleAttachmentDelete}
-            onAttachmentDownload={downloadAttachment}
-            disabled={isViewMode}
-          />
+          {currentNav.isAggregate ? (
+            <AggregateDimensionView
+              dimensionId={currentNav.dimensionId}
+              dimensionName={currentNav.name}
+              aggregateData={getAggregateDimensionScore(currentNav.dimensionId)}
+            />
+          ) : (
+            <DimensionPage
+              dimensionId={currentNav.dimensionId}
+              subDimensionId={currentNav.subDimensionId}
+              dimensionName={currentNav.name}
+              dimensionDescription={currentNav.description}
+              isRequired={currentNav.isRequired}
+              aspects={currentAspects}
+              ratings={ratingsMap}
+              attachments={attachmentsMap}
+              onLevelChange={handleLevelChange}
+              onTargetLevelChange={handleTargetLevelChange}
+              onQuestionChange={handleQuestionChange}
+              onEvidenceChange={handleEvidenceChange}
+              onNotesChange={handleNotesChange}
+              onBarriersChange={handleBarriersChange}
+              onPlansChange={handlePlansChange}
+              onAttachmentUpload={handleAttachmentUpload}
+              onAttachmentDelete={handleAttachmentDelete}
+              onAttachmentDownload={downloadAttachment}
+              disabled={isViewMode}
+            />
+          )}
         </Box>
       </Box>
 

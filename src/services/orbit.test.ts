@@ -52,7 +52,7 @@ describe('orbit service', () => {
         'outcomes',
         'roles',
         'businessArchitecture',
-        'informationData',
+        'information',
         'technology',
       ]);
     });
@@ -61,7 +61,7 @@ describe('orbit service', () => {
   describe('getRequiredDimensionIds', () => {
     it('should return required dimension IDs', () => {
       const ids = getRequiredDimensionIds();
-      expect(ids).toEqual(['businessArchitecture', 'informationData', 'technology']);
+      expect(ids).toEqual(['businessArchitecture', 'information', 'technology']);
     });
   });
 
@@ -96,7 +96,7 @@ describe('orbit service', () => {
         'outcomes',
         'roles',
         'businessArchitecture',
-        'informationData',
+        'information',
       ]);
     });
   });
@@ -227,7 +227,7 @@ describe('orbit service', () => {
     it('should return count of aspects in required dimensions only', () => {
       const count = getRequiredAspectCount();
       const businessCount = getAspectCountForDimension('businessArchitecture');
-      const infoCount = getAspectCountForDimension('informationData');
+      const infoCount = getAspectCountForDimension('information');
       const techCount = getAspectCountForDimension('technology');
       expect(count).toBe(businessCount + infoCount + techCount);
     });
@@ -246,8 +246,8 @@ describe('orbit service', () => {
       expect(isDimensionRequired('businessArchitecture')).toBe(true);
     });
 
-    it('should return true for informationData', () => {
-      expect(isDimensionRequired('informationData')).toBe(true);
+    it('should return true for information', () => {
+      expect(isDimensionRequired('information')).toBe(true);
     });
 
     it('should return true for technology', () => {

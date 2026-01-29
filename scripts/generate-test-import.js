@@ -145,8 +145,8 @@ function getAreasFromDomain(domain) {
 function getAllAspects() {
   const aspects = [];
 
-  // Standard dimensions: outcomes, roles, businessArchitecture, informationData
-  for (const dimId of ['outcomes', 'roles', 'businessArchitecture', 'informationData']) {
+  // Standard dimensions: outcomes, roles, businessArchitecture, information
+  for (const dimId of ['outcomes', 'roles', 'businessArchitecture', 'information']) {
     const dimension = orbitModel.dimensions[dimId];
     if (dimension && dimension.aspects) {
       for (const aspect of dimension.aspects) {
@@ -488,7 +488,7 @@ function buildMaturityProfile(assessments, allRatings, stateName) {
     outcomes: 'Outcomes',
     roles: 'Roles',
     businessArchitecture: 'Business Architecture',
-    informationData: 'Information & Data',
+    information: 'Information',
     technology: 'Technology',
   };
 
@@ -560,7 +560,7 @@ const GUARANTEED_DOMAINS = [
 const GUARANTEED_ATTACHMENT_DIMENSIONS = [
   'outcomes',
   'businessArchitecture',
-  'informationData',
+  'information',
   'technology',
 ];
 

@@ -7,14 +7,15 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/db';
-import { getTotalAreaCount, getAreasByDomainId } from '../services/capabilities';
-import { calculateAverageScore } from '../services/scoring';
+import { getTotalAreaCount, getAreasByDomainId, getAreaWithDomain } from '../services/capabilities';
+import { calculateAverageScore, calculateDimensionScore } from '../services/scoring';
 import {
   getAllDimensionIds,
   getTotalAspectCount,
   getTechnologySubDimensions,
   getAspectsForDimension,
   getAspectsForSubDimension,
+  isEnterpriseDomain,
 } from '../services/orbit';
 import type { OrbitRating, OrbitDimensionId, DimensionScore, SubDimensionScore } from '../types';
 
@@ -30,6 +31,23 @@ export interface CapabilityScoreData {
   tags: string[];
   status: 'not_started' | 'in_progress' | 'finalized';
   completionPercentage: number;
+}
+
+/**
+ * Aggregate dimension score details
+ */
+export interface AggregateDimensionScore {
+  score: number | null;
+  contributingCount: number;
+  assessmentIds: string[];
+  breakdown: Array<{
+    assessmentId: string;
+    capabilityAreaId: string;
+    capabilityAreaName: string;
+    capabilityDomainId: string;
+    capabilityDomainName: string;
+    dimensionScore: number;
+  }>;
 }
 
 /**
@@ -60,6 +78,7 @@ export interface UseScoresReturn {
     total: number;
   };
   getDimensionScoresForAssessment: (assessmentId: string) => DimensionScore[] | undefined;
+  getAggregateDimensionScore: (dimensionId: OrbitDimensionId) => AggregateDimensionScore;
 }
 
 /**
@@ -365,6 +384,64 @@ export function useScores(): UseScoresReturn {
     });
   };
 
+  /**
+   * Calculate aggregate score for a dimension across all qualifying finalized assessments.
+   * Used for enterprise domains (Enterprise Data Management, Enterprise Technology).
+   * Excludes enterprise domains from the calculation to prevent circular dependencies.
+   *
+   * @param dimensionId - The dimension to aggregate (e.g., 'information' or 'technology')
+   * @returns Aggregate score details including breakdown by contributing assessment
+   */
+  const getAggregateDimensionScore = (dimensionId: OrbitDimensionId): AggregateDimensionScore => {
+    if (!data) {
+      return { score: null, contributingCount: 0, assessmentIds: [], breakdown: [] };
+    }
+
+    // Filter to finalized, non-enterprise domain assessments
+    const qualifyingAssessments = data.assessments.filter(
+      (a) => a.status === 'finalized' && !isEnterpriseDomain(a.capabilityDomainId)
+    );
+
+    const breakdown: AggregateDimensionScore['breakdown'] = [];
+
+    for (const assessment of qualifyingAssessments) {
+      const ratings = data.ratingsByAssessment.get(assessment.id) ?? [];
+      const dimRatings = ratings.filter((r) => r.dimensionId === dimensionId);
+
+      // Calculate dimension score using shared function
+      const dimScore = calculateDimensionScore(dimensionId, dimRatings);
+
+      if (dimScore !== null) {
+        // Get area info for breakdown
+        const areaInfo = getAreaWithDomain(assessment.capabilityAreaId);
+        breakdown.push({
+          assessmentId: assessment.id,
+          capabilityAreaId: assessment.capabilityAreaId,
+          capabilityAreaName: areaInfo?.area.name ?? assessment.capabilityAreaName,
+          capabilityDomainId: assessment.capabilityDomainId,
+          capabilityDomainName: areaInfo?.domain.name ?? assessment.capabilityDomainName,
+          dimensionScore: dimScore,
+        });
+      }
+    }
+
+    if (breakdown.length === 0) {
+      return { score: null, contributingCount: 0, assessmentIds: [], breakdown: [] };
+    }
+
+    const avgScore =
+      Math.round(
+        (breakdown.reduce((sum, b) => sum + b.dimensionScore, 0) / breakdown.length) * 10
+      ) / 10;
+
+    return {
+      score: avgScore,
+      contributingCount: breakdown.length,
+      assessmentIds: breakdown.map((b) => b.assessmentId),
+      breakdown,
+    };
+  };
+
   return {
     scoresByArea: data?.scoresByArea ?? new Map(),
     getCapabilityScoreData,
@@ -380,6 +457,7 @@ export function useScores(): UseScoresReturn {
     getStatusCounts,
     getDomainStatusCounts,
     getDimensionScoresForAssessment,
+    getAggregateDimensionScore,
   };
 }
 
@@ -391,7 +469,7 @@ function getDimensionDisplayName(dimensionId: OrbitDimensionId): string {
     outcomes: 'Outcomes',
     roles: 'Roles',
     businessArchitecture: 'Business Architecture',
-    informationData: 'Information & Data',
+    information: 'Information',
     technology: 'Technology',
   };
   return names[dimensionId];
@@ -403,7 +481,7 @@ function getDimensionDisplayName(dimensionId: OrbitDimensionId): string {
 function isDimensionRequired(dimensionId: OrbitDimensionId): boolean {
   return (
     dimensionId === 'businessArchitecture' ||
-    dimensionId === 'informationData' ||
+    dimensionId === 'information' ||
     dimensionId === 'technology'
   );
 }

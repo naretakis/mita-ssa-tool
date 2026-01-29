@@ -14,10 +14,27 @@ import { db } from '../db';
 import { createHistorySnapshot, calculateDimensionScores, toHistoricalRatings } from '../history';
 import { extractAttachmentIdFromFileName } from './exportService';
 import type { ExportData, ImportResult, ImportItemResult, ImportProgressCallback } from './types';
-import type { CapabilityAssessment, Attachment } from '../../types';
+import type { CapabilityAssessment, Attachment, OrbitDimensionId } from '../../types';
 
 /** Current supported export version */
 const SUPPORTED_VERSIONS = ['1.0'];
+
+/**
+ * Maps legacy dimension IDs to current dimension IDs.
+ * Used for backwards compatibility when importing older exports.
+ */
+const LEGACY_DIMENSION_ID_MAP: Record<string, OrbitDimensionId> = {
+  informationData: 'information',
+};
+
+/**
+ * Normalizes a dimension ID, mapping legacy IDs to current ones.
+ * @param dimensionId - The dimension ID from imported data
+ * @returns The normalized dimension ID
+ */
+function normalizeDimensionId(dimensionId: string): OrbitDimensionId {
+  return (LEGACY_DIMENSION_ID_MAP[dimensionId] ?? dimensionId) as OrbitDimensionId;
+}
 
 /**
  * Validates export data structure
@@ -217,7 +234,7 @@ export async function importFromZip(
                     );
                     return (
                       originalRating &&
-                      r.dimensionId === originalRating.dimensionId &&
+                      r.dimensionId === normalizeDimensionId(originalRating.dimensionId) &&
                       r.aspectId === originalRating.aspectId
                     );
                   })
@@ -380,6 +397,7 @@ async function processAssessmentImport(
         ...rating,
         id: uuidv4(),
         capabilityAssessmentId: newAssessmentId,
+        dimensionId: normalizeDimensionId(rating.dimensionId),
         updatedAt: new Date(rating.updatedAt),
         attachmentIds: [], // Attachments handled separately
       });
@@ -452,6 +470,7 @@ async function processAssessmentImport(
         ...rating,
         id: uuidv4(),
         capabilityAssessmentId: existingAssessment.id,
+        dimensionId: normalizeDimensionId(rating.dimensionId),
         updatedAt: new Date(rating.updatedAt),
         attachmentIds: [],
       });
@@ -491,6 +510,11 @@ async function processAssessmentImport(
       // Create history entry from imported data using shared utilities
       // Note: We construct a temporary assessment object with the imported date
       // since the imported assessment has a different ID than the existing one
+      // Normalize dimension IDs for backwards compatibility with older exports
+      const normalizedRatings = importedRatings.map((r) => ({
+        ...r,
+        dimensionId: normalizeDimensionId(r.dimensionId),
+      }));
       await db.assessmentHistory.add({
         id: uuidv4(),
         capabilityAssessmentId: existingAssessment.id,
@@ -498,8 +522,8 @@ async function processAssessmentImport(
         snapshotDate: importedDate,
         tags: importedAssessment.tags,
         overallScore: importedAssessment.overallScore,
-        dimensionScores: calculateDimensionScores(importedRatings),
-        ratings: toHistoricalRatings(importedRatings),
+        dimensionScores: calculateDimensionScores(normalizedRatings),
+        ratings: toHistoricalRatings(normalizedRatings),
       });
 
       return {

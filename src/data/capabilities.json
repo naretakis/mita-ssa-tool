@@ -593,9 +593,9 @@
     },
     {
       "id": "data-management",
-      "name": "Data Management",
+      "name": "Enterprise Data Management",
       "layer": "support",
-      "description": "The Data Management Capability Domain represents the SMA's ability to manage its data. The domain encompasses key data management capability areas organized into Foundational (oversight and structure) and Lifecycle (data through planning, design, use, enhancement, enablement, and maintenance) categories.",
+      "description": "The Enterprise Data Management Capability Domain represents the SMA's ability to manage its data. The domain encompasses key data management capability areas organized into Foundational (oversight and structure) and Lifecycle (data through planning, design, use, enhancement, enablement, and maintenance) categories.",
       "categories": [
         {
           "id": "foundational",
@@ -739,9 +739,9 @@
     },
     {
       "id": "technical",
-      "name": "Technical",
+      "name": "Enterprise Technology",
       "layer": "support",
-      "description": "The Technical Capability Domain represents the SMA's technology capabilities that enable and support core and strategic capabilities. Organized into seven categories: Infrastructure, Integration, Platform Services, Application Architecture, Security and Identity, Operations and Maintenance, and Development and Release.",
+      "description": "The Enterprise Technology Capability Domain represents the SMA's technology capabilities that enable and support core and strategic capabilities. Organized into seven categories: Infrastructure, Integration, Platform Services, Application Architecture, Security and Identity, Operations and Maintenance, and Development and Release.",
       "categories": [
         {
           "id": "infrastructure",

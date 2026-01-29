@@ -103,7 +103,7 @@ export type OrbitDimensionId =
   | 'outcomes'
   | 'roles'
   | 'businessArchitecture'
-  | 'informationData'
+  | 'information'
   | 'technology';
 
 /**
@@ -231,7 +231,7 @@ export interface OrbitModel {
     outcomes: OrbitDimension;
     roles: OrbitDimension;
     businessArchitecture: OrbitDimension;
-    informationData: OrbitDimension;
+    information: OrbitDimension;
     technology: TechnologyDimension;
   };
 }
@@ -334,6 +334,21 @@ export interface HistoricalRating {
 }
 
 /**
+ * Aggregate dimension metadata stored in history snapshots.
+ * Captures point-in-time aggregate data for enterprise domains.
+ */
+export interface AggregateSnapshotData {
+  /** The dimension that was aggregated (e.g., 'information' or 'technology') */
+  dimensionId: OrbitDimensionId;
+  /** The aggregate score at snapshot time */
+  score: number | null;
+  /** Number of assessments that contributed to the aggregate */
+  contributingCount: number;
+  /** IDs of assessments that contributed (for traceability) */
+  contributingAssessmentIds: string[];
+}
+
+/**
  * Assessment History - snapshots of finalized assessments
  */
 export interface AssessmentHistory {
@@ -345,6 +360,8 @@ export interface AssessmentHistory {
   overallScore: number;
   dimensionScores: Record<string, number>;
   ratings: HistoricalRating[];
+  /** Aggregate dimension data for enterprise domains (stored at snapshot time) */
+  aggregateData?: AggregateSnapshotData;
 }
 
 /**

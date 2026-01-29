@@ -363,7 +363,7 @@ describe('exportService', () => {
       const rating2: OrbitRating = {
         id: uuidv4(),
         capabilityAssessmentId: assessment.id,
-        dimensionId: 'informationData',
+        dimensionId: 'information',
         aspectId: 'data-governance',
         currentLevel: 4,
         targetLevel: 5,

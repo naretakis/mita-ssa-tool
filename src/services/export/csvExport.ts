@@ -15,7 +15,7 @@ const ORBIT_DIMENSIONS = [
   'Outcomes',
   'Roles',
   'Business Architecture',
-  'Information & Data',
+  'Information',
   'Technology',
 ];
 

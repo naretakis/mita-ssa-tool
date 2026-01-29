@@ -16,8 +16,9 @@ import {
   getTechnologySubDimensions,
   getAspectsForDimension,
   getAspectsForSubDimension,
+  getAggregatedDimensionForDomain,
 } from '../services/orbit';
-import { AssessmentSidebar, DimensionPage } from '../components/assessment';
+import { AssessmentSidebar, DimensionPage, AggregateDimensionView } from '../components/assessment';
 import type {
   OrbitDimensionId,
   TechnologySubDimensionId,
@@ -35,36 +36,63 @@ interface NavItem {
   description: string;
   isRequired: boolean;
   aspectCount: number;
+  isAggregate?: boolean;
 }
 
 /**
  * Build navigation items from ORBIT model
+ * @param domainId - The domain ID to check for aggregate dimensions
  */
-function buildNavItems(): NavItem[] {
+function buildNavItems(domainId?: string): NavItem[] {
   const items: NavItem[] = [];
   const orbitModel = getOrbitModel();
 
-  for (const dimId of ['outcomes', 'roles', 'businessArchitecture', 'informationData'] as const) {
+  // Get the aggregated dimension for this domain (if any)
+  const aggregatedDimension = domainId ? getAggregatedDimensionForDomain(domainId) : null;
+
+  for (const dimId of ['outcomes', 'roles', 'businessArchitecture', 'information'] as const) {
     const dim = orbitModel.dimensions[dimId];
+    const isAggregate = aggregatedDimension === dimId;
+
     items.push({
       dimensionId: dimId,
       name: dim.name,
-      description: dim.description,
+      description: isAggregate
+        ? `Aggregate ${dim.name} score from all finalized capability assessments`
+        : dim.description,
       isRequired: dim.required,
       aspectCount: dim.aspects.length,
+      isAggregate,
     });
   }
 
-  const techSubDims = getTechnologySubDimensions();
-  for (const subDim of techSubDims) {
+  // Technology dimension - check if it's aggregated
+  const isTechAggregate = aggregatedDimension === 'technology';
+
+  if (isTechAggregate) {
+    // Show Technology as a single aggregate item
+    const techDim = orbitModel.dimensions.technology;
     items.push({
       dimensionId: 'technology',
-      subDimensionId: subDim.id,
-      name: subDim.name,
-      description: subDim.description,
+      name: techDim.name,
+      description: `Aggregate ${techDim.name} score from all finalized capability assessments`,
       isRequired: true,
-      aspectCount: subDim.aspects.length,
+      aspectCount: techDim.subDimensions.reduce((sum, sd) => sum + sd.aspects.length, 0),
+      isAggregate: true,
     });
+  } else {
+    // Show Technology sub-dimensions
+    const techSubDims = getTechnologySubDimensions();
+    for (const subDim of techSubDims) {
+      items.push({
+        dimensionId: 'technology',
+        subDimensionId: subDim.id,
+        name: subDim.name,
+        description: subDim.description,
+        isRequired: true,
+        aspectCount: subDim.aspects.length,
+      });
+    }
   }
 
   return items;
@@ -110,16 +138,19 @@ export default function HistoryView(): JSX.Element {
     [historyId]
   );
 
-  // Navigation state
-  const navItems = useMemo(() => buildNavItems(), []);
-  const [currentNavIndex, setCurrentNavIndex] = useState(0);
-  const currentNav = navItems[currentNavIndex] ?? navItems[0];
-
-  // Get capability info
+  // Get capability info (needed for domain ID)
   const capabilityInfo = useMemo(() => {
     if (!historyEntry) return null;
     return getAreaWithDomain(historyEntry.capabilityAreaId);
   }, [historyEntry]);
+
+  // Navigation state - build with domain ID for aggregate detection
+  const navItems = useMemo(
+    () => buildNavItems(capabilityInfo?.domain.id),
+    [capabilityInfo?.domain.id]
+  );
+  const [currentNavIndex, setCurrentNavIndex] = useState(0);
+  const currentNav = navItems[currentNavIndex] ?? navItems[0];
 
   // Convert historical ratings to OrbitRating format
   const ratings = useMemo(() => {
@@ -164,6 +195,20 @@ export default function HistoryView(): JSX.Element {
       const totalCount = nav.aspectCount;
       let avgScore: number | null = null;
 
+      // For aggregate dimensions, use stored aggregate data from snapshot
+      if (nav.isAggregate && historyEntry?.aggregateData?.dimensionId === nav.dimensionId) {
+        return {
+          dimensionId: nav.dimensionId,
+          subDimensionId: nav.subDimensionId,
+          name: nav.name,
+          assessedCount: historyEntry.aggregateData.contributingCount,
+          totalCount: historyEntry.aggregateData.contributingCount,
+          averageScore: historyEntry.aggregateData.score,
+          isRequired: nav.isRequired,
+          isAggregate: true,
+        };
+      }
+
       const dimRatings = ratings.filter((r) => {
         if (nav.subDimensionId) {
           return r.dimensionId === nav.dimensionId && r.subDimensionId === nav.subDimensionId;
@@ -185,9 +230,10 @@ export default function HistoryView(): JSX.Element {
         totalCount,
         averageScore: avgScore,
         isRequired: nav.isRequired,
+        isAggregate: nav.isAggregate,
       };
     });
-  }, [navItems, ratings]);
+  }, [navItems, ratings, historyEntry?.aggregateData]);
 
   // Calculate overall progress
   const totalAspects = navItems.reduce((sum, nav) => sum + nav.aspectCount, 0);
@@ -296,27 +342,40 @@ export default function HistoryView(): JSX.Element {
 
         {/* Main Content Area */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          <DimensionPage
-            dimensionId={currentNav.dimensionId}
-            subDimensionId={currentNav.subDimensionId}
-            dimensionName={currentNav.name}
-            dimensionDescription={currentNav.description}
-            isRequired={currentNav.isRequired}
-            aspects={currentAspects}
-            ratings={ratingsMap}
-            attachments={new Map()}
-            onLevelChange={() => Promise.resolve()}
-            onTargetLevelChange={() => Promise.resolve()}
-            onQuestionChange={() => Promise.resolve()}
-            onEvidenceChange={() => Promise.resolve()}
-            onNotesChange={() => Promise.resolve()}
-            onBarriersChange={() => Promise.resolve()}
-            onPlansChange={() => Promise.resolve()}
-            onAttachmentUpload={() => Promise.resolve()}
-            onAttachmentDelete={() => Promise.resolve()}
-            onAttachmentDownload={() => Promise.resolve()}
-            disabled={true}
-          />
+          {currentNav.isAggregate && historyEntry.aggregateData ? (
+            <AggregateDimensionView
+              dimensionId={currentNav.dimensionId}
+              dimensionName={currentNav.name}
+              aggregateData={{
+                score: historyEntry.aggregateData.score,
+                contributingCount: historyEntry.aggregateData.contributingCount,
+                assessmentIds: historyEntry.aggregateData.contributingAssessmentIds,
+                breakdown: [], // Historical view doesn't show breakdown details
+              }}
+            />
+          ) : (
+            <DimensionPage
+              dimensionId={currentNav.dimensionId}
+              subDimensionId={currentNav.subDimensionId}
+              dimensionName={currentNav.name}
+              dimensionDescription={currentNav.description}
+              isRequired={currentNav.isRequired}
+              aspects={currentAspects}
+              ratings={ratingsMap}
+              attachments={new Map()}
+              onLevelChange={() => Promise.resolve()}
+              onTargetLevelChange={() => Promise.resolve()}
+              onQuestionChange={() => Promise.resolve()}
+              onEvidenceChange={() => Promise.resolve()}
+              onNotesChange={() => Promise.resolve()}
+              onBarriersChange={() => Promise.resolve()}
+              onPlansChange={() => Promise.resolve()}
+              onAttachmentUpload={() => Promise.resolve()}
+              onAttachmentDelete={() => Promise.resolve()}
+              onAttachmentDownload={() => Promise.resolve()}
+              disabled={true}
+            />
+          )}
         </Box>
       </Box>
     </Box>

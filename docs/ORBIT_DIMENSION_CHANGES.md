@@ -659,8 +659,8 @@ function getAssessmentsForAggregate(excludeDomainId: string): CapabilityAssessme
 
 ### Import (Backwards Compatibility)
 
-- [ ] Can import files with old `informationData` dimension ID
-- [ ] Gracefully maps to new `information` ID
+- [x] Can import files with old `informationData` dimension ID
+- [x] Gracefully maps to new `information` ID
 
 ### Regression
 
@@ -727,8 +727,117 @@ function getAssessmentsForAggregate(excludeDomainId: string): CapabilityAssessme
 
 ---
 
+## Implementation Status
+
+**Last Updated:** January 29, 2026
+
+### Summary
+
+| Phase   | Description           | Status      |
+| ------- | --------------------- | ----------- |
+| Phase 1 | Data & Type Changes   | ✅ Complete |
+| Phase 2 | Service Layer         | ✅ Complete |
+| Phase 3 | UI Components         | ✅ Complete |
+| Phase 4 | Export                | ✅ Complete |
+| Phase 5 | History Service       | ✅ Complete |
+| Phase 6 | Tests & Documentation | ✅ Complete |
+
+### Phase 1: Data & Type Changes — ✅ COMPLETE
+
+| Task                                                     | Status  | Files Modified                                     |
+| -------------------------------------------------------- | ------- | -------------------------------------------------- |
+| Update `orbit-model.json` - rename dimension ID and name | ✅ Done | `src/data/orbit-model.json`                        |
+| Update `capabilities.json` - rename domain display names | ✅ Done | `src/data/capabilities.json`                       |
+| Update `OrbitDimensionId` type                           | ✅ Done | `src/types/index.ts`                               |
+| Update `OrbitModel` interface                            | ✅ Done | `src/types/index.ts`                               |
+| Update CSV template                                      | ✅ Done | `src/data/templates/maturity-profile-template.csv` |
+
+### Phase 2: Service Layer — ✅ COMPLETE
+
+| Task                                                 | Status  | Files Modified           |
+| ---------------------------------------------------- | ------- | ------------------------ |
+| Add `ENTERPRISE_DOMAIN_IDS` constant                 | ✅ Done | `src/constants/index.ts` |
+| Add `DOMAIN_AGGREGATE_DIMENSIONS` constant           | ✅ Done | `src/constants/index.ts` |
+| Add `getAggregatedDimensionForDomain()`              | ✅ Done | `src/services/orbit.ts`  |
+| Add `isAggregatedDimension()`                        | ✅ Done | `src/services/orbit.ts`  |
+| Add `hasAggregatedDimension()`                       | ✅ Done | `src/services/orbit.ts`  |
+| Add `isEnterpriseDomain()`                           | ✅ Done | `src/services/orbit.ts`  |
+| Rename `informationData` → `information` in orbit.ts | ✅ Done | `src/services/orbit.ts`  |
+| Add `getAggregateDimensionScore()` to useScores      | ✅ Done | `src/hooks/useScores.ts` |
+| Export `AggregateDimensionScore` type                | ✅ Done | `src/hooks/index.ts`     |
+
+### Phase 3: UI Components — ✅ COMPLETE
+
+| Task                                                 | Status  | Files Modified                                         |
+| ---------------------------------------------------- | ------- | ------------------------------------------------------ |
+| Create `AggregateDimensionView.tsx`                  | ✅ Done | `src/components/assessment/AggregateDimensionView.tsx` |
+| Update `AssessmentSidebar.tsx` - aggregate indicator | ✅ Done | `src/components/assessment/AssessmentSidebar.tsx`      |
+| Update `Assessment.tsx` - conditional rendering      | ✅ Done | `src/pages/Assessment.tsx`                             |
+| Update `HistoryView.tsx` - dimension iteration       | ✅ Done | `src/pages/HistoryView.tsx`                            |
+| Update `ResultsMasterDetail.tsx` - dimension labels  | ✅ Done | `src/components/results/ResultsMasterDetail.tsx`       |
+| Update `About.tsx` - dimension names                 | ✅ Done | `src/pages/About.tsx`                                  |
+| Update `AreaResults.tsx` - dimension labels          | ✅ Done | `src/pages/AreaResults.tsx`                            |
+| Export `AggregateDimensionView` from index           | ✅ Done | `src/components/assessment/index.ts`                   |
+
+### Phase 4: Export — ✅ COMPLETE
+
+| Task                                        | Status  | Files Modified                         |
+| ------------------------------------------- | ------- | -------------------------------------- | --------------------------------------------------------- |
+| Update `csvExport.ts` - dimension names     | ✅ Done | `src/services/export/csvExport.ts`     |
+| Update `pdfStyles.ts` - dimension names     | ✅ Done | `src/services/export/pdfStyles.ts`     |
+| Update `pdfExport.ts` - dimension names     | ✅ Done | `src/services/export/pdfExport.ts`     |
+| Update `exportService.ts` - dimension names | ✅ Done | `src/services/export/exportService.ts` |
+| CSV "(Aggregate)" note in Notes column      | ✅ Done | `src/services/export/exportService.ts` | Added via `generateCapabilityAreaProfile`                 |
+| JSON export aggregate metadata              | ✅ Done | `src/services/export/exportService.ts` | Added `enterpriseAggregates` field                        |
+| Export types for aggregate data             | ✅ Done | `src/services/export/types.ts`         | Added `ExportAggregateData`, `ExportEnterpriseAssessment` |
+| Import backwards compatibility              | ✅ Done | `src/services/export/importService.ts` | Maps `informationData` → `information`                    |
+
+### Phase 5: History Service — ✅ COMPLETE
+
+| Task                                     | Status  | Files Modified                          |
+| ---------------------------------------- | ------- | --------------------------------------- | --------------------------------------- |
+| Add `AggregateSnapshotData` type         | ✅ Done | `src/types/index.ts`                    |
+| Update `AssessmentHistory` interface     | ✅ Done | `src/types/index.ts`                    | Added optional `aggregateData` field    |
+| Update `createHistorySnapshot()`         | ✅ Done | `src/services/history.ts`               | Now accepts optional aggregate data     |
+| Store aggregate in snapshots during edit | ✅ Done | `src/hooks/useCapabilityAssessments.ts` | `editAssessment` captures aggregate     |
+| Include aggregate in overall score       | ✅ Done | `src/hooks/useCapabilityAssessments.ts` | `finalizeAssessment` includes aggregate |
+| Update `HistoryView.tsx` for aggregates  | ✅ Done | `src/pages/HistoryView.tsx`             | Shows stored aggregate from snapshot    |
+
+### Phase 6: Tests & Documentation — ✅ COMPLETE
+
+| Task                                   | Status  | Files Modified                                         |
+| -------------------------------------- | ------- | ------------------------------------------------------ |
+| Update `orbit.test.ts`                 | ✅ Done | `src/services/orbit.test.ts`                           |
+| Update `exportService.test.ts`         | ✅ Done | `src/services/export/exportService.test.ts`            |
+| Update `csvExport.test.ts`             | ✅ Done | `src/services/export/csvExport.test.ts`                |
+| Update `DimensionScoresTable.test.tsx` | ✅ Done | `src/components/results/DimensionScoresTable.test.tsx` |
+| Update `generate-test-import.js`       | ✅ Done | `scripts/generate-test-import.js`                      |
+| Update `PROJECT_FOUNDATION_v2.md`      | ✅ Done | `PROJECT_FOUNDATION_v2.md`                             |
+| Update `CHANGELOG.md`                  | ✅ Done | `CHANGELOG.md`                                         |
+
+### Additional Items — ⚠️ PARTIAL
+
+| Task                             | Status      | Notes                                                                 |
+| -------------------------------- | ----------- | --------------------------------------------------------------------- |
+| Target level (To-Be) aggregation | ❌ Not Done | Lower priority - spec says to aggregate target levels same as current |
+| PDF aggregate indicators         | ❌ Not Done | Lower priority - PDF already shows dimension names correctly          |
+
+---
+
+### Remaining Work Summary
+
+**Lower Priority (Nice to Have):**
+
+1. **Target level aggregation** - Calculate and display aggregate To-Be levels alongside As-Is
+2. **PDF aggregate indicators** - Show contributing assessment count in PDF export for aggregate dimensions
+
+---
+
 ## Revision History
 
-| Date       | Author  | Changes                                  |
-| ---------- | ------- | ---------------------------------------- |
-| 2026-01-28 | Initial | Document created with full specification |
+| Date       | Author  | Changes                                                                    |
+| ---------- | ------- | -------------------------------------------------------------------------- |
+| 2026-01-28 | Initial | Document created with full specification                                   |
+| 2026-01-29 | Update  | Added Implementation Status section with detailed tracking                 |
+| 2026-01-29 | Update  | Completed Phase 4 (Export) and Phase 5 (History Service)                   |
+| 2026-01-29 | Update  | Added import backwards compatibility for `informationData` → `information` |

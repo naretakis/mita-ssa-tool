@@ -228,7 +228,7 @@ function generateExecutiveSummary(doc: JsPDFWithAutoTable, data: ExportData): nu
   const introText =
     'This report presents the results of the MITA 4.0 maturity self-assessment. ' +
     'Each capability area has been evaluated across the five ORBIT dimensions: ' +
-    'Outcomes, Roles, Business Architecture, Information & Data, and Technology.';
+    'Outcomes, Roles, Business Architecture, Information, and Technology.';
 
   const splitIntro = doc.splitTextToSize(introText, CONTENT_WIDTH);
   doc.text(splitIntro, MARGIN_LEFT, yPos);
@@ -304,7 +304,7 @@ function generateExecutiveSummary(doc: JsPDFWithAutoTable, data: ExportData): nu
       outcomes: [],
       roles: [],
       businessArchitecture: [],
-      informationData: [],
+      information: [],
       technology: [],
     };
 

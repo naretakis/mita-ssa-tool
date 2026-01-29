@@ -48,7 +48,7 @@ describe('csvExport', () => {
               plans: 'BA plans',
             },
             {
-              dimension: 'Information & Data',
+              dimension: 'Information',
               asIs: '2.0',
               toBe: '3.0',
               notes: '',
@@ -124,7 +124,7 @@ describe('csvExport', () => {
       expect(dataLines[0]).toContain('Outcomes');
       expect(dataLines[1]).toContain('Roles');
       expect(dataLines[2]).toContain('Business Architecture');
-      expect(dataLines[3]).toContain('Information & Data');
+      expect(dataLines[3]).toContain('Information');
       expect(dataLines[4]).toContain('Technology');
     });
 
@@ -406,7 +406,7 @@ Outcomes,3.0,4.0,,,`;
             plans: '',
           },
           {
-            dimension: 'Information & Data',
+            dimension: 'Information',
             asIs: '2.0',
             toBe: '3.0',
             notes: '',

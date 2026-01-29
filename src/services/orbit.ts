@@ -7,6 +7,7 @@
  */
 
 import orbitData from '../data/orbit-model.json';
+import { DOMAIN_AGGREGATE_DIMENSIONS, ENTERPRISE_DOMAIN_IDS } from '../constants';
 import type {
   OrbitModel,
   OrbitDimension,
@@ -43,7 +44,7 @@ export function getOrbitModelVersion(): string {
  * @returns Array of all five ORBIT dimension IDs
  */
 export function getAllDimensionIds(): OrbitDimensionId[] {
-  return ['outcomes', 'roles', 'businessArchitecture', 'informationData', 'technology'];
+  return ['outcomes', 'roles', 'businessArchitecture', 'information', 'technology'];
 }
 
 /**
@@ -51,7 +52,7 @@ export function getAllDimensionIds(): OrbitDimensionId[] {
  * @returns Array of dimension IDs that are required for assessment
  */
 export function getRequiredDimensionIds(): OrbitDimensionId[] {
-  return ['businessArchitecture', 'informationData', 'technology'];
+  return ['businessArchitecture', 'information', 'technology'];
 }
 
 /**
@@ -75,14 +76,14 @@ export function getDimension(
 
 /**
  * Get all standard (non-Technology) dimensions
- * @returns Array of the four standard dimensions (Outcomes, Roles, Business Architecture, Information & Data)
+ * @returns Array of the four standard dimensions (Outcomes, Roles, Business Architecture, Information)
  */
 export function getStandardDimensions(): OrbitDimension[] {
   return [
     orbitModel.dimensions.outcomes,
     orbitModel.dimensions.roles,
     orbitModel.dimensions.businessArchitecture,
-    orbitModel.dimensions.informationData,
+    orbitModel.dimensions.information,
   ];
 }
 
@@ -197,7 +198,7 @@ export function getTotalAspectCount(): number {
   let count = 0;
 
   // Standard dimensions
-  for (const dimId of ['outcomes', 'roles', 'businessArchitecture', 'informationData'] as const) {
+  for (const dimId of ['outcomes', 'roles', 'businessArchitecture', 'information'] as const) {
     count += orbitModel.dimensions[dimId].aspects.length;
   }
 
@@ -284,7 +285,7 @@ export function getAspectLocation(aspectId: string):
     }
   | undefined {
   // Check standard dimensions first
-  for (const dimId of ['outcomes', 'roles', 'businessArchitecture', 'informationData'] as const) {
+  for (const dimId of ['outcomes', 'roles', 'businessArchitecture', 'information'] as const) {
     const dimension = orbitModel.dimensions[dimId];
     if (dimension.aspects.some((a) => a.id === aspectId)) {
       return { dimensionId: dimId };
@@ -302,4 +303,52 @@ export function getAspectLocation(aspectId: string):
   }
 
   return undefined;
+}
+
+// =============================================================================
+// Enterprise Domain Aggregate Functions
+// =============================================================================
+
+/**
+ * Get the aggregated dimension for a domain, if any.
+ * Enterprise domains have one dimension that shows an aggregate score
+ * instead of being manually assessed.
+ *
+ * @param domainId - The domain ID to check
+ * @returns The dimension ID that should show aggregate scores, or null if none
+ */
+export function getAggregatedDimensionForDomain(domainId: string): OrbitDimensionId | null {
+  return DOMAIN_AGGREGATE_DIMENSIONS[domainId] ?? null;
+}
+
+/**
+ * Check if a dimension should show aggregate scores for a given domain.
+ *
+ * @param domainId - The domain ID
+ * @param dimensionId - The dimension ID to check
+ * @returns True if this dimension is aggregated for this domain
+ */
+export function isAggregatedDimension(domainId: string, dimensionId: OrbitDimensionId): boolean {
+  return DOMAIN_AGGREGATE_DIMENSIONS[domainId] === dimensionId;
+}
+
+/**
+ * Check if a domain has any aggregated dimensions (is an enterprise domain).
+ *
+ * @param domainId - The domain ID to check
+ * @returns True if this domain has an aggregated dimension
+ */
+export function hasAggregatedDimension(domainId: string): boolean {
+  return domainId in DOMAIN_AGGREGATE_DIMENSIONS;
+}
+
+/**
+ * Check if a domain is an enterprise domain.
+ * Enterprise domains are excluded from aggregate calculations for other enterprise domains.
+ *
+ * @param domainId - The domain ID to check
+ * @returns True if this is an enterprise domain
+ */
+export function isEnterpriseDomain(domainId: string): boolean {
+  return ENTERPRISE_DOMAIN_IDS.includes(domainId as (typeof ENTERPRISE_DOMAIN_IDS)[number]);
 }

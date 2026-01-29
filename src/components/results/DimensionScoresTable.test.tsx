@@ -62,19 +62,19 @@ describe('DimensionScoresTable', () => {
   it('should render dimension names', () => {
     const scores: DimensionScore[] = [
       createDimensionScore('businessArchitecture', 'Business Architecture', 3.5),
-      createDimensionScore('informationData', 'Information & Data', 4.0),
+      createDimensionScore('information', 'Information', 4.0),
     ];
 
     render(<DimensionScoresTable dimensionScores={scores} {...defaultProps} />);
 
     expect(screen.getByText('Business Architecture')).toBeInTheDocument();
-    expect(screen.getByText('Information & Data')).toBeInTheDocument();
+    expect(screen.getByText('Information')).toBeInTheDocument();
   });
 
   it('should render dimension scores', () => {
     const scores: DimensionScore[] = [
       createDimensionScore('businessArchitecture', 'Business Architecture', 3.5),
-      createDimensionScore('informationData', 'Information & Data', 4.2),
+      createDimensionScore('information', 'Information', 4.2),
     ];
 
     render(<DimensionScoresTable dimensionScores={scores} {...defaultProps} />);

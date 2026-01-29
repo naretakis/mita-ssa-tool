@@ -2,6 +2,7 @@
  * Assessment Sidebar Component
  *
  * Compact navigation showing dimensions with progress indicators.
+ * Supports aggregate dimensions for enterprise domains.
  */
 
 import { JSX } from 'react';
@@ -15,9 +16,11 @@ import {
   Paper,
   alpha,
   useTheme,
+  Tooltip,
 } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import FlagIcon from '@mui/icons-material/Flag';
+import BarChartIcon from '@mui/icons-material/BarChart';
 import type { OrbitDimensionId, TechnologySubDimensionId } from '../../types';
 
 interface DimensionProgress {
@@ -28,6 +31,9 @@ interface DimensionProgress {
   totalCount: number;
   averageScore: number | null;
   isRequired: boolean;
+  isAggregate?: boolean;
+  aggregateScore?: number | null;
+  aggregateCount?: number;
 }
 
 interface AssessmentSidebarProps {
@@ -48,8 +54,8 @@ interface AssessmentSidebarProps {
 /**
  * Format score for display
  */
-function formatScore(score: number | null): string {
-  if (score === null) return '—';
+function formatScore(score: number | null | undefined): string {
+  if (score === null || score === undefined) return '—';
   return score.toFixed(1);
 }
 
@@ -69,7 +75,45 @@ export function AssessmentSidebar({
 }: AssessmentSidebarProps): JSX.Element {
   const theme = useTheme();
 
-  const getProgressChip = (assessed: number, total: number): JSX.Element => {
+  const getProgressChip = (
+    assessed: number,
+    total: number,
+    isAggregate?: boolean,
+    aggregateCount?: number
+  ): JSX.Element => {
+    // For aggregate dimensions, show aggregate indicator instead of progress
+    if (isAggregate) {
+      return (
+        <Tooltip title={`Aggregate from ${aggregateCount ?? 0} assessments`} arrow>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 0.5,
+              px: 0.75,
+              py: 0.25,
+              borderRadius: 1,
+              bgcolor: alpha(theme.palette.primary.main, 0.15),
+              color: 'primary.main',
+              minWidth: 40,
+              justifyContent: 'center',
+            }}
+          >
+            <BarChartIcon sx={{ fontSize: 12 }} />
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 600,
+                fontSize: '0.7rem',
+              }}
+            >
+              AGG
+            </Typography>
+          </Box>
+        </Tooltip>
+      );
+    }
+
     const isComplete = assessed === total;
     const isStarted = assessed > 0;
 
@@ -244,6 +288,7 @@ export function AssessmentSidebar({
           {/* Standard Dimensions */}
           {standardDimensions.map((dim) => {
             const selected = isSelected(dim);
+            const displayScore = dim.isAggregate ? dim.aggregateScore : dim.averageScore;
 
             return (
               <ListItemButton
@@ -251,7 +296,7 @@ export function AssessmentSidebar({
                 selected={selected}
                 onClick={() => onDimensionSelect(dim.dimensionId)}
                 aria-current={selected ? 'true' : undefined}
-                aria-label={`${dim.name}${!dim.isRequired ? ' (optional)' : ''}, ${dim.assessedCount} of ${dim.totalCount} assessed${dim.averageScore !== null ? `, average score ${formatScore(dim.averageScore)}` : ''}`}
+                aria-label={`${dim.name}${dim.isAggregate ? ' (aggregate)' : !dim.isRequired ? ' (optional)' : ''}, ${dim.isAggregate ? `aggregate from ${dim.aggregateCount ?? 0} assessments` : `${dim.assessedCount} of ${dim.totalCount} assessed`}${displayScore !== null ? `, average score ${formatScore(displayScore)}` : ''}`}
                 sx={{
                   py: 0.75,
                   px: 1.5,
@@ -277,17 +322,25 @@ export function AssessmentSidebar({
                   >
                     {dim.name}
                   </Typography>
-                  {getProgressChip(dim.assessedCount, dim.totalCount)}
+                  {getProgressChip(
+                    dim.assessedCount,
+                    dim.totalCount,
+                    dim.isAggregate,
+                    dim.aggregateCount
+                  )}
                   <Typography
                     variant="caption"
                     sx={{
                       fontWeight: 600,
                       minWidth: 24,
                       textAlign: 'right',
-                      color: 'text.secondary',
+                      color:
+                        dim.isAggregate && displayScore !== null
+                          ? 'primary.main'
+                          : 'text.secondary',
                     }}
                   >
-                    {dim.averageScore !== null ? formatScore(dim.averageScore) : '—'}
+                    {displayScore !== null ? formatScore(displayScore) : '—'}
                   </Typography>
                 </Box>
               </ListItemButton>
@@ -297,86 +350,97 @@ export function AssessmentSidebar({
           {/* Technology Dimension */}
           {techTotals && (
             <>
-              {/* Technology Parent Row */}
-              <Box
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  width: '100%',
-                  gap: 1,
-                  py: 0.75,
-                  px: 1.5,
-                  minHeight: 36,
-                  bgcolor: isTechSelected ? alpha(theme.palette.primary.main, 0.1) : 'transparent',
-                  borderLeft: isTechSelected ? '3px solid' : '3px solid transparent',
-                  borderColor: isTechSelected ? 'primary.main' : 'transparent',
-                }}
-              >
-                <Typography
-                  variant="body2"
-                  sx={{
-                    fontWeight: isTechSelected ? 600 : 500,
-                    flex: 1,
-                    fontSize: '0.8125rem',
-                  }}
-                >
-                  Technology
-                </Typography>
-                {getProgressChip(techTotals.assessedCount, techTotals.totalCount)}
-                <Typography
-                  variant="caption"
-                  sx={{
-                    fontWeight: 600,
-                    minWidth: 24,
-                    textAlign: 'right',
-                    color: 'text.secondary',
-                  }}
-                >
-                  {techTotals.averageScore !== null ? formatScore(techTotals.averageScore) : '—'}
-                </Typography>
-              </Box>
+              {/* Check if Technology is an aggregate dimension */}
+              {(() => {
+                const techDim = dimensions.find(
+                  (d) => d.dimensionId === 'technology' && !d.subDimensionId
+                );
+                const isTechAggregate = techDim?.isAggregate ?? false;
 
-              {/* Technology Sub-dimensions */}
-              {techDimensions.map((dim) => {
-                const selected = isSelected(dim);
+                if (isTechAggregate) {
+                  // Render Technology as a single aggregate row (no sub-dimensions)
+                  const selected = isTechSelected;
+                  const displayScore = techDim?.aggregateScore ?? null;
 
-                return (
-                  <ListItemButton
-                    key={`${dim.dimensionId}-${dim.subDimensionId}`}
-                    selected={selected}
-                    onClick={() => onDimensionSelect(dim.dimensionId, dim.subDimensionId)}
-                    aria-current={selected ? 'true' : undefined}
-                    aria-label={`${dim.name}, ${dim.assessedCount} of ${dim.totalCount} assessed${dim.averageScore !== null ? `, average score ${formatScore(dim.averageScore)}` : ''}`}
-                    sx={{
-                      py: 0.75,
-                      px: 1.5,
-                      pl: 3,
-                      minHeight: 36,
-                      bgcolor: alpha(theme.palette.grey[100], 0.5),
-                      '&.Mui-selected': {
-                        bgcolor: alpha(theme.palette.grey[200], 0.7),
-                        '&:hover': {
-                          bgcolor: alpha(theme.palette.grey[200], 0.9),
+                  return (
+                    <ListItemButton
+                      selected={selected}
+                      onClick={() => onDimensionSelect('technology')}
+                      aria-current={selected ? 'true' : undefined}
+                      aria-label={`Technology (aggregate), aggregate from ${techDim?.aggregateCount ?? 0} assessments${displayScore !== null ? `, average score ${formatScore(displayScore)}` : ''}`}
+                      sx={{
+                        py: 0.75,
+                        px: 1.5,
+                        minHeight: 36,
+                        '&.Mui-selected': {
+                          bgcolor: alpha(theme.palette.primary.main, 0.1),
+                          borderLeft: '3px solid',
+                          borderColor: 'primary.main',
+                          '&:hover': {
+                            bgcolor: alpha(theme.palette.primary.main, 0.15),
+                          },
                         },
-                      },
-                      '&:hover': {
-                        bgcolor: alpha(theme.palette.grey[100], 0.8),
-                      },
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: selected ? 600 : 400,
+                            flex: 1,
+                            fontSize: '0.8125rem',
+                          }}
+                        >
+                          Technology
+                        </Typography>
+                        {getProgressChip(0, 0, true, techDim?.aggregateCount)}
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontWeight: 600,
+                            minWidth: 24,
+                            textAlign: 'right',
+                            color: displayScore !== null ? 'primary.main' : 'text.secondary',
+                          }}
+                        >
+                          {displayScore !== null ? formatScore(displayScore) : '—'}
+                        </Typography>
+                      </Box>
+                    </ListItemButton>
+                  );
+                }
+
+                // Standard Technology with sub-dimensions
+                return (
+                  <>
+                    {/* Technology Parent Row */}
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        width: '100%',
+                        gap: 1,
+                        py: 0.75,
+                        px: 1.5,
+                        minHeight: 36,
+                        bgcolor: isTechSelected
+                          ? alpha(theme.palette.primary.main, 0.1)
+                          : 'transparent',
+                        borderLeft: isTechSelected ? '3px solid' : '3px solid transparent',
+                        borderColor: isTechSelected ? 'primary.main' : 'transparent',
+                      }}
+                    >
                       <Typography
                         variant="body2"
                         sx={{
-                          fontWeight: selected ? 600 : 400,
+                          fontWeight: isTechSelected ? 600 : 500,
                           flex: 1,
                           fontSize: '0.8125rem',
-                          color: 'text.secondary',
                         }}
                       >
-                        {dim.name}
+                        Technology
                       </Typography>
-                      {getProgressChip(dim.assessedCount, dim.totalCount)}
+                      {getProgressChip(techTotals.assessedCount, techTotals.totalCount)}
                       <Typography
                         variant="caption"
                         sx={{
@@ -386,12 +450,73 @@ export function AssessmentSidebar({
                           color: 'text.secondary',
                         }}
                       >
-                        {dim.averageScore !== null ? formatScore(dim.averageScore) : '—'}
+                        {techTotals.averageScore !== null
+                          ? formatScore(techTotals.averageScore)
+                          : '—'}
                       </Typography>
                     </Box>
-                  </ListItemButton>
+
+                    {/* Technology Sub-dimensions */}
+                    {techDimensions.map((dim) => {
+                      const selected = isSelected(dim);
+
+                      return (
+                        <ListItemButton
+                          key={`${dim.dimensionId}-${dim.subDimensionId}`}
+                          selected={selected}
+                          onClick={() => onDimensionSelect(dim.dimensionId, dim.subDimensionId)}
+                          aria-current={selected ? 'true' : undefined}
+                          aria-label={`${dim.name}, ${dim.assessedCount} of ${dim.totalCount} assessed${dim.averageScore !== null ? `, average score ${formatScore(dim.averageScore)}` : ''}`}
+                          sx={{
+                            py: 0.75,
+                            px: 1.5,
+                            pl: 3,
+                            minHeight: 36,
+                            bgcolor: alpha(theme.palette.grey[100], 0.5),
+                            '&.Mui-selected': {
+                              bgcolor: alpha(theme.palette.grey[200], 0.7),
+                              '&:hover': {
+                                bgcolor: alpha(theme.palette.grey[200], 0.9),
+                              },
+                            },
+                            '&:hover': {
+                              bgcolor: alpha(theme.palette.grey[100], 0.8),
+                            },
+                          }}
+                        >
+                          <Box
+                            sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}
+                          >
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: selected ? 600 : 400,
+                                flex: 1,
+                                fontSize: '0.8125rem',
+                                color: 'text.secondary',
+                              }}
+                            >
+                              {dim.name}
+                            </Typography>
+                            {getProgressChip(dim.assessedCount, dim.totalCount)}
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                fontWeight: 600,
+                                minWidth: 24,
+                                textAlign: 'right',
+                                color: 'text.secondary',
+                              }}
+                            >
+                              {dim.averageScore !== null ? formatScore(dim.averageScore) : '—'}
+                            </Typography>
+                          </Box>
+                        </ListItemButton>
+                      );
+                    })}
+                  </>
                 );
-              })}
+              })()}
             </>
           )}
         </List>

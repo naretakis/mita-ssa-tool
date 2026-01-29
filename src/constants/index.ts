@@ -5,6 +5,8 @@
  * Organized by category for easy discovery and maintenance.
  */
 
+import type { OrbitDimensionId } from '../types';
+
 // =============================================================================
 // External Links
 // =============================================================================
@@ -15,6 +17,29 @@
  * Falls back to empty string for local development (link won't appear if not set).
  */
 export const GITHUB_REPO_URL = import.meta.env.VITE_GITHUB_REPO_URL || '';
+
+// =============================================================================
+// Enterprise Domain Configuration
+// =============================================================================
+
+/**
+ * Domain IDs that have aggregate dimensions (enterprise domains).
+ * These domains should not contribute to each other's aggregates.
+ */
+export const ENTERPRISE_DOMAIN_IDS = ['data-management', 'technical'] as const;
+
+/**
+ * Maps domain IDs to their aggregated dimension.
+ * These domains show an aggregate score for the specified dimension
+ * instead of allowing manual assessment.
+ *
+ * - Enterprise Data Management (data-management): Information is aggregated from other domains
+ * - Enterprise Technology (technical): Technology is aggregated from other domains
+ */
+export const DOMAIN_AGGREGATE_DIMENSIONS: Partial<Record<string, OrbitDimensionId>> = {
+  'data-management': 'information', // Enterprise Data Management: ORBT (no I)
+  technical: 'technology', // Enterprise Technology: ORBI (no T)
+};
 
 // =============================================================================
 // Maturity Score Thresholds

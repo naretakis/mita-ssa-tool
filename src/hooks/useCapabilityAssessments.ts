@@ -11,7 +11,14 @@ import { db } from '../services/db';
 import { getAreaWithDomain } from '../services/capabilities';
 import { createHistorySnapshot as createSnapshot } from '../services/history';
 import { incrementTagUsage } from '../services/tags';
-import type { CapabilityAssessment, AssessmentStatus } from '../types';
+import { calculateDimensionScore } from '../services/scoring';
+import { isEnterpriseDomain, getAggregatedDimensionForDomain } from '../services/orbit';
+import type {
+  CapabilityAssessment,
+  AssessmentStatus,
+  OrbitDimensionId,
+  AggregateSnapshotData,
+} from '../types';
 
 /**
  * Return type for useCapabilityAssessments hook
@@ -107,7 +114,22 @@ export function useCapabilityAssessments(): UseCapabilityAssessmentsReturn {
       .toArray();
 
     if (assessment.overallScore !== undefined) {
-      const snapshot = createSnapshot(assessment, ratings, assessment.overallScore);
+      // Check if this is an enterprise domain - capture aggregate data for snapshot
+      let aggregateData: AggregateSnapshotData | undefined;
+      const aggregatedDimension = getAggregatedDimensionForDomain(assessment.capabilityDomainId);
+
+      if (aggregatedDimension) {
+        const aggregateResult =
+          await calculateAggregateDimensionScoreForFinalization(aggregatedDimension);
+        aggregateData = {
+          dimensionId: aggregatedDimension,
+          score: aggregateResult.score,
+          contributingCount: aggregateResult.contributingCount,
+          contributingAssessmentIds: aggregateResult.assessmentIds,
+        };
+      }
+
+      const snapshot = createSnapshot(assessment, ratings, assessment.overallScore, aggregateData);
       await db.assessmentHistory.add(snapshot);
     }
 
@@ -133,6 +155,7 @@ export function useCapabilityAssessments(): UseCapabilityAssessmentsReturn {
   /**
    * Finalize an assessment
    * Calculates scores and marks as finalized
+   * For enterprise domains, includes aggregate dimension score in overall calculation
    */
   const finalizeAssessment = async (assessmentId: string): Promise<void> => {
     const assessment = await db.capabilityAssessments.get(assessmentId);
@@ -146,13 +169,30 @@ export function useCapabilityAssessments(): UseCapabilityAssessmentsReturn {
       .equals(assessmentId)
       .toArray();
 
-    const assessedRatings = ratings.filter(
-      (r) => r.currentLevel > 0 // Exclude 0 (not assessed) and -1 (N/A)
-    );
+    // Check if this is an enterprise domain with an aggregate dimension
+    const aggregatedDimension = getAggregatedDimensionForDomain(assessment.capabilityDomainId);
+    let aggregateScore: number | null = null;
 
+    if (aggregatedDimension) {
+      // Calculate aggregate score for enterprise domains
+      const aggregateResult =
+        await calculateAggregateDimensionScoreForFinalization(aggregatedDimension);
+      aggregateScore = aggregateResult.score;
+    }
+
+    // Calculate dimension scores from manual ratings
+    const dimensionScores = calculateDimensionScoresFromRatings(ratings);
+
+    // For enterprise domains, add the aggregate score to dimension scores
+    if (aggregatedDimension && aggregateScore !== null) {
+      dimensionScores.set(aggregatedDimension, aggregateScore);
+    }
+
+    // Calculate overall score as average of all dimension scores
+    const allDimensionScores = Array.from(dimensionScores.values());
     const overallScore =
-      assessedRatings.length > 0
-        ? assessedRatings.reduce((sum, r) => sum + r.currentLevel, 0) / assessedRatings.length
+      allDimensionScores.length > 0
+        ? allDimensionScores.reduce((sum, s) => sum + s, 0) / allDimensionScores.length
         : undefined;
 
     const now = new Date();
@@ -169,6 +209,91 @@ export function useCapabilityAssessments(): UseCapabilityAssessmentsReturn {
       await incrementTagUsage(tag);
     }
   };
+
+  /**
+   * Calculate dimension scores from ratings.
+   * Groups by dimension and uses the shared calculateDimensionScore function.
+   */
+  function calculateDimensionScoresFromRatings(
+    ratings: { dimensionId: OrbitDimensionId; subDimensionId?: string; currentLevel: number }[]
+  ): Map<OrbitDimensionId, number> {
+    const dimensionScores = new Map<OrbitDimensionId, number>();
+
+    // Group ratings by dimension
+    const ratingsByDimension = new Map<OrbitDimensionId, typeof ratings>();
+    for (const rating of ratings) {
+      const existing = ratingsByDimension.get(rating.dimensionId) ?? [];
+      existing.push(rating);
+      ratingsByDimension.set(rating.dimensionId, existing);
+    }
+
+    // Calculate scores for each dimension using shared function
+    for (const [dimId, dimRatings] of ratingsByDimension) {
+      const score = calculateDimensionScore(dimId, dimRatings);
+      if (score !== null) {
+        dimensionScores.set(dimId, score);
+      }
+    }
+
+    return dimensionScores;
+  }
+
+  /**
+   * Calculate aggregate dimension score for finalization.
+   * Used when finalizing enterprise domain assessments.
+   */
+  async function calculateAggregateDimensionScoreForFinalization(
+    dimensionId: OrbitDimensionId
+  ): Promise<{ score: number | null; contributingCount: number; assessmentIds: string[] }> {
+    // Get all finalized assessments from non-enterprise domains
+    const allAssessments = await db.capabilityAssessments.toArray();
+    const qualifyingAssessments = allAssessments.filter(
+      (a) => a.status === 'finalized' && !isEnterpriseDomain(a.capabilityDomainId)
+    );
+
+    if (qualifyingAssessments.length === 0) {
+      return { score: null, contributingCount: 0, assessmentIds: [] };
+    }
+
+    // Get all ratings for qualifying assessments
+    const assessmentIds = qualifyingAssessments.map((a) => a.id);
+    const allRatings = await db.orbitRatings
+      .where('capabilityAssessmentId')
+      .anyOf(assessmentIds)
+      .toArray();
+
+    // Group ratings by assessment
+    const ratingsByAssessment = new Map<string, typeof allRatings>();
+    for (const rating of allRatings) {
+      const existing = ratingsByAssessment.get(rating.capabilityAssessmentId) ?? [];
+      existing.push(rating);
+      ratingsByAssessment.set(rating.capabilityAssessmentId, existing);
+    }
+
+    // Calculate dimension score for each qualifying assessment
+    const scoresWithIds: { id: string; score: number }[] = [];
+
+    for (const assessment of qualifyingAssessments) {
+      const ratings = ratingsByAssessment.get(assessment.id) ?? [];
+      const dimRatings = ratings.filter((r) => r.dimensionId === dimensionId);
+
+      const dimScore = calculateDimensionScore(dimensionId, dimRatings);
+      if (dimScore !== null) {
+        scoresWithIds.push({ id: assessment.id, score: dimScore });
+      }
+    }
+
+    if (scoresWithIds.length === 0) {
+      return { score: null, contributingCount: 0, assessmentIds: [] };
+    }
+
+    const avgScore = scoresWithIds.reduce((sum, s) => sum + s.score, 0) / scoresWithIds.length;
+    return {
+      score: Math.round(avgScore * 10) / 10,
+      contributingCount: scoresWithIds.length,
+      assessmentIds: scoresWithIds.map((s) => s.id),
+    };
+  }
 
   /**
    * Update tags on an assessment
