@@ -27,6 +27,7 @@ import type {
   TechnologySubDimensionId,
   OrganizationalAssessmentId,
 } from '../../types';
+import { formatScore } from '../../utils';
 
 interface DimensionProgress {
   dimensionId?: OrbitDimensionId;
@@ -59,14 +60,6 @@ interface AssessmentSidebarProps {
   isReviewSelected?: boolean;
   showFinalize?: boolean;
   isOrganizationalAssessment?: boolean;
-}
-
-/**
- * Format score for display
- */
-function formatScore(score: number | null | undefined): string {
-  if (score === null || score === undefined) return '—';
-  return score.toFixed(1);
 }
 
 /**

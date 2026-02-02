@@ -16,7 +16,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db';
 import { createHistorySnapshot, calculateDimensionScores, toHistoricalRatings } from '../history';
 import { extractAttachmentIdFromFileName } from './exportService';
-import { isOrganizationalAssessmentArea } from '../../constants';
+import { isOrganizationalAssessmentArea, TIMESTAMP_TOLERANCE_MS } from '../../constants';
 import type { ExportData, ImportResult, ImportItemResult, ImportProgressCallback } from './types';
 import type {
   CapabilityAssessment,
@@ -463,9 +463,9 @@ async function processAssessmentImport(
   const existingDate = existingAssessment.updatedAt;
   const timeDiff = Math.abs(importedDate.getTime() - existingDate.getTime());
 
-  // Check if this is essentially the same data (same timestamp within 1 second and same score)
+  // Check if this is essentially the same data (same timestamp within tolerance and same score)
   const isSameData =
-    timeDiff < 1000 &&
+    timeDiff < TIMESTAMP_TOLERANCE_MS &&
     importedAssessment.overallScore !== undefined &&
     existingAssessment.overallScore !== undefined &&
     Math.abs(importedAssessment.overallScore - existingAssessment.overallScore) < 0.01;
@@ -543,7 +543,7 @@ async function processAssessmentImport(
 
       const alreadyExists = existingHistory.some(
         (h) =>
-          Math.abs(h.snapshotDate.getTime() - importedDate.getTime()) < 1000 &&
+          Math.abs(h.snapshotDate.getTime() - importedDate.getTime()) < TIMESTAMP_TOLERANCE_MS &&
           Math.abs(h.overallScore - importedAssessment.overallScore!) < 0.01
       );
 

@@ -42,3 +42,21 @@ export function getScoreColor(score: number | null): string {
   if (score >= MATURITY_THRESHOLDS.DEVELOPING) return SCORE_COLORS.developing;
   return SCORE_COLORS.initial;
 }
+
+/**
+ * Format a numeric score for display.
+ * Returns an em dash (—) for null/undefined values, otherwise formats to 1 decimal place.
+ *
+ * @param score - Maturity score (1-5) or null/undefined if not assessed
+ * @returns Formatted string (e.g., "3.5" or "—")
+ *
+ * @example
+ * formatScore(3.5) // returns '3.5'
+ * formatScore(4) // returns '4.0'
+ * formatScore(null) // returns '—'
+ * formatScore(undefined) // returns '—'
+ */
+export function formatScore(score: number | null | undefined): string {
+  if (score === null || score === undefined) return '—';
+  return score.toFixed(1);
+}

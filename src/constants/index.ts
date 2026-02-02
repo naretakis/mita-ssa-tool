@@ -95,6 +95,17 @@ export const MATURITY_THRESHOLDS = {
 } as const;
 
 // =============================================================================
+// Import/Export Constants
+// =============================================================================
+
+/**
+ * Tolerance in milliseconds for comparing timestamps during import.
+ * Two timestamps within this tolerance are considered "the same time".
+ * Used to detect duplicate imports and avoid creating redundant history entries.
+ */
+export const TIMESTAMP_TOLERANCE_MS = 1000;
+
+// =============================================================================
 // UI Constants
 // =============================================================================
 

@@ -4,7 +4,7 @@
  * Re-exports all utility functions for convenient importing.
  */
 
-export { getScoreColor, SCORE_COLORS } from './colors';
+export { getScoreColor, formatScore, SCORE_COLORS } from './colors';
 export {
   AssessmentError,
   withErrorHandling,

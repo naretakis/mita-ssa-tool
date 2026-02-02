@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { getScoreColor, SCORE_COLORS } from './colors';
+import { getScoreColor, formatScore, SCORE_COLORS } from './colors';
 
 describe('getScoreColor', () => {
   it('returns grey for null score', () => {
@@ -52,5 +52,38 @@ describe('SCORE_COLORS', () => {
     expect(SCORE_COLORS.developing).toMatch(hexColorRegex);
     expect(SCORE_COLORS.initial).toMatch(hexColorRegex);
     expect(SCORE_COLORS.none).toMatch(hexColorRegex);
+  });
+});
+
+describe('formatScore', () => {
+  it('returns em dash for null', () => {
+    expect(formatScore(null)).toBe('—');
+  });
+
+  it('returns em dash for undefined', () => {
+    expect(formatScore(undefined)).toBe('—');
+  });
+
+  it('formats whole numbers with one decimal place', () => {
+    expect(formatScore(3)).toBe('3.0');
+    expect(formatScore(5)).toBe('5.0');
+    expect(formatScore(1)).toBe('1.0');
+  });
+
+  it('formats decimal numbers to one decimal place', () => {
+    expect(formatScore(3.5)).toBe('3.5');
+    expect(formatScore(4.2)).toBe('4.2');
+    expect(formatScore(2.7)).toBe('2.7');
+  });
+
+  it('rounds to one decimal place', () => {
+    expect(formatScore(3.14)).toBe('3.1');
+    expect(formatScore(3.16)).toBe('3.2');
+    expect(formatScore(3.149)).toBe('3.1');
+    expect(formatScore(4.96)).toBe('5.0');
+  });
+
+  it('handles zero', () => {
+    expect(formatScore(0)).toBe('0.0');
   });
 });

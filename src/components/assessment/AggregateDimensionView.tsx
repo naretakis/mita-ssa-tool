@@ -33,19 +33,12 @@ import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import type { AggregateDimensionScore } from '../../hooks';
 import type { OrbitDimensionId } from '../../types';
+import { formatScore } from '../../utils';
 
 interface AggregateDimensionViewProps {
   dimensionId: OrbitDimensionId;
   dimensionName: string;
   aggregateData: AggregateDimensionScore;
-}
-
-/**
- * Format score for display
- */
-function formatScore(score: number | null): string {
-  if (score === null) return '—';
-  return score.toFixed(1);
 }
 
 /**
