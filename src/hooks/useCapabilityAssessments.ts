@@ -17,6 +17,7 @@ import type {
   CapabilityAssessment,
   AssessmentStatus,
   OrbitDimensionId,
+  RatingDimensionId,
   AggregateSnapshotData,
 } from '../types';
 
@@ -213,15 +214,24 @@ export function useCapabilityAssessments(): UseCapabilityAssessmentsReturn {
   /**
    * Calculate dimension scores from ratings.
    * Groups by dimension and uses the shared calculateDimensionScore function.
+   * Filters out organizational assessment ratings (outcomes, roles).
    */
   function calculateDimensionScoresFromRatings(
-    ratings: { dimensionId: OrbitDimensionId; subDimensionId?: string; currentLevel: number }[]
+    ratings: { dimensionId: RatingDimensionId; subDimensionId?: string; currentLevel: number }[]
   ): Map<OrbitDimensionId, number> {
     const dimensionScores = new Map<OrbitDimensionId, number>();
 
+    // Filter to only B-I-T dimensions (exclude organizational assessments)
+    const standardRatings = ratings.filter(
+      (r): r is typeof r & { dimensionId: OrbitDimensionId } =>
+        r.dimensionId === 'businessArchitecture' ||
+        r.dimensionId === 'information' ||
+        r.dimensionId === 'technology'
+    );
+
     // Group ratings by dimension
-    const ratingsByDimension = new Map<OrbitDimensionId, typeof ratings>();
-    for (const rating of ratings) {
+    const ratingsByDimension = new Map<OrbitDimensionId, typeof standardRatings>();
+    for (const rating of standardRatings) {
       const existing = ratingsByDimension.get(rating.dimensionId) ?? [];
       existing.push(rating);
       ratingsByDimension.set(rating.dimensionId, existing);

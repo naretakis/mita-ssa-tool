@@ -527,7 +527,7 @@ describe('useScores', () => {
       const counts = result.current.getStatusCounts();
       expect(counts.inProgress).toBe(1);
       expect(counts.finalized).toBe(2);
-      expect(counts.total).toBe(75); // Total capability areas from capabilities.json
+      expect(counts.total).toBe(77); // Total capability areas (75 original + 2 organizational)
     });
   });
 
@@ -601,13 +601,13 @@ describe('useScores', () => {
         overallScore: 3.5,
       });
 
-      // Use real aspect IDs from the ORBIT model
+      // Use real aspect IDs from the ORBIT model (B-I-T dimensions only)
       await db.orbitRatings.bulkAdd([
         {
           id: 'r1',
           capabilityAssessmentId: 'a1',
-          dimensionId: 'outcomes',
-          aspectId: 'culture-mindset', // Real ORBIT aspect ID
+          dimensionId: 'businessArchitecture',
+          aspectId: 'business-capability',
           currentLevel: 3,
           questionResponses: [],
           evidenceResponses: [],
@@ -621,8 +621,8 @@ describe('useScores', () => {
         {
           id: 'r2',
           capabilityAssessmentId: 'a1',
-          dimensionId: 'outcomes',
-          aspectId: 'capability', // Real ORBIT aspect ID
+          dimensionId: 'businessArchitecture',
+          aspectId: 'business-process',
           currentLevel: 4,
           questionResponses: [],
           evidenceResponses: [],
@@ -636,8 +636,8 @@ describe('useScores', () => {
         {
           id: 'r3',
           capabilityAssessmentId: 'a1',
-          dimensionId: 'roles',
-          aspectId: 'technology-resources', // Real ORBIT aspect ID
+          dimensionId: 'information',
+          aspectId: 'data-governance',
           currentLevel: 5,
           questionResponses: [],
           evidenceResponses: [],
@@ -658,13 +658,13 @@ describe('useScores', () => {
 
       const dimensionScores = result.current.getDimensionScoresForAssessment('a1');
       expect(dimensionScores).toBeDefined();
-      expect(dimensionScores).toHaveLength(5); // All 5 ORBIT dimensions
+      expect(dimensionScores).toHaveLength(3); // B-I-T dimensions only
 
-      const outcomesScore = dimensionScores?.find((d) => d.dimensionId === 'outcomes');
-      expect(outcomesScore?.averageLevel).toBe(3.5); // (3 + 4) / 2
+      const businessScore = dimensionScores?.find((d) => d.dimensionId === 'businessArchitecture');
+      expect(businessScore?.averageLevel).toBe(3.5); // (3 + 4) / 2
 
-      const rolesScore = dimensionScores?.find((d) => d.dimensionId === 'roles');
-      expect(rolesScore?.averageLevel).toBe(5.0);
+      const infoScore = dimensionScores?.find((d) => d.dimensionId === 'information');
+      expect(infoScore?.averageLevel).toBe(5.0);
     });
 
     it('should return undefined for non-existent assessment', async () => {

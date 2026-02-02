@@ -3,6 +3,8 @@
  *
  * Main page for conducting ORBIT maturity assessments.
  * Shows capability context, sidebar navigation, and dimension-based assessment flow.
+ * Supports both standard capability assessments (B-I-T dimensions) and
+ * organizational assessments (Outcomes/Roles with direct aspect navigation).
  */
 
 import { JSX, useState, useCallback, useMemo } from 'react';
@@ -29,7 +31,9 @@ import {
   getAspectsForDimension,
   getAspectsForSubDimension,
   getAggregatedDimensionForDomain,
+  getOrganizationalAspects,
 } from '../services/orbit';
+import { isOrganizationalAssessmentArea, getOrganizationalAssessmentType } from '../constants';
 import {
   useOrbitRatings,
   useAttachments,
@@ -49,36 +53,69 @@ import type {
   MaturityLevelWithNA,
   OrbitRating,
   Attachment,
+  OrganizationalAssessmentId,
 } from '../types';
 
 type SaveStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 /**
  * Navigation item for sidebar
+ * Supports both standard dimension navigation and organizational aspect navigation
  */
 interface NavItem {
-  dimensionId: OrbitDimensionId;
+  /** For standard assessments: the ORBIT dimension ID */
+  dimensionId?: OrbitDimensionId;
+  /** For Technology sub-dimensions */
   subDimensionId?: TechnologySubDimensionId;
+  /** For organizational assessments: the type (outcomes/roles) */
+  organizationalType?: OrganizationalAssessmentId;
+  /** For organizational assessments: the aspect ID being navigated to */
+  aspectId?: string;
+  /** Display name */
   name: string;
+  /** Description text */
   description: string;
+  /** Whether this item is required */
   isRequired: boolean;
+  /** Number of aspects in this nav item */
   aspectCount: number;
+  /** Whether this is an aggregate dimension (enterprise domains) */
   isAggregate?: boolean;
+  /** Whether this is an organizational assessment nav item */
+  isOrganizational?: boolean;
 }
 
 /**
- * Build navigation items from ORBIT model
+ * Build navigation items for organizational assessments (Outcomes/Roles)
+ * Shows aspects directly in the sidebar instead of dimensions
+ * @param orgType - The organizational assessment type
+ */
+function buildOrganizationalNavItems(orgType: OrganizationalAssessmentId): NavItem[] {
+  const aspects = getOrganizationalAspects(orgType);
+  return aspects.map((aspect) => ({
+    organizationalType: orgType,
+    aspectId: aspect.id,
+    name: aspect.name,
+    description: aspect.description,
+    isRequired: true,
+    aspectCount: 1, // Each nav item is one aspect
+    isOrganizational: true,
+  }));
+}
+
+/**
+ * Build navigation items from ORBIT model for standard assessments
  * @param domainId - The domain ID to check for aggregate dimensions
  */
-function buildNavItems(domainId?: string): NavItem[] {
+function buildStandardNavItems(domainId?: string): NavItem[] {
   const items: NavItem[] = [];
   const orbitModel = getOrbitModel();
 
   // Get the aggregated dimension for this domain (if any)
   const aggregatedDimension = domainId ? getAggregatedDimensionForDomain(domainId) : null;
 
-  // Standard dimensions (non-Technology)
-  for (const dimId of ['outcomes', 'roles', 'businessArchitecture', 'information'] as const) {
+  // Standard dimensions (B, I - non-Technology)
+  for (const dimId of ['businessArchitecture', 'information'] as const) {
     const dim = orbitModel.dimensions[dimId];
     const isAggregate = aggregatedDimension === dimId;
 
@@ -169,11 +206,25 @@ export default function Assessment(): JSX.Element {
     return getAreaWithDomain(assessment.capabilityAreaId);
   }, [assessment]);
 
-  // Navigation state - depends on domain for aggregate dimensions
-  const navItems = useMemo(
-    () => buildNavItems(assessment?.capabilityDomainId),
-    [assessment?.capabilityDomainId]
-  );
+  // Detect if this is an organizational assessment
+  const isOrganizationalAssessment = useMemo(() => {
+    if (!assessment) return false;
+    return isOrganizationalAssessmentArea(assessment.capabilityAreaId);
+  }, [assessment]);
+
+  const organizationalType = useMemo(() => {
+    if (!assessment) return null;
+    return getOrganizationalAssessmentType(assessment.capabilityAreaId);
+  }, [assessment]);
+
+  // Navigation state - depends on assessment type and domain
+  const navItems = useMemo(() => {
+    if (organizationalType) {
+      return buildOrganizationalNavItems(organizationalType);
+    }
+    return buildStandardNavItems(assessment?.capabilityDomainId);
+  }, [assessment?.capabilityDomainId, organizationalType]);
+
   const [currentNavIndex, setCurrentNavIndex] = useState(0);
   const [isReviewSelected, setIsReviewSelected] = useState(false);
 
@@ -196,19 +247,30 @@ export default function Assessment(): JSX.Element {
   // Ensure currentNav is always defined
   const currentNav = navItems[currentNavIndex] ?? navItems[0];
 
-  // Build ratings map for current dimension
+  // Build ratings map for current dimension/aspect
   const ratingsMap = useMemo(() => {
     const map = new Map<string, OrbitRating>();
     if (!currentNav) return map;
+
     for (const rating of ratings) {
-      if (currentNav.subDimensionId) {
+      // For organizational assessments, match by organizationalType and aspectId
+      if (currentNav.isOrganizational && currentNav.organizationalType && currentNav.aspectId) {
+        if (
+          rating.dimensionId === currentNav.organizationalType &&
+          rating.aspectId === currentNav.aspectId
+        ) {
+          map.set(rating.aspectId, rating);
+        }
+      } else if (currentNav.subDimensionId) {
+        // Technology sub-dimension
         if (
           rating.dimensionId === currentNav.dimensionId &&
           rating.subDimensionId === currentNav.subDimensionId
         ) {
           map.set(rating.aspectId, rating);
         }
-      } else {
+      } else if (currentNav.dimensionId) {
+        // Standard dimension (B, I)
         if (rating.dimensionId === currentNav.dimensionId && !rating.subDimensionId) {
           map.set(rating.aspectId, rating);
         }
@@ -227,20 +289,32 @@ export default function Assessment(): JSX.Element {
     return map;
   }, [ratingsMap, attachmentsByRating]);
 
-  // Get aspects for current dimension
+  // Get aspects for current dimension/organizational assessment
   const currentAspects = useMemo(() => {
     if (!currentNav) return [];
+
+    // For organizational assessments, return just the single aspect for this nav item
+    if (currentNav.isOrganizational && currentNav.organizationalType && currentNav.aspectId) {
+      const aspects = getOrganizationalAspects(currentNav.organizationalType);
+      const aspect = aspects.find((a) => a.id === currentNav.aspectId);
+      return aspect ? [aspect] : [];
+    }
+
+    // Standard dimension navigation
     if (currentNav.subDimensionId) {
       return getAspectsForSubDimension(currentNav.subDimensionId);
     }
-    return getAspectsForDimension(currentNav.dimensionId);
+    if (currentNav.dimensionId) {
+      return getAspectsForDimension(currentNav.dimensionId);
+    }
+    return [];
   }, [currentNav]);
 
   // Calculate sidebar progress data
   const sidebarDimensions = useMemo(() => {
     return navItems.map((nav) => {
       // For aggregate dimensions, get aggregate score data
-      if (nav.isAggregate) {
+      if (nav.isAggregate && nav.dimensionId) {
         const aggregateData = getAggregateDimensionScore(nav.dimensionId);
         return {
           dimensionId: nav.dimensionId,
@@ -253,6 +327,29 @@ export default function Assessment(): JSX.Element {
           isAggregate: true,
           aggregateScore: aggregateData.score,
           aggregateCount: aggregateData.contributingCount,
+        };
+      }
+
+      // For organizational assessments, calculate progress per aspect
+      if (nav.isOrganizational && nav.organizationalType && nav.aspectId) {
+        const aspectRating = ratings.find(
+          (r) => r.dimensionId === nav.organizationalType && r.aspectId === nav.aspectId
+        );
+        const isAssessed = aspectRating ? aspectRating.currentLevel !== 0 : false;
+        const score =
+          aspectRating && aspectRating.currentLevel > 0 ? aspectRating.currentLevel : null;
+
+        return {
+          dimensionId: nav.organizationalType as OrbitDimensionId, // Cast for sidebar compatibility
+          aspectId: nav.aspectId,
+          name: nav.name,
+          assessedCount: isAssessed ? 1 : 0,
+          totalCount: 1,
+          averageScore: score,
+          isRequired: nav.isRequired,
+          isAggregate: false,
+          isOrganizational: true,
+          organizationalType: nav.organizationalType,
         };
       }
 
@@ -270,7 +367,7 @@ export default function Assessment(): JSX.Element {
         if (scored.length > 0) {
           avgScore = scored.reduce((sum, r) => sum + r.currentLevel, 0) / scored.length;
         }
-      } else {
+      } else if (nav.dimensionId) {
         assessedCount = getAssessedCountForDimension(nav.dimensionId);
         avgScore = getAverageLevelForDimension(nav.dimensionId);
       }
@@ -334,7 +431,13 @@ export default function Assessment(): JSX.Element {
   const handleLevelChange = useCallback(
     async (aspectId: string, level: MaturityLevelWithNA) => {
       if (!currentNav) return;
-      await updateLevel(currentNav.dimensionId, aspectId, level, currentNav.subDimensionId);
+      // For organizational assessments, use organizationalType as dimensionId
+      const dimId =
+        currentNav.isOrganizational && currentNav.organizationalType
+          ? currentNav.organizationalType
+          : currentNav.dimensionId;
+      if (!dimId) return;
+      await updateLevel(dimId, aspectId, level, currentNav.subDimensionId);
       triggerSave();
     },
     [updateLevel, currentNav, triggerSave]
@@ -343,7 +446,12 @@ export default function Assessment(): JSX.Element {
   const handleTargetLevelChange = useCallback(
     async (aspectId: string, level: MaturityLevelWithNA | undefined) => {
       if (!currentNav) return;
-      await updateTargetLevel(currentNav.dimensionId, aspectId, level, currentNav.subDimensionId);
+      const dimId =
+        currentNav.isOrganizational && currentNav.organizationalType
+          ? currentNav.organizationalType
+          : currentNav.dimensionId;
+      if (!dimId) return;
+      await updateTargetLevel(dimId, aspectId, level, currentNav.subDimensionId);
       triggerSave();
     },
     [updateTargetLevel, currentNav, triggerSave]
@@ -352,6 +460,12 @@ export default function Assessment(): JSX.Element {
   const handleQuestionChange = useCallback(
     async (aspectId: string, index: number, checked: boolean) => {
       if (!currentNav) return;
+      const dimId =
+        currentNav.isOrganizational && currentNav.organizationalType
+          ? currentNav.organizationalType
+          : currentNav.dimensionId;
+      if (!dimId) return;
+
       const rating = ratingsMap.get(aspectId);
       const responses = [...(rating?.questionResponses ?? [])];
       const existingIndex = responses.findIndex((r) => r.questionIndex === index);
@@ -363,7 +477,7 @@ export default function Assessment(): JSX.Element {
       }
 
       await saveRating({
-        dimensionId: currentNav.dimensionId,
+        dimensionId: dimId,
         subDimensionId: currentNav.subDimensionId,
         aspectId,
         currentLevel: rating?.currentLevel ?? 0,
@@ -382,6 +496,12 @@ export default function Assessment(): JSX.Element {
   const handleEvidenceChange = useCallback(
     async (aspectId: string, index: number, checked: boolean) => {
       if (!currentNav) return;
+      const dimId =
+        currentNav.isOrganizational && currentNav.organizationalType
+          ? currentNav.organizationalType
+          : currentNav.dimensionId;
+      if (!dimId) return;
+
       const rating = ratingsMap.get(aspectId);
       const responses = [...(rating?.evidenceResponses ?? [])];
       const existingIndex = responses.findIndex((r) => r.evidenceIndex === index);
@@ -393,7 +513,7 @@ export default function Assessment(): JSX.Element {
       }
 
       await saveRating({
-        dimensionId: currentNav.dimensionId,
+        dimensionId: dimId,
         subDimensionId: currentNav.subDimensionId,
         aspectId,
         currentLevel: rating?.currentLevel ?? 0,
@@ -412,7 +532,12 @@ export default function Assessment(): JSX.Element {
   const handleNotesChange = useCallback(
     async (aspectId: string, notes: string) => {
       if (!currentNav) return;
-      await updateNotes(currentNav.dimensionId, aspectId, notes, currentNav.subDimensionId);
+      const dimId =
+        currentNav.isOrganizational && currentNav.organizationalType
+          ? currentNav.organizationalType
+          : currentNav.dimensionId;
+      if (!dimId) return;
+      await updateNotes(dimId, aspectId, notes, currentNav.subDimensionId);
       triggerSave();
     },
     [updateNotes, currentNav, triggerSave]
@@ -421,7 +546,12 @@ export default function Assessment(): JSX.Element {
   const handleBarriersChange = useCallback(
     async (aspectId: string, barriers: string) => {
       if (!currentNav) return;
-      await updateBarriers(currentNav.dimensionId, aspectId, barriers, currentNav.subDimensionId);
+      const dimId =
+        currentNav.isOrganizational && currentNav.organizationalType
+          ? currentNav.organizationalType
+          : currentNav.dimensionId;
+      if (!dimId) return;
+      await updateBarriers(dimId, aspectId, barriers, currentNav.subDimensionId);
       triggerSave();
     },
     [updateBarriers, currentNav, triggerSave]
@@ -430,7 +560,12 @@ export default function Assessment(): JSX.Element {
   const handlePlansChange = useCallback(
     async (aspectId: string, plans: string) => {
       if (!currentNav) return;
-      await updatePlans(currentNav.dimensionId, aspectId, plans, currentNav.subDimensionId);
+      const dimId =
+        currentNav.isOrganizational && currentNav.organizationalType
+          ? currentNav.organizationalType
+          : currentNav.dimensionId;
+      if (!dimId) return;
+      await updatePlans(dimId, aspectId, plans, currentNav.subDimensionId);
       triggerSave();
     },
     [updatePlans, currentNav, triggerSave]
@@ -439,13 +574,18 @@ export default function Assessment(): JSX.Element {
   const handleAttachmentUpload = useCallback(
     async (aspectId: string, file: File, description?: string) => {
       if (!currentNav || !assessmentId) return;
+      const dimId =
+        currentNav.isOrganizational && currentNav.organizationalType
+          ? currentNav.organizationalType
+          : currentNav.dimensionId;
+      if (!dimId) return;
 
       const rating = ratingsMap.get(aspectId);
 
       if (!rating) {
         // Create a rating first if it doesn't exist
         await saveRating({
-          dimensionId: currentNav.dimensionId,
+          dimensionId: dimId,
           subDimensionId: currentNav.subDimensionId,
           aspectId,
           currentLevel: 0,
@@ -459,13 +599,13 @@ export default function Assessment(): JSX.Element {
         // Technology sub-dimension - use 4-part compound index
         updatedRating = await db.orbitRatings
           .where('[capabilityAssessmentId+dimensionId+subDimensionId+aspectId]')
-          .equals([assessmentId, currentNav.dimensionId, currentNav.subDimensionId, aspectId])
+          .equals([assessmentId, dimId, currentNav.subDimensionId, aspectId])
           .first();
       } else {
-        // Non-technology dimension - use 3-part compound index and filter out any with subDimensionId
+        // Non-technology dimension or organizational assessment - use 3-part compound index
         const candidates = await db.orbitRatings
           .where('[capabilityAssessmentId+dimensionId+aspectId]')
-          .equals([assessmentId, currentNav.dimensionId, aspectId])
+          .equals([assessmentId, dimId, aspectId])
           .toArray();
         updatedRating = candidates.find((r) => !r.subDimensionId);
       }
@@ -489,6 +629,21 @@ export default function Assessment(): JSX.Element {
   // Navigation handlers
   const handleDimensionSelect = useCallback(
     (dimensionId: OrbitDimensionId, subDimensionId?: TechnologySubDimensionId) => {
+      // For organizational assessments, dimensionId is actually the aspectId
+      // Check if we're in organizational mode
+      if (isOrganizationalAssessment && organizationalType) {
+        // Find by aspectId (passed as dimensionId from sidebar)
+        const index = navItems.findIndex(
+          (nav) => nav.isOrganizational && nav.aspectId === (dimensionId as string)
+        );
+        if (index >= 0) {
+          setCurrentNavIndex(index);
+          setIsReviewSelected(false);
+        }
+        return;
+      }
+
+      // Standard dimension navigation
       const index = navItems.findIndex(
         (nav) => nav.dimensionId === dimensionId && nav.subDimensionId === subDimensionId
       );
@@ -497,7 +652,7 @@ export default function Assessment(): JSX.Element {
         setIsReviewSelected(false);
       }
     },
-    [navItems]
+    [navItems, isOrganizationalAssessment, organizationalType]
   );
 
   const handleReviewSelect = useCallback(() => {
@@ -584,17 +739,19 @@ export default function Assessment(): JSX.Element {
           overallScore={getOverallAverageLevel()}
           overallProgress={overallProgress}
           dimensions={sidebarDimensions}
-          currentDimensionId={currentNav.dimensionId}
+          currentDimensionId={currentNav.dimensionId ?? (currentNav.aspectId as OrbitDimensionId)}
           currentSubDimensionId={currentNav.subDimensionId}
+          currentAspectId={currentNav.aspectId}
           onDimensionSelect={handleDimensionSelect}
           onReviewSelect={handleReviewSelect}
           isReviewSelected={isReviewSelected}
           showFinalize={!isViewMode}
+          isOrganizationalAssessment={isOrganizationalAssessment}
         />
 
         {/* Main Content Area */}
         <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-          {currentNav.isAggregate ? (
+          {currentNav.isAggregate && currentNav.dimensionId ? (
             <AggregateDimensionView
               dimensionId={currentNav.dimensionId}
               dimensionName={currentNav.name}
@@ -602,7 +759,9 @@ export default function Assessment(): JSX.Element {
             />
           ) : (
             <DimensionPage
-              dimensionId={currentNav.dimensionId}
+              dimensionId={
+                currentNav.dimensionId ?? (currentNav.organizationalType as OrbitDimensionId)
+              }
               subDimensionId={currentNav.subDimensionId}
               dimensionName={currentNav.name}
               dimensionDescription={currentNav.description}

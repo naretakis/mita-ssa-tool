@@ -28,6 +28,7 @@ import type {
   AssessmentHistory,
   Tag,
   OrbitDimensionId,
+  RatingDimensionId,
 } from '../../types';
 import { generatePdfReport } from './pdfExport';
 import { generateMaturityProfileCsv, generateCombinedMaturityProfileCsv } from './csvExport';
@@ -531,7 +532,9 @@ function generateCapabilityAreaProfile(
   aggregateData?: { dimensionId: OrbitDimensionId; score: number | null; contributingCount: number }
 ): CapabilityAreaProfile {
   // Map dimension IDs to display names (matches MITA 4.0 ORBIT model)
-  const dimensionMap: Record<OrbitDimensionId, string> = {
+  // Note: Outcomes and Roles are now organizational assessments, not per-capability dimensions
+  // We use RatingDimensionId to handle both standard and organizational assessments in ratings
+  const dimensionMap: Record<RatingDimensionId, string> = {
     outcomes: 'Outcomes',
     roles: 'Roles',
     businessArchitecture: 'Business Architecture',

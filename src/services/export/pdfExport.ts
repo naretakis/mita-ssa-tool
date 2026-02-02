@@ -301,16 +301,20 @@ function generateExecutiveSummary(doc: JsPDFWithAutoTable, data: ExportData): nu
 
     // Calculate average scores per dimension
     const dimensionScores: Record<OrbitDimensionId, number[]> = {
-      outcomes: [],
-      roles: [],
       businessArchitecture: [],
       information: [],
       technology: [],
     };
 
     for (const rating of data.data.ratings) {
-      if (rating.currentLevel > 0) {
-        dimensionScores[rating.dimensionId].push(rating.currentLevel);
+      // Only include B-I-T dimensions in the summary
+      if (
+        rating.currentLevel > 0 &&
+        (rating.dimensionId === 'businessArchitecture' ||
+          rating.dimensionId === 'information' ||
+          rating.dimensionId === 'technology')
+      ) {
+        dimensionScores[rating.dimensionId as OrbitDimensionId].push(rating.currentLevel);
       }
     }
 
@@ -460,14 +464,19 @@ function generateCapabilityAreaSection(
   // Get ratings for this assessment
   const ratings = data.data.ratings.filter((r) => r.capabilityAssessmentId === assessment.id);
 
-  // Group ratings by dimension
+  // Group ratings by dimension - only include B-I-T dimensions for standard assessments
   const ratingsByDimension = new Map<OrbitDimensionId, OrbitRating[]>();
   for (const rating of ratings) {
-    const existing = ratingsByDimension.get(rating.dimensionId);
+    // Skip organizational assessment ratings (outcomes, roles)
+    if (rating.dimensionId === 'outcomes' || rating.dimensionId === 'roles') {
+      continue;
+    }
+    const dimId = rating.dimensionId as OrbitDimensionId;
+    const existing = ratingsByDimension.get(dimId);
     if (existing) {
       existing.push(rating);
     } else {
-      ratingsByDimension.set(rating.dimensionId, [rating]);
+      ratingsByDimension.set(dimId, [rating]);
     }
   }
 

@@ -964,6 +964,40 @@
           ]
         }
       ]
+    },
+    {
+      "id": "enterprise-governance",
+      "name": "Enterprise Governance",
+      "layer": "support",
+      "description": "The Enterprise Governance domain assesses organizational maturity in defining outcomes and managing roles across the Medicaid enterprise. These capabilities apply at the organizational level rather than to specific business functions.",
+      "areas": [
+        {
+          "id": "organizational-outcomes",
+          "name": "Organizational Outcomes",
+          "description": "Assesses the organization's maturity in defining, tracking, and achieving desired outcomes across the Medicaid enterprise. Covers culture, capability, quality, alignment, metrics, and reusability of outcome practices.",
+          "topics": [
+            "Culture & Mindset",
+            "Outcome Development Capability",
+            "Quality & Consistency",
+            "Goal Alignment",
+            "Metrics & Measurement",
+            "Reusability & Integration"
+          ]
+        },
+        {
+          "id": "organizational-roles",
+          "name": "Organizational Roles",
+          "description": "Assesses the organization's maturity in managing roles, resources, governance, and capacity across the Medicaid enterprise. Covers technology resources, goal alignment, governance, communication, leadership, and staffing.",
+          "topics": [
+            "Technology Resources",
+            "Organizational Goals Alignment",
+            "Governance & Standardization",
+            "Communication",
+            "Culture & Leadership",
+            "Resourcing Capacity"
+          ]
+        }
+      ]
     }
   ]
 }

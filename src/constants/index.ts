@@ -5,7 +5,7 @@
  * Organized by category for easy discovery and maintenance.
  */
 
-import type { OrbitDimensionId } from '../types';
+import type { OrbitDimensionId, OrganizationalAssessmentId } from '../types';
 
 // =============================================================================
 // External Links
@@ -37,9 +37,45 @@ export const ENTERPRISE_DOMAIN_IDS = ['data-management', 'technical'] as const;
  * - Enterprise Technology (technical): Technology is aggregated from other domains
  */
 export const DOMAIN_AGGREGATE_DIMENSIONS: Partial<Record<string, OrbitDimensionId>> = {
-  'data-management': 'information', // Enterprise Data Management: ORBT (no I)
-  technical: 'technology', // Enterprise Technology: ORBI (no T)
+  'data-management': 'information', // Enterprise Data Management: BT (aggregate I)
+  technical: 'technology', // Enterprise Technology: BI (aggregate T)
 };
+
+// =============================================================================
+// Organizational Assessment Configuration
+// =============================================================================
+
+/**
+ * Domain ID for Enterprise Governance (organizational assessments).
+ */
+export const ENTERPRISE_GOVERNANCE_DOMAIN_ID = 'enterprise-governance';
+
+/**
+ * Capability area IDs that use organizational assessment mode.
+ * These areas assess Outcomes/Roles aspects directly, not through ORBIT dimensions.
+ */
+export const ORGANIZATIONAL_ASSESSMENT_AREAS: Record<string, OrganizationalAssessmentId> = {
+  'organizational-outcomes': 'outcomes',
+  'organizational-roles': 'roles',
+};
+
+/**
+ * Check if a capability area uses organizational assessment mode.
+ * @param areaId - The capability area ID to check
+ * @returns True if this area uses organizational assessment mode
+ */
+export function isOrganizationalAssessmentArea(areaId: string): boolean {
+  return areaId in ORGANIZATIONAL_ASSESSMENT_AREAS;
+}
+
+/**
+ * Get the organizational assessment type for a capability area.
+ * @param areaId - The capability area ID
+ * @returns The organizational assessment type, or null if not an organizational assessment
+ */
+export function getOrganizationalAssessmentType(areaId: string): OrganizationalAssessmentId | null {
+  return ORGANIZATIONAL_ASSESSMENT_AREAS[areaId] ?? null;
+}
 
 // =============================================================================
 // Maturity Score Thresholds

@@ -466,8 +466,6 @@ export function useScores(): UseScoresReturn {
  */
 function getDimensionDisplayName(dimensionId: OrbitDimensionId): string {
   const names: Record<OrbitDimensionId, string> = {
-    outcomes: 'Outcomes',
-    roles: 'Roles',
     businessArchitecture: 'Business Architecture',
     information: 'Information',
     technology: 'Technology',

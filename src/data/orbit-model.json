@@ -1,6 +1,6 @@
 {
   "version": "4.0",
-  "lastUpdated": "2026-01-16",
+  "lastUpdated": "2026-01-30",
   "source": "MITA 4.0 Maturity Model Reference Document v0.1 (August 8, 2025)",
   "maturityLevels": {
     "level1": {
@@ -29,406 +29,6 @@
     }
   },
   "dimensions": {
-    "outcomes": {
-      "id": "outcomes",
-      "name": "Outcomes",
-      "description": "The definition of the desired outcomes that require the capability to be achieved.",
-      "required": false,
-      "aspects": [
-        {
-          "id": "culture-mindset",
-          "name": "Culture & Mindset",
-          "description": "Organizational norms, expectations, and behaviors related to outcome development.",
-          "levels": {
-            "level1": {
-              "description": "No culture or expectation of outcomes for projects (at any phase of the project).",
-              "questions": [],
-              "evidence": []
-            },
-            "level2": {
-              "description": "Recognition begins to take hold of the importance of outcomes during planning.",
-              "questions": [],
-              "evidence": []
-            },
-            "level3": {
-              "description": "Leadership sets expectations; outcome development during planning becomes a norm.",
-              "questions": [],
-              "evidence": []
-            },
-            "level4": {
-              "description": "Outcome development is formalized and institutionally expected.",
-              "questions": [],
-              "evidence": []
-            },
-            "level5": {
-              "description": "Outcome thinking is fully embedded at all levels of organization—without direction by or requirement from leadership.",
-              "questions": [],
-              "evidence": []
-            }
-          }
-        },
-        {
-          "id": "capability",
-          "name": "Capability",
-          "description": "The internal capacity to develop, oversee, and apply outcomes without reliance on vendors.",
-          "levels": {
-            "level1": {
-              "description": "No internal capabilities to identify or draft outcomes.",
-              "questions": [],
-              "evidence": []
-            },
-            "level2": {
-              "description": "Organization understands at a high-level what elements are needed to identify and draft outcomes, but vendor leads development of outcomes.",
-              "questions": [],
-              "evidence": []
-            },
-            "level3": {
-              "description": "Sufficient experience in identifying and drafting outcomes internally; organization may lead or closely oversee vendors to draft outcomes.",
-              "questions": [],
-              "evidence": []
-            },
-            "level4": {
-              "description": "Full in-house capability to independently produce outcomes.",
-              "questions": [],
-              "evidence": []
-            },
-            "level5": {
-              "description": "Deep in-house expertise with fully self-sufficient teams across the organization. Organization may also support sister organizations and agencies in developing outcomes.",
-              "questions": [],
-              "evidence": []
-            }
-          }
-        },
-        {
-          "id": "quality-consistency",
-          "name": "Quality & Consistency",
-          "description": "The clarity, structure, and strategic alignment of outcome statements.",
-          "levels": {
-            "level1": {
-              "description": "Outcomes are ambiguous, inconsistent, and disconnected from goals. No consistent approach or methodology to developing outcomes.",
-              "questions": [],
-              "evidence": []
-            },
-            "level2": {
-              "description": "Outcomes may be aligned with priorities but are not 'smart' or actionable. Defined approach or methodology to developing outcomes.",
-              "questions": [],
-              "evidence": []
-            },
-            "level3": {
-              "description": "Outcomes capture the capability sought and benefit derived from a given project, but the quality of the outcome statements vary. Well-established and consistently applied approach to developing outcomes.",
-              "questions": [],
-              "evidence": []
-            },
-            "level4": {
-              "description": "Outcomes are clear, actionable, reusable, and strategically aligned. Well-established and consistently applied approach to developing outcomes.",
-              "questions": [],
-              "evidence": []
-            },
-            "level5": {
-              "description": "Outcome statements are of consistently high quality, recognizable, and standardized.",
-              "questions": [],
-              "evidence": []
-            }
-          }
-        },
-        {
-          "id": "alignment-goals-priorities",
-          "name": "Alignment to Goals & Priorities",
-          "description": "The extent to which outcomes are traceable to broader goals, priorities, and mission.",
-          "levels": {
-            "level1": {
-              "description": "Outcomes are not aligned to goals or priorities.",
-              "questions": [],
-              "evidence": []
-            },
-            "level2": {
-              "description": "Emerging awareness of need to align outcomes with goals and priorities but gaps remain.",
-              "questions": [],
-              "evidence": []
-            },
-            "level3": {
-              "description": "Outcomes are intentionally aligned to strategic goals and priorities.",
-              "questions": [],
-              "evidence": []
-            },
-            "level4": {
-              "description": "Systematic alignment of outcomes to goals and priorities. Outcomes inform broader strategies.",
-              "questions": [],
-              "evidence": []
-            },
-            "level5": {
-              "description": "Outcomes reflect and reinforce strategic direction seamlessly.",
-              "questions": [],
-              "evidence": []
-            }
-          }
-        },
-        {
-          "id": "use-of-metrics",
-          "name": "Use of Metrics",
-          "description": "How outcomes are tracked, and metrics are used to measure progress and guide improvement.",
-          "levels": {
-            "level1": {
-              "description": "No recognition of the need to measure progress toward achieving outcomes or commitment to continuous improvement.",
-              "questions": [],
-              "evidence": []
-            },
-            "level2": {
-              "description": "Interest in measuring progress toward achieving outcomes. Metrics are not well-aligned with outcomes.",
-              "questions": [],
-              "evidence": []
-            },
-            "level3": {
-              "description": "Metrics are generally appropriate and regularly referenced to determine progress in achieving outcomes. Some engagement in continuous improvement cycles.",
-              "questions": [],
-              "evidence": []
-            },
-            "level4": {
-              "description": "Metrics are well-developed. Staff regularly use metrics to evaluate performance and engage in well-established continuous improvement cycles.",
-              "questions": [],
-              "evidence": []
-            },
-            "level5": {
-              "description": "Performance monitoring is deeply embedded in organization's culture. Metrics and outcomes support continuous improvement, learning, and decision-making.",
-              "questions": [],
-              "evidence": []
-            }
-          }
-        },
-        {
-          "id": "reusability-integration",
-          "name": "Reusability & Integration",
-          "description": "Whether outcomes are reused across project documents, Advance Planning Documents (APD), systems, and reporting.",
-          "levels": {
-            "level1": {
-              "description": "No reuse. Outcomes are informal or nonexistent.",
-              "questions": [],
-              "evidence": []
-            },
-            "level2": {
-              "description": "Reuse is isolated to APDs; no reuse across other project, planning, or leadership documents.",
-              "questions": [],
-              "evidence": []
-            },
-            "level3": {
-              "description": "Reuse is focused on APDs and some project-related documents. Inconsistent reuse across leadership documents, and external communications.",
-              "questions": [],
-              "evidence": []
-            },
-            "level4": {
-              "description": "Reuse is consistent and intentional across APDs, project documents, and leadership and external communications.",
-              "questions": [],
-              "evidence": []
-            },
-            "level5": {
-              "description": "Seamless reuse across systems and communications, which improves coherence and efficiency.",
-              "questions": [],
-              "evidence": []
-            }
-          }
-        }
-      ]
-    },
-    "roles": {
-      "id": "roles",
-      "name": "Roles",
-      "description": "The individual roles responsible for providing the capability.",
-      "required": false,
-      "aspects": [
-        {
-          "id": "technology-resources",
-          "name": "Technology Resources",
-          "description": "Management and understanding of technical resources across the SMA.",
-          "levels": {
-            "level1": {
-              "description": "Partial list of technical resources exists; capabilities are not fully understood across the SMA.",
-              "questions": [],
-              "evidence": []
-            },
-            "level2": {
-              "description": "SMA maintains a comprehensive list of all technical resources and their capabilities.",
-              "questions": [],
-              "evidence": []
-            },
-            "level3": {
-              "description": "SMA maps technical resources directly to business processes.",
-              "questions": [],
-              "evidence": []
-            },
-            "level4": {
-              "description": "Technical resources are actively shared and optimized across business units for seamless execution.",
-              "questions": [],
-              "evidence": []
-            },
-            "level5": {
-              "description": "Technical resources are accessible to agencies, states, and federal partners and support continuous improvement through data-driven insights and collaborative efforts; drives technical reforms across the broader health and human services network.",
-              "questions": [],
-              "evidence": []
-            }
-          }
-        },
-        {
-          "id": "organizational-goals-alignment",
-          "name": "Organizational Goals Alignment",
-          "description": "Alignment of business units with enterprise-wide Medicaid goals.",
-          "levels": {
-            "level1": {
-              "description": "Business units operate in silos without clear understanding of enterprise-wide Medicaid goals.",
-              "questions": [],
-              "evidence": []
-            },
-            "level2": {
-              "description": "Organizational goals are defined but not fully communicated across all levels.",
-              "questions": [],
-              "evidence": []
-            },
-            "level3": {
-              "description": "Business units align their roles and processes to support broader Medicaid goals.",
-              "questions": [],
-              "evidence": []
-            },
-            "level4": {
-              "description": "All roles (internal and external) collaborate to drive enterprise-wide Medicaid program goals, with regular reassessments for alignment.",
-              "questions": [],
-              "evidence": []
-            },
-            "level5": {
-              "description": "SMA leadership collaborates at the national level to set adaptable, data-driven goals and performance outcomes for the Medicaid program; focus is on improving healthcare and social services delivery and beneficiary well-being nationwide.",
-              "questions": [],
-              "evidence": []
-            }
-          }
-        },
-        {
-          "id": "governance-standardization",
-          "name": "Governance & Standardization",
-          "description": "Formal governance structures and process standardization.",
-          "levels": {
-            "level1": {
-              "description": "Limited or no formal governance to guide roles or standardize processes.",
-              "questions": [],
-              "evidence": []
-            },
-            "level2": {
-              "description": "Some governance exists, but role clarity and process standardization are inconsistent.",
-              "questions": [],
-              "evidence": []
-            },
-            "level3": {
-              "description": "Formal governance structures support role clarity, with standard operating procedures (SOP).",
-              "questions": [],
-              "evidence": []
-            },
-            "level4": {
-              "description": "Enterprise governance bodies actively coordinate roles, processes, and data for continuous improvement and standardization.",
-              "questions": [],
-              "evidence": []
-            },
-            "level5": {
-              "description": "SMA leads data-driven solutions at a national level and collaborates with other SMAs to develop shared business and technical standards that are disseminated nationally to strengthen overall Medicaid service delivery.",
-              "questions": [],
-              "evidence": []
-            }
-          }
-        },
-        {
-          "id": "communication",
-          "name": "Communication (Internal / External)",
-          "description": "Communication channels between leadership, business, and technical units.",
-          "levels": {
-            "level1": {
-              "description": "Minimal communication between leadership, business, and technical units.",
-              "questions": [],
-              "evidence": []
-            },
-            "level2": {
-              "description": "Defined communication channels exist but are not used consistently.",
-              "questions": [],
-              "evidence": []
-            },
-            "level3": {
-              "description": "Regular cross-unit communication occurs, including with external partners like Managed Care Organizations (MCO) and vendors.",
-              "questions": [],
-              "evidence": []
-            },
-            "level4": {
-              "description": "Transparent, enterprise-wide communication ensures all roles understand priorities, responsibilities, and impacts.",
-              "questions": [],
-              "evidence": []
-            },
-            "level5": {
-              "description": "Integrates communication across all business areas to align long-term Medicaid goals and performance outcomes. Fosters cooperation with other SMAs, CMS, and external partners nationally. The Agency is recognized for its leadership in sharing solutions, provider enrollment process needs, and best practices.",
-              "questions": [],
-              "evidence": []
-            }
-          }
-        },
-        {
-          "id": "culture-leadership",
-          "name": "Culture & Leadership",
-          "description": "Leadership visibility into workloads and resource capacity.",
-          "levels": {
-            "level1": {
-              "description": "Leadership lacks visibility into workloads and resource capacity; roles are reactive.",
-              "questions": [],
-              "evidence": []
-            },
-            "level2": {
-              "description": "Leadership begins assessing role capacity but lacks full enterprise insight.",
-              "questions": [],
-              "evidence": []
-            },
-            "level3": {
-              "description": "Leadership proactively manages workloads and roles based on enterprise needs and priorities.",
-              "questions": [],
-              "evidence": []
-            },
-            "level4": {
-              "description": "Leadership fosters a culture of collaboration and continuous learning across internal and external roles.",
-              "questions": [],
-              "evidence": []
-            },
-            "level5": {
-              "description": "Leadership supports internal change agents to align culture, strategy, and resources with long-term Medicaid goals.",
-              "questions": [],
-              "evidence": []
-            }
-          }
-        },
-        {
-          "id": "resourcing-capacity",
-          "name": "Resourcing Capacity (Staffing, Training, Recruitment)",
-          "description": "Capacity management for staffing, training, and recruitment.",
-          "levels": {
-            "level1": {
-              "description": "SMA struggles to identify gaps in role capacity; staffing is reactive.",
-              "questions": [],
-              "evidence": []
-            },
-            "level2": {
-              "description": "Some processes exist for role capacity management (staffing, training, recruitment).",
-              "questions": [],
-              "evidence": []
-            },
-            "level3": {
-              "description": "SMA systematically identifies, recruits, and trains staff.",
-              "questions": [],
-              "evidence": []
-            },
-            "level4": {
-              "description": "SMA maintains a dynamic capacity model to forecast and meet enterprise role needs, including succession planning and continuous role development.",
-              "questions": [],
-              "evidence": []
-            },
-            "level5": {
-              "description": "SMA uses comprehensive planning and advanced analytics to align roles and skills with program objectives, enabling rapid response to required changes while maintaining high service delivery standards.",
-              "questions": [],
-              "evidence": []
-            }
-          }
-        }
-      ]
-    },
     "businessArchitecture": {
       "id": "businessArchitecture",
       "name": "Business Architecture",
@@ -2242,6 +1842,408 @@
               }
             }
           ]
+        }
+      ]
+    }
+  },
+  "organizationalAssessments": {
+    "outcomes": {
+      "id": "outcomes",
+      "name": "Organizational Outcomes",
+      "description": "The definition of the desired outcomes that require the capability to be achieved.",
+      "capabilityAreaId": "organizational-outcomes",
+      "aspects": [
+        {
+          "id": "culture-mindset",
+          "name": "Culture & Mindset",
+          "description": "Organizational norms, expectations, and behaviors related to outcome development.",
+          "levels": {
+            "level1": {
+              "description": "No culture or expectation of outcomes for projects (at any phase of the project).",
+              "questions": [],
+              "evidence": []
+            },
+            "level2": {
+              "description": "Recognition begins to take hold of the importance of outcomes during planning.",
+              "questions": [],
+              "evidence": []
+            },
+            "level3": {
+              "description": "Leadership sets expectations; outcome development during planning becomes a norm.",
+              "questions": [],
+              "evidence": []
+            },
+            "level4": {
+              "description": "Outcome development is formalized and institutionally expected.",
+              "questions": [],
+              "evidence": []
+            },
+            "level5": {
+              "description": "Outcome thinking is fully embedded at all levels of organization—without direction by or requirement from leadership.",
+              "questions": [],
+              "evidence": []
+            }
+          }
+        },
+        {
+          "id": "capability",
+          "name": "Capability",
+          "description": "The internal capacity to develop, oversee, and apply outcomes without reliance on vendors.",
+          "levels": {
+            "level1": {
+              "description": "No internal capabilities to identify or draft outcomes.",
+              "questions": [],
+              "evidence": []
+            },
+            "level2": {
+              "description": "Organization understands at a high-level what elements are needed to identify and draft outcomes, but vendor leads development of outcomes.",
+              "questions": [],
+              "evidence": []
+            },
+            "level3": {
+              "description": "Sufficient experience in identifying and drafting outcomes internally; organization may lead or closely oversee vendors to draft outcomes.",
+              "questions": [],
+              "evidence": []
+            },
+            "level4": {
+              "description": "Full in-house capability to independently produce outcomes.",
+              "questions": [],
+              "evidence": []
+            },
+            "level5": {
+              "description": "Deep in-house expertise with fully self-sufficient teams across the organization. Organization may also support sister organizations and agencies in developing outcomes.",
+              "questions": [],
+              "evidence": []
+            }
+          }
+        },
+        {
+          "id": "quality-consistency",
+          "name": "Quality & Consistency",
+          "description": "The clarity, structure, and strategic alignment of outcome statements.",
+          "levels": {
+            "level1": {
+              "description": "Outcomes are ambiguous, inconsistent, and disconnected from goals. No consistent approach or methodology to developing outcomes.",
+              "questions": [],
+              "evidence": []
+            },
+            "level2": {
+              "description": "Outcomes may be aligned with priorities but are not 'smart' or actionable. Defined approach or methodology to developing outcomes.",
+              "questions": [],
+              "evidence": []
+            },
+            "level3": {
+              "description": "Outcomes capture the capability sought and benefit derived from a given project, but the quality of the outcome statements vary. Well-established and consistently applied approach to developing outcomes.",
+              "questions": [],
+              "evidence": []
+            },
+            "level4": {
+              "description": "Outcomes are clear, actionable, reusable, and strategically aligned. Well-established and consistently applied approach to developing outcomes.",
+              "questions": [],
+              "evidence": []
+            },
+            "level5": {
+              "description": "Outcome statements are of consistently high quality, recognizable, and standardized.",
+              "questions": [],
+              "evidence": []
+            }
+          }
+        },
+        {
+          "id": "alignment-goals-priorities",
+          "name": "Alignment to Goals & Priorities",
+          "description": "The extent to which outcomes are traceable to broader goals, priorities, and mission.",
+          "levels": {
+            "level1": {
+              "description": "Outcomes are not aligned to goals or priorities.",
+              "questions": [],
+              "evidence": []
+            },
+            "level2": {
+              "description": "Emerging awareness of need to align outcomes with goals and priorities but gaps remain.",
+              "questions": [],
+              "evidence": []
+            },
+            "level3": {
+              "description": "Outcomes are intentionally aligned to strategic goals and priorities.",
+              "questions": [],
+              "evidence": []
+            },
+            "level4": {
+              "description": "Systematic alignment of outcomes to goals and priorities. Outcomes inform broader strategies.",
+              "questions": [],
+              "evidence": []
+            },
+            "level5": {
+              "description": "Outcomes reflect and reinforce strategic direction seamlessly.",
+              "questions": [],
+              "evidence": []
+            }
+          }
+        },
+        {
+          "id": "use-of-metrics",
+          "name": "Use of Metrics",
+          "description": "How outcomes are tracked, and metrics are used to measure progress and guide improvement.",
+          "levels": {
+            "level1": {
+              "description": "No recognition of the need to measure progress toward achieving outcomes or commitment to continuous improvement.",
+              "questions": [],
+              "evidence": []
+            },
+            "level2": {
+              "description": "Interest in measuring progress toward achieving outcomes. Metrics are not well-aligned with outcomes.",
+              "questions": [],
+              "evidence": []
+            },
+            "level3": {
+              "description": "Metrics are generally appropriate and regularly referenced to determine progress in achieving outcomes. Some engagement in continuous improvement cycles.",
+              "questions": [],
+              "evidence": []
+            },
+            "level4": {
+              "description": "Metrics are well-developed. Staff regularly use metrics to evaluate performance and engage in well-established continuous improvement cycles.",
+              "questions": [],
+              "evidence": []
+            },
+            "level5": {
+              "description": "Performance monitoring is deeply embedded in organization's culture. Metrics and outcomes support continuous improvement, learning, and decision-making.",
+              "questions": [],
+              "evidence": []
+            }
+          }
+        },
+        {
+          "id": "reusability-integration",
+          "name": "Reusability & Integration",
+          "description": "Whether outcomes are reused across project documents, Advance Planning Documents (APD), systems, and reporting.",
+          "levels": {
+            "level1": {
+              "description": "No reuse. Outcomes are informal or nonexistent.",
+              "questions": [],
+              "evidence": []
+            },
+            "level2": {
+              "description": "Reuse is isolated to APDs; no reuse across other project, planning, or leadership documents.",
+              "questions": [],
+              "evidence": []
+            },
+            "level3": {
+              "description": "Reuse is focused on APDs and some project-related documents. Inconsistent reuse across leadership documents, and external communications.",
+              "questions": [],
+              "evidence": []
+            },
+            "level4": {
+              "description": "Reuse is consistent and intentional across APDs, project documents, and leadership and external communications.",
+              "questions": [],
+              "evidence": []
+            },
+            "level5": {
+              "description": "Seamless reuse across systems and communications, which improves coherence and efficiency.",
+              "questions": [],
+              "evidence": []
+            }
+          }
+        }
+      ]
+    },
+    "roles": {
+      "id": "roles",
+      "name": "Organizational Roles",
+      "description": "The individual roles responsible for providing the capability.",
+      "capabilityAreaId": "organizational-roles",
+      "aspects": [
+        {
+          "id": "technology-resources",
+          "name": "Technology Resources",
+          "description": "Management and understanding of technical resources across the SMA.",
+          "levels": {
+            "level1": {
+              "description": "Partial list of technical resources exists; capabilities are not fully understood across the SMA.",
+              "questions": [],
+              "evidence": []
+            },
+            "level2": {
+              "description": "SMA maintains a comprehensive list of all technical resources and their capabilities.",
+              "questions": [],
+              "evidence": []
+            },
+            "level3": {
+              "description": "SMA maps technical resources directly to business processes.",
+              "questions": [],
+              "evidence": []
+            },
+            "level4": {
+              "description": "Technical resources are actively shared and optimized across business units for seamless execution.",
+              "questions": [],
+              "evidence": []
+            },
+            "level5": {
+              "description": "Technical resources are accessible to agencies, states, and federal partners and support continuous improvement through data-driven insights and collaborative efforts; drives technical reforms across the broader health and human services network.",
+              "questions": [],
+              "evidence": []
+            }
+          }
+        },
+        {
+          "id": "organizational-goals-alignment",
+          "name": "Organizational Goals Alignment",
+          "description": "Alignment of business units with enterprise-wide Medicaid goals.",
+          "levels": {
+            "level1": {
+              "description": "Business units operate in silos without clear understanding of enterprise-wide Medicaid goals.",
+              "questions": [],
+              "evidence": []
+            },
+            "level2": {
+              "description": "Organizational goals are defined but not fully communicated across all levels.",
+              "questions": [],
+              "evidence": []
+            },
+            "level3": {
+              "description": "Business units align their roles and processes to support broader Medicaid goals.",
+              "questions": [],
+              "evidence": []
+            },
+            "level4": {
+              "description": "All roles (internal and external) collaborate to drive enterprise-wide Medicaid program goals, with regular reassessments for alignment.",
+              "questions": [],
+              "evidence": []
+            },
+            "level5": {
+              "description": "SMA leadership collaborates at the national level to set adaptable, data-driven goals and performance outcomes for the Medicaid program; focus is on improving healthcare and social services delivery and beneficiary well-being nationwide.",
+              "questions": [],
+              "evidence": []
+            }
+          }
+        },
+        {
+          "id": "governance-standardization",
+          "name": "Governance & Standardization",
+          "description": "Formal governance structures and process standardization.",
+          "levels": {
+            "level1": {
+              "description": "Limited or no formal governance to guide roles or standardize processes.",
+              "questions": [],
+              "evidence": []
+            },
+            "level2": {
+              "description": "Some governance exists, but role clarity and process standardization are inconsistent.",
+              "questions": [],
+              "evidence": []
+            },
+            "level3": {
+              "description": "Formal governance structures support role clarity, with standard operating procedures (SOP).",
+              "questions": [],
+              "evidence": []
+            },
+            "level4": {
+              "description": "Enterprise governance bodies actively coordinate roles, processes, and data for continuous improvement and standardization.",
+              "questions": [],
+              "evidence": []
+            },
+            "level5": {
+              "description": "SMA leads data-driven solutions at a national level and collaborates with other SMAs to develop shared business and technical standards that are disseminated nationally to strengthen overall Medicaid service delivery.",
+              "questions": [],
+              "evidence": []
+            }
+          }
+        },
+        {
+          "id": "communication",
+          "name": "Communication (Internal / External)",
+          "description": "Communication channels between leadership, business, and technical units.",
+          "levels": {
+            "level1": {
+              "description": "Minimal communication between leadership, business, and technical units.",
+              "questions": [],
+              "evidence": []
+            },
+            "level2": {
+              "description": "Defined communication channels exist but are not used consistently.",
+              "questions": [],
+              "evidence": []
+            },
+            "level3": {
+              "description": "Regular cross-unit communication occurs, including with external partners like Managed Care Organizations (MCO) and vendors.",
+              "questions": [],
+              "evidence": []
+            },
+            "level4": {
+              "description": "Transparent, enterprise-wide communication ensures all roles understand priorities, responsibilities, and impacts.",
+              "questions": [],
+              "evidence": []
+            },
+            "level5": {
+              "description": "Integrates communication across all business areas to align long-term Medicaid goals and performance outcomes. Fosters cooperation with other SMAs, CMS, and external partners nationally. The Agency is recognized for its leadership in sharing solutions, provider enrollment process needs, and best practices.",
+              "questions": [],
+              "evidence": []
+            }
+          }
+        },
+        {
+          "id": "culture-leadership",
+          "name": "Culture & Leadership",
+          "description": "Leadership visibility into workloads and resource capacity.",
+          "levels": {
+            "level1": {
+              "description": "Leadership lacks visibility into workloads and resource capacity; roles are reactive.",
+              "questions": [],
+              "evidence": []
+            },
+            "level2": {
+              "description": "Leadership begins assessing role capacity but lacks full enterprise insight.",
+              "questions": [],
+              "evidence": []
+            },
+            "level3": {
+              "description": "Leadership proactively manages workloads and roles based on enterprise needs and priorities.",
+              "questions": [],
+              "evidence": []
+            },
+            "level4": {
+              "description": "Leadership fosters a culture of collaboration and continuous learning across internal and external roles.",
+              "questions": [],
+              "evidence": []
+            },
+            "level5": {
+              "description": "Leadership supports internal change agents to align culture, strategy, and resources with long-term Medicaid goals.",
+              "questions": [],
+              "evidence": []
+            }
+          }
+        },
+        {
+          "id": "resourcing-capacity",
+          "name": "Resourcing Capacity (Staffing, Training, Recruitment)",
+          "description": "Capacity management for staffing, training, and recruitment.",
+          "levels": {
+            "level1": {
+              "description": "SMA struggles to identify gaps in role capacity; staffing is reactive.",
+              "questions": [],
+              "evidence": []
+            },
+            "level2": {
+              "description": "Some processes exist for role capacity management (staffing, training, recruitment).",
+              "questions": [],
+              "evidence": []
+            },
+            "level3": {
+              "description": "SMA systematically identifies, recruits, and trains staff.",
+              "questions": [],
+              "evidence": []
+            },
+            "level4": {
+              "description": "SMA maintains a dynamic capacity model to forecast and meet enterprise role needs, including succession planning and continuous role development.",
+              "questions": [],
+              "evidence": []
+            },
+            "level5": {
+              "description": "SMA uses comprehensive planning and advanced analytics to align roles and skills with program objectives, enabling rapid response to required changes while maintaining high service delivery standards.",
+              "questions": [],
+              "evidence": []
+            }
+          }
         }
       ]
     }

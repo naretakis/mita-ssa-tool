@@ -3,6 +3,7 @@
  *
  * Compact navigation showing dimensions with progress indicators.
  * Supports aggregate dimensions for enterprise domains.
+ * Supports organizational assessments (Outcomes/Roles) with direct aspect navigation.
  */
 
 import { JSX } from 'react';
@@ -21,11 +22,16 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import FlagIcon from '@mui/icons-material/Flag';
 import BarChartIcon from '@mui/icons-material/BarChart';
-import type { OrbitDimensionId, TechnologySubDimensionId } from '../../types';
+import type {
+  OrbitDimensionId,
+  TechnologySubDimensionId,
+  OrganizationalAssessmentId,
+} from '../../types';
 
 interface DimensionProgress {
-  dimensionId: OrbitDimensionId;
+  dimensionId?: OrbitDimensionId;
   subDimensionId?: TechnologySubDimensionId;
+  aspectId?: string;
   name: string;
   assessedCount: number;
   totalCount: number;
@@ -34,6 +40,8 @@ interface DimensionProgress {
   isAggregate?: boolean;
   aggregateScore?: number | null;
   aggregateCount?: number;
+  isOrganizational?: boolean;
+  organizationalType?: OrganizationalAssessmentId;
 }
 
 interface AssessmentSidebarProps {
@@ -42,6 +50,7 @@ interface AssessmentSidebarProps {
   dimensions: DimensionProgress[];
   currentDimensionId: OrbitDimensionId | 'review';
   currentSubDimensionId?: TechnologySubDimensionId;
+  currentAspectId?: string;
   onDimensionSelect: (
     dimensionId: OrbitDimensionId,
     subDimensionId?: TechnologySubDimensionId
@@ -49,6 +58,7 @@ interface AssessmentSidebarProps {
   onReviewSelect: () => void;
   isReviewSelected?: boolean;
   showFinalize?: boolean;
+  isOrganizationalAssessment?: boolean;
 }
 
 /**
@@ -68,10 +78,12 @@ export function AssessmentSidebar({
   dimensions,
   currentDimensionId,
   currentSubDimensionId,
+  currentAspectId,
   onDimensionSelect,
   onReviewSelect,
   isReviewSelected = false,
   showFinalize = true,
+  isOrganizationalAssessment = false,
 }: AssessmentSidebarProps): JSX.Element {
   const theme = useTheme();
 
@@ -152,11 +164,217 @@ export function AssessmentSidebar({
 
   const isSelected = (dim: DimensionProgress): boolean => {
     if (isReviewSelected) return false;
+
+    // For organizational assessments, match by aspectId
+    if (dim.isOrganizational && dim.aspectId) {
+      return dim.aspectId === currentAspectId;
+    }
+
+    // Standard dimension matching
     if (dim.subDimensionId) {
       return dim.dimensionId === currentDimensionId && dim.subDimensionId === currentSubDimensionId;
     }
     return dim.dimensionId === currentDimensionId && !currentSubDimensionId;
   };
+
+  // For organizational assessments, render aspects directly
+  if (isOrganizationalAssessment) {
+    return (
+      <Paper
+        elevation={0}
+        sx={{
+          width: 240,
+          height: '100%',
+          borderRight: '1px solid',
+          borderColor: 'divider',
+          display: 'flex',
+          flexDirection: 'column',
+          bgcolor: 'background.paper',
+        }}
+        component="aside"
+        aria-label="Assessment navigation"
+      >
+        {/* Overall Progress - Compact */}
+        <Box
+          sx={{ px: 1.5, py: 1, bgcolor: alpha(theme.palette.primary.main, 0.03) }}
+          role="region"
+          aria-label="Overall assessment progress"
+        >
+          <Box
+            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}
+          >
+            <Typography variant="caption" color="text.secondary">
+              Progress
+            </Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                {overallProgress}%
+              </Typography>
+              {overallScore !== null && (
+                <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                  Avg: {formatScore(overallScore)}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+          <LinearProgress
+            variant="determinate"
+            value={overallProgress}
+            aria-label={`Overall progress: ${overallProgress}% complete`}
+            sx={{
+              height: 4,
+              borderRadius: 2,
+              bgcolor: 'grey.200',
+              '& .MuiLinearProgress-bar': {
+                borderRadius: 2,
+                bgcolor: overallProgress === 100 ? 'success.main' : 'primary.main',
+              },
+            }}
+          />
+        </Box>
+
+        <Divider />
+
+        {/* Column Headers */}
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            px: 1.5,
+            py: 0.75,
+            gap: 1,
+            borderBottom: '1px solid',
+            borderColor: 'divider',
+          }}
+        >
+          <Typography
+            variant="caption"
+            sx={{ flex: 1, fontWeight: 600, color: 'text.secondary', fontSize: '0.65rem' }}
+          >
+            ASPECT
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 600,
+              color: 'text.secondary',
+              fontSize: '0.65rem',
+              minWidth: 28,
+              textAlign: 'right',
+            }}
+          >
+            PROG
+          </Typography>
+          <Typography
+            variant="caption"
+            sx={{
+              fontWeight: 600,
+              color: 'text.secondary',
+              fontSize: '0.65rem',
+              minWidth: 24,
+              textAlign: 'right',
+            }}
+          >
+            SCORE
+          </Typography>
+        </Box>
+
+        {/* Aspect Navigation */}
+        <Box sx={{ flex: 1, overflow: 'auto' }} component="nav" aria-label="Assessment aspects">
+          <List disablePadding role="list">
+            {dimensions.map((dim) => {
+              const selected = isSelected(dim);
+              const displayScore = dim.averageScore;
+
+              return (
+                <ListItemButton
+                  key={dim.aspectId ?? dim.dimensionId}
+                  selected={selected}
+                  onClick={() => onDimensionSelect(dim.aspectId as OrbitDimensionId)}
+                  aria-current={selected ? 'true' : undefined}
+                  aria-label={`${dim.name}, ${dim.assessedCount} of ${dim.totalCount} assessed${displayScore !== null ? `, score ${formatScore(displayScore)}` : ''}`}
+                  sx={{
+                    py: 0.75,
+                    px: 1.5,
+                    minHeight: 36,
+                    '&.Mui-selected': {
+                      bgcolor: alpha(theme.palette.primary.main, 0.1),
+                      borderLeft: '3px solid',
+                      borderColor: 'primary.main',
+                      '&:hover': {
+                        bgcolor: alpha(theme.palette.primary.main, 0.15),
+                      },
+                    },
+                  }}
+                >
+                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        fontWeight: selected ? 600 : 400,
+                        flex: 1,
+                        fontSize: '0.8125rem',
+                      }}
+                    >
+                      {dim.name}
+                    </Typography>
+                    {getProgressChip(dim.assessedCount, dim.totalCount)}
+                    <Typography
+                      variant="caption"
+                      sx={{
+                        fontWeight: 600,
+                        minWidth: 24,
+                        textAlign: 'right',
+                        color: 'text.secondary',
+                      }}
+                    >
+                      {displayScore !== null ? formatScore(displayScore) : '—'}
+                    </Typography>
+                  </Box>
+                </ListItemButton>
+              );
+            })}
+          </List>
+        </Box>
+
+        <Divider />
+
+        {/* Review & Finalize - Compact */}
+        {showFinalize && (
+          <Box sx={{ p: 0.75 }}>
+            <ListItemButton
+              selected={isReviewSelected}
+              onClick={onReviewSelect}
+              sx={{
+                py: 0.75,
+                px: 1,
+                minHeight: 36,
+                borderRadius: 1,
+                bgcolor: isReviewSelected ? alpha(theme.palette.success.main, 0.1) : 'transparent',
+                border: '1px solid',
+                borderColor: isReviewSelected ? 'success.main' : 'divider',
+                '&:hover': {
+                  bgcolor: alpha(theme.palette.success.main, 0.08),
+                },
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>
+                <FlagIcon sx={{ fontSize: 16, color: 'success.main' }} />
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 600, color: 'success.dark', fontSize: '0.8125rem' }}
+                >
+                  Review & Finalize
+                </Typography>
+              </Box>
+            </ListItemButton>
+          </Box>
+        )}
+      </Paper>
+    );
+  }
+
+  // Standard dimension navigation (B-I-T)
 
   // Group dimensions for display
   const standardDimensions = dimensions.filter((d) => d.dimensionId !== 'technology');
@@ -290,11 +508,14 @@ export function AssessmentSidebar({
             const selected = isSelected(dim);
             const displayScore = dim.isAggregate ? dim.aggregateScore : dim.averageScore;
 
+            // Skip if no dimensionId (shouldn't happen for standard dimensions)
+            if (!dim.dimensionId) return null;
+
             return (
               <ListItemButton
                 key={dim.dimensionId}
                 selected={selected}
-                onClick={() => onDimensionSelect(dim.dimensionId)}
+                onClick={() => onDimensionSelect(dim.dimensionId!)}
                 aria-current={selected ? 'true' : undefined}
                 aria-label={`${dim.name}${dim.isAggregate ? ' (aggregate)' : !dim.isRequired ? ' (optional)' : ''}, ${dim.isAggregate ? `aggregate from ${dim.aggregateCount ?? 0} assessments` : `${dim.assessedCount} of ${dim.totalCount} assessed`}${displayScore !== null ? `, average score ${formatScore(displayScore)}` : ''}`}
                 sx={{
@@ -460,11 +681,14 @@ export function AssessmentSidebar({
                     {techDimensions.map((dim) => {
                       const selected = isSelected(dim);
 
+                      // Skip if no dimensionId (shouldn't happen for tech dimensions)
+                      if (!dim.dimensionId) return null;
+
                       return (
                         <ListItemButton
                           key={`${dim.dimensionId}-${dim.subDimensionId}`}
                           selected={selected}
-                          onClick={() => onDimensionSelect(dim.dimensionId, dim.subDimensionId)}
+                          onClick={() => onDimensionSelect(dim.dimensionId!, dim.subDimensionId)}
                           aria-current={selected ? 'true' : undefined}
                           aria-label={`${dim.name}, ${dim.assessedCount} of ${dim.totalCount} assessed${dim.averageScore !== null ? `, average score ${formatScore(dim.averageScore)}` : ''}`}
                           sx={{

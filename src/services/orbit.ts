@@ -12,6 +12,8 @@ import type {
   OrbitModel,
   OrbitDimension,
   OrbitDimensionId,
+  OrganizationalAssessmentId,
+  OrganizationalAssessmentDefinition,
   TechnologyDimension,
   TechnologySubDimension,
   TechnologySubDimensionId,
@@ -40,11 +42,11 @@ export function getOrbitModelVersion(): string {
 }
 
 /**
- * Get all dimension IDs
- * @returns Array of all five ORBIT dimension IDs
+ * Get all dimension IDs (B-I-T only)
+ * @returns Array of the three ORBIT dimension IDs for standard assessments
  */
 export function getAllDimensionIds(): OrbitDimensionId[] {
-  return ['outcomes', 'roles', 'businessArchitecture', 'information', 'technology'];
+  return ['businessArchitecture', 'information', 'technology'];
 }
 
 /**
@@ -57,10 +59,11 @@ export function getRequiredDimensionIds(): OrbitDimensionId[] {
 
 /**
  * Get optional dimension IDs
- * @returns Array of dimension IDs that are optional for assessment
+ * @returns Empty array - all dimensions are now required for standard assessments
+ * @deprecated Outcomes and Roles are now organizational assessments, not optional dimensions
  */
 export function getOptionalDimensionIds(): OrbitDimensionId[] {
-  return ['outcomes', 'roles'];
+  return [];
 }
 
 /**
@@ -76,15 +79,10 @@ export function getDimension(
 
 /**
  * Get all standard (non-Technology) dimensions
- * @returns Array of the four standard dimensions (Outcomes, Roles, Business Architecture, Information)
+ * @returns Array of the two standard dimensions (Business Architecture, Information)
  */
 export function getStandardDimensions(): OrbitDimension[] {
-  return [
-    orbitModel.dimensions.outcomes,
-    orbitModel.dimensions.roles,
-    orbitModel.dimensions.businessArchitecture,
-    orbitModel.dimensions.information,
-  ];
+  return [orbitModel.dimensions.businessArchitecture, orbitModel.dimensions.information];
 }
 
 /**
@@ -191,14 +189,14 @@ export function getAllMaturityLevels(): Record<LevelKey | 'notApplicable', Matur
 }
 
 /**
- * Get total aspect count across all dimensions
- * @returns Total number of aspects in the ORBIT model
+ * Get total aspect count across all standard dimensions (B-I-T)
+ * @returns Total number of aspects for standard capability assessments
  */
 export function getTotalAspectCount(): number {
   let count = 0;
 
-  // Standard dimensions
-  for (const dimId of ['outcomes', 'roles', 'businessArchitecture', 'information'] as const) {
+  // Standard dimensions (B, I)
+  for (const dimId of ['businessArchitecture', 'information'] as const) {
     count += orbitModel.dimensions[dimId].aspects.length;
   }
 
@@ -208,6 +206,14 @@ export function getTotalAspectCount(): number {
   }
 
   return count;
+}
+
+/**
+ * Get aspect count for standard assessments (B-I-T dimensions only)
+ * @returns Total number of aspects in B-I-T dimensions
+ */
+export function getStandardAspectCount(): number {
+  return getTotalAspectCount();
 }
 
 /**
@@ -284,8 +290,8 @@ export function getAspectLocation(aspectId: string):
       subDimensionId?: TechnologySubDimensionId;
     }
   | undefined {
-  // Check standard dimensions first
-  for (const dimId of ['outcomes', 'roles', 'businessArchitecture', 'information'] as const) {
+  // Check standard dimensions (B, I)
+  for (const dimId of ['businessArchitecture', 'information'] as const) {
     const dimension = orbitModel.dimensions[dimId];
     if (dimension.aspects.some((a) => a.id === aspectId)) {
       return { dimensionId: dimId };
@@ -351,4 +357,74 @@ export function hasAggregatedDimension(domainId: string): boolean {
  */
 export function isEnterpriseDomain(domainId: string): boolean {
   return ENTERPRISE_DOMAIN_IDS.includes(domainId as (typeof ENTERPRISE_DOMAIN_IDS)[number]);
+}
+
+// =============================================================================
+// Organizational Assessment Functions
+// =============================================================================
+
+/**
+ * Get an organizational assessment definition by type.
+ * Organizational assessments (Outcomes, Roles) are assessed at the organizational level,
+ * not per capability area.
+ *
+ * @param type - The organizational assessment type ('outcomes' or 'roles')
+ * @returns The organizational assessment definition
+ */
+export function getOrganizationalAssessment(
+  type: OrganizationalAssessmentId
+): OrganizationalAssessmentDefinition {
+  return orbitModel.organizationalAssessments[type];
+}
+
+/**
+ * Get all aspects for an organizational assessment.
+ *
+ * @param type - The organizational assessment type ('outcomes' or 'roles')
+ * @returns Array of aspects for the organizational assessment
+ */
+export function getOrganizationalAspects(type: OrganizationalAssessmentId): OrbitAspect[] {
+  return orbitModel.organizationalAssessments[type].aspects;
+}
+
+/**
+ * Get the aspect count for an organizational assessment.
+ *
+ * @param type - The organizational assessment type ('outcomes' or 'roles')
+ * @returns Number of aspects in the organizational assessment
+ */
+export function getOrganizationalAspectCount(type: OrganizationalAssessmentId): number {
+  return orbitModel.organizationalAssessments[type].aspects.length;
+}
+
+/**
+ * Get a specific aspect from an organizational assessment.
+ *
+ * @param type - The organizational assessment type ('outcomes' or 'roles')
+ * @param aspectId - The aspect ID to find
+ * @returns The aspect if found, undefined otherwise
+ */
+export function getOrganizationalAspect(
+  type: OrganizationalAssessmentId,
+  aspectId: string
+): OrbitAspect | undefined {
+  return orbitModel.organizationalAssessments[type].aspects.find((a) => a.id === aspectId);
+}
+
+/**
+ * Get all organizational assessment types.
+ *
+ * @returns Array of organizational assessment type IDs
+ */
+export function getOrganizationalAssessmentTypes(): OrganizationalAssessmentId[] {
+  return ['outcomes', 'roles'];
+}
+
+/**
+ * Get total aspect count for all organizational assessments.
+ *
+ * @returns Total number of aspects across all organizational assessments
+ */
+export function getTotalOrganizationalAspectCount(): number {
+  return getOrganizationalAspectCount('outcomes') + getOrganizationalAspectCount('roles');
 }
