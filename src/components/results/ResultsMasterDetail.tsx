@@ -27,9 +27,16 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import { useScores, useCapabilityAssessments, useOrbitRatings, useAttachments } from '../../hooks';
-import type { CapabilityDomain, DimensionScore, CapabilityArea } from '../../types';
+import type {
+  CapabilityDomain,
+  DimensionScore,
+  CapabilityArea,
+  CapabilityLayer,
+} from '../../types';
 import { getAreasFromDomain, isCategorizedDomain } from '../../types';
 import { getAreaWithDomain } from '../../services/capabilities';
+import { isEnterpriseDomain, getAggregatedDimensionForDomain } from '../../services/orbit';
+import { isOrganizationalAssessmentArea as isOrgArea } from '../../constants';
 import { DimensionScoresTableWithTarget } from './DimensionScoresTableWithTarget';
 import {
   Chart as ChartJS,
@@ -65,8 +72,8 @@ const LAYER_NAMES: Record<string, string> = {
  * Short labels for radar chart
  */
 const SHORT_DIMENSION_LABELS: Record<string, string> = {
-  Outcomes: 'Outcomes',
-  Roles: 'Roles',
+  'Organizational Outcomes': 'Outcomes',
+  'Organizational Roles': 'Roles',
   'Business Architecture': 'Bus. Arch.',
   Information: 'Info',
   Technology: 'Tech',
@@ -307,13 +314,65 @@ function AreaDetailPanel({
   areaName: string;
   headingRef: React.RefObject<HTMLHeadingElement>;
 }): JSX.Element {
-  const { getCapabilityScoreData, getDimensionScoresForAssessment } = useScores();
+  const {
+    getCapabilityScoreData,
+    getDimensionScoresForAssessment,
+    getOrganizationalScoresForAssessment,
+    getAggregateDimensionScore,
+  } = useScores();
   const { getAssessmentForArea } = useCapabilityAssessments();
 
   const areaInfo = useMemo(() => getAreaWithDomain(areaId), [areaId]);
   const scoreData = getCapabilityScoreData(areaId);
   const assessment = getAssessmentForArea(areaId);
-  const dimensionScores = assessment ? getDimensionScoresForAssessment(assessment.id) : undefined;
+
+  // Detect assessment type
+  const isOrganizational = isOrgArea(areaId);
+  const domainId = areaInfo?.domain.id ?? '';
+  const isEnterprise = isEnterpriseDomain(domainId);
+  const aggregatedDimension = isEnterprise ? getAggregatedDimensionForDomain(domainId) : null;
+
+  // Get dimension scores based on assessment type
+  const dimensionScores = useMemo(() => {
+    if (!assessment) return undefined;
+
+    // For organizational assessments, use organizational scores
+    if (isOrganizational) {
+      return getOrganizationalScoresForAssessment(assessment.id, areaId);
+    }
+
+    // For standard assessments, get B-I-T dimension scores
+    const rawScores = getDimensionScoresForAssessment(assessment.id);
+    if (!rawScores) return undefined;
+
+    // For enterprise domains, inject aggregate score for the aggregated dimension
+    if (isEnterprise && aggregatedDimension) {
+      const aggregateData = getAggregateDimensionScore(aggregatedDimension);
+
+      return rawScores.map((dim) => {
+        if (dim.dimensionId === aggregatedDimension) {
+          return {
+            ...dim,
+            averageLevel: aggregateData.score,
+            isAggregate: true,
+            aggregateContributingCount: aggregateData.contributingCount,
+          };
+        }
+        return dim;
+      });
+    }
+
+    return rawScores;
+  }, [
+    assessment,
+    areaId,
+    isOrganizational,
+    isEnterprise,
+    aggregatedDimension,
+    getDimensionScoresForAssessment,
+    getOrganizationalScoresForAssessment,
+    getAggregateDimensionScore,
+  ]);
 
   const { ratings } = useOrbitRatings(assessment?.id);
   const { attachments, downloadAttachment } = useAttachments(assessment?.id);
@@ -545,8 +604,16 @@ function AreaDetailPanel({
   );
 }
 
+/** Layer configuration for grouping */
+const LAYER_ORDER: CapabilityLayer[] = ['strategic', 'core', 'support'];
+const LAYER_DISPLAY: Record<CapabilityLayer, { name: string; color: string }> = {
+  strategic: { name: 'Strategic', color: '#1976d2' },
+  core: { name: 'Core Operations', color: '#388e3c' },
+  support: { name: 'Support', color: '#7b1fa2' },
+};
+
 /**
- * Navigation panel showing domains and areas
+ * Navigation panel showing domains and areas grouped by layer
  */
 function NavigationPanel({
   domains,
@@ -560,10 +627,38 @@ function NavigationPanel({
   onSelectArea: (areaId: string, areaName: string) => void;
 }): JSX.Element {
   const [expandedDomains, setExpandedDomains] = useState<Set<string>>(new Set());
+  const [expandedLayers, setExpandedLayers] = useState<Set<CapabilityLayer>>(new Set(LAYER_ORDER));
   const { getDomainScore, getCapabilityScore, getCapabilityStatus } = useScores();
 
   const selectedDomainId = selection?.type === 'domain' ? selection.domain.id : null;
   const selectedAreaId = selection?.type === 'area' ? selection.areaId : null;
+
+  // Group domains by layer
+  const domainsByLayer = useMemo(() => {
+    const grouped = new Map<CapabilityLayer, CapabilityDomain[]>();
+    for (const layer of LAYER_ORDER) {
+      grouped.set(layer, []);
+    }
+    for (const domain of domains) {
+      const layerDomains = grouped.get(domain.layer);
+      if (layerDomains) {
+        layerDomains.push(domain);
+      }
+    }
+    return grouped;
+  }, [domains]);
+
+  const toggleLayer = (layer: CapabilityLayer): void => {
+    setExpandedLayers((prev) => {
+      const next = new Set(prev);
+      if (next.has(layer)) {
+        next.delete(layer);
+      } else {
+        next.add(layer);
+      }
+      return next;
+    });
+  };
 
   return (
     <Box>
@@ -573,177 +668,235 @@ function NavigationPanel({
         </Typography>
       </Box>
       <List disablePadding dense role="list">
-        {domains.map((domain) => {
-          const isExpanded = expandedDomains.has(domain.id);
-          const isDomainSelected = selectedDomainId === domain.id;
-          const domainScore = getDomainScore(domain.id);
-          const allAreas = getAreasFromDomain(domain);
-          const finalizedAreas = allAreas.filter(
-            (area) => getCapabilityStatus(area.id) === 'finalized'
-          );
+        {LAYER_ORDER.map((layer) => {
+          const layerDomains = domainsByLayer.get(layer) ?? [];
+          const isLayerExpanded = expandedLayers.has(layer);
+          const layerConfig = LAYER_DISPLAY[layer];
 
           return (
-            <Fragment key={domain.id}>
+            <Fragment key={layer}>
+              {/* Layer Header */}
               <ListItemButton
-                selected={isDomainSelected}
-                onClick={() => {
-                  onSelectDomain(domain);
-                  // Toggle expand/collapse
-                  setExpandedDomains((prev) => {
-                    const next = new Set(prev);
-                    if (next.has(domain.id)) {
-                      next.delete(domain.id);
-                    } else {
-                      next.add(domain.id);
-                    }
-                    return next;
-                  });
+                onClick={() => toggleLayer(layer)}
+                sx={{
+                  py: 0.75,
+                  bgcolor: 'grey.100',
+                  borderBottom: 1,
+                  borderColor: 'divider',
+                  '&:hover': { bgcolor: 'grey.200' },
                 }}
-                sx={{ py: 0.5, minHeight: 36 }}
-                aria-expanded={isExpanded}
-                aria-label={`${domain.name}, ${domainScore !== null ? `score ${domainScore.toFixed(1)}, ` : ''}${finalizedAreas.length} of ${allAreas.length} assessed`}
+                aria-expanded={isLayerExpanded}
+                aria-label={`${layerConfig.name} layer, ${layerDomains.length} domains`}
               >
-                {isExpanded ? (
-                  <ExpandMoreIcon
-                    sx={{ fontSize: 18, mr: 0.5, color: 'action.active' }}
-                    aria-hidden="true"
-                  />
+                {isLayerExpanded ? (
+                  <ExpandMoreIcon sx={{ fontSize: 16, mr: 0.5, color: layerConfig.color }} />
                 ) : (
-                  <ChevronRightIcon
-                    sx={{ fontSize: 18, mr: 0.5, color: 'action.active' }}
-                    aria-hidden="true"
-                  />
+                  <ChevronRightIcon sx={{ fontSize: 16, mr: 0.5, color: layerConfig.color }} />
                 )}
+                <Box
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 0.5,
+                    bgcolor: layerConfig.color,
+                    mr: 1,
+                  }}
+                />
                 <ListItemText
                   primary={
-                    <Typography variant="body2" fontWeight={500} noWrap>
-                      {domain.name}
+                    <Typography
+                      variant="caption"
+                      fontWeight={700}
+                      sx={{ textTransform: 'uppercase', letterSpacing: 0.5 }}
+                    >
+                      {layerConfig.name}
                     </Typography>
                   }
                   sx={{ my: 0 }}
                 />
-                {domainScore !== null ? (
-                  <Chip
-                    label={`${domainScore.toFixed(1)} (${finalizedAreas.length}/${allAreas.length})`}
-                    size="small"
-                    sx={{
-                      bgcolor: 'primary.main',
-                      color: 'white',
-                      fontWeight: 600,
-                      height: 20,
-                      fontSize: '0.7rem',
-                      ml: 0.5,
-                    }}
-                  />
-                ) : (
-                  <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
-                    {finalizedAreas.length}/{allAreas.length}
-                  </Typography>
-                )}
+                <Typography variant="caption" color="text.secondary">
+                  {layerDomains.length}
+                </Typography>
               </ListItemButton>
 
-              <Collapse in={isExpanded} timeout="auto" unmountOnExit>
-                <List disablePadding dense>
-                  {isCategorizedDomain(domain)
-                    ? domain.categories.map((category) => (
-                        <Fragment key={category.id}>
-                          <Box sx={{ px: 2, py: 0.25, bgcolor: 'grey.100' }}>
-                            <Typography
-                              variant="caption"
-                              fontWeight={600}
-                              color="text.secondary"
-                              sx={{ fontSize: '0.65rem' }}
-                            >
-                              {category.name}
+              {/* Domains in this layer */}
+              <Collapse in={isLayerExpanded} timeout="auto" unmountOnExit>
+                {layerDomains.map((domain) => {
+                  const isExpanded = expandedDomains.has(domain.id);
+                  const isDomainSelected = selectedDomainId === domain.id;
+                  const domainScore = getDomainScore(domain.id);
+                  const allAreas = getAreasFromDomain(domain);
+                  const finalizedAreas = allAreas.filter(
+                    (area) => getCapabilityStatus(area.id) === 'finalized'
+                  );
+
+                  return (
+                    <Fragment key={domain.id}>
+                      <ListItemButton
+                        selected={isDomainSelected}
+                        onClick={() => {
+                          onSelectDomain(domain);
+                          // Toggle expand/collapse
+                          setExpandedDomains((prev) => {
+                            const next = new Set(prev);
+                            if (next.has(domain.id)) {
+                              next.delete(domain.id);
+                            } else {
+                              next.add(domain.id);
+                            }
+                            return next;
+                          });
+                        }}
+                        sx={{ py: 0.5, minHeight: 36 }}
+                        aria-expanded={isExpanded}
+                        aria-label={`${domain.name}, ${domainScore !== null ? `score ${domainScore.toFixed(1)}, ` : ''}${finalizedAreas.length} of ${allAreas.length} assessed`}
+                      >
+                        {isExpanded ? (
+                          <ExpandMoreIcon
+                            sx={{ fontSize: 18, mr: 0.5, color: 'action.active' }}
+                            aria-hidden="true"
+                          />
+                        ) : (
+                          <ChevronRightIcon
+                            sx={{ fontSize: 18, mr: 0.5, color: 'action.active' }}
+                            aria-hidden="true"
+                          />
+                        )}
+                        <ListItemText
+                          primary={
+                            <Typography variant="body2" fontWeight={500} noWrap>
+                              {domain.name}
                             </Typography>
-                          </Box>
-                          {category.areas.map((area) => {
-                            const areaScore = getCapabilityScore(area.id);
-                            const isSelected = selectedAreaId === area.id;
-                            const isFinalized = getCapabilityStatus(area.id) === 'finalized';
-                            return (
-                              <ListItemButton
-                                key={area.id}
-                                selected={isSelected}
-                                onClick={() => onSelectArea(area.id, area.name)}
-                                sx={{
-                                  pl: 4,
-                                  py: 0.25,
-                                  minHeight: 28,
-                                  opacity: isFinalized ? 1 : 0.7,
-                                }}
-                              >
-                                <ListItemText
-                                  primary={
-                                    <Typography
-                                      variant="body2"
-                                      sx={{
-                                        fontSize: '0.8rem',
-                                        fontStyle: isFinalized ? 'normal' : 'italic',
-                                      }}
-                                    >
-                                      {area.name}
-                                    </Typography>
-                                  }
-                                  sx={{ my: 0 }}
-                                />
-                                {areaScore !== null ? (
-                                  <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                                    {areaScore.toFixed(1)}
-                                  </Typography>
-                                ) : (
-                                  <Typography variant="caption" color="text.disabled">
-                                    —
-                                  </Typography>
-                                )}
-                              </ListItemButton>
-                            );
-                          })}
-                        </Fragment>
-                      ))
-                    : allAreas.map((area) => {
-                        const areaScore = getCapabilityScore(area.id);
-                        const isSelected = selectedAreaId === area.id;
-                        const isFinalized = getCapabilityStatus(area.id) === 'finalized';
-                        return (
-                          <ListItemButton
-                            key={area.id}
-                            selected={isSelected}
-                            onClick={() => onSelectArea(area.id, area.name)}
+                          }
+                          sx={{ my: 0 }}
+                        />
+                        {domainScore !== null ? (
+                          <Chip
+                            label={`${domainScore.toFixed(1)} (${finalizedAreas.length}/${allAreas.length})`}
+                            size="small"
                             sx={{
-                              pl: 3.5,
-                              py: 0.25,
-                              minHeight: 28,
-                              opacity: isFinalized ? 1 : 0.7,
+                              bgcolor: 'primary.main',
+                              color: 'white',
+                              fontWeight: 600,
+                              height: 20,
+                              fontSize: '0.7rem',
+                              ml: 0.5,
                             }}
-                          >
-                            <ListItemText
-                              primary={
-                                <Typography
-                                  variant="body2"
-                                  sx={{
-                                    fontSize: '0.8rem',
-                                    fontStyle: isFinalized ? 'normal' : 'italic',
-                                  }}
-                                >
-                                  {area.name}
-                                </Typography>
-                              }
-                              sx={{ my: 0 }}
-                            />
-                            {areaScore !== null ? (
-                              <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                                {areaScore.toFixed(1)}
-                              </Typography>
-                            ) : (
-                              <Typography variant="caption" color="text.disabled">
-                                —
-                              </Typography>
-                            )}
-                          </ListItemButton>
-                        );
-                      })}
-                </List>
+                          />
+                        ) : (
+                          <Typography variant="caption" color="text.secondary" sx={{ ml: 0.5 }}>
+                            {finalizedAreas.length}/{allAreas.length}
+                          </Typography>
+                        )}
+                      </ListItemButton>
+
+                      <Collapse in={isExpanded} timeout="auto" unmountOnExit>
+                        <List disablePadding dense>
+                          {isCategorizedDomain(domain)
+                            ? domain.categories.map((category) => (
+                                <Fragment key={category.id}>
+                                  <Box sx={{ px: 2, py: 0.25, bgcolor: 'grey.100' }}>
+                                    <Typography
+                                      variant="caption"
+                                      fontWeight={600}
+                                      color="text.secondary"
+                                      sx={{ fontSize: '0.65rem' }}
+                                    >
+                                      {category.name}
+                                    </Typography>
+                                  </Box>
+                                  {category.areas.map((area) => {
+                                    const areaScore = getCapabilityScore(area.id);
+                                    const isSelected = selectedAreaId === area.id;
+                                    const isFinalized =
+                                      getCapabilityStatus(area.id) === 'finalized';
+                                    return (
+                                      <ListItemButton
+                                        key={area.id}
+                                        selected={isSelected}
+                                        onClick={() => onSelectArea(area.id, area.name)}
+                                        sx={{
+                                          pl: 4,
+                                          py: 0.25,
+                                          minHeight: 28,
+                                          opacity: isFinalized ? 1 : 0.7,
+                                        }}
+                                      >
+                                        <ListItemText
+                                          primary={
+                                            <Typography
+                                              variant="body2"
+                                              sx={{
+                                                fontSize: '0.8rem',
+                                                fontStyle: isFinalized ? 'normal' : 'italic',
+                                              }}
+                                            >
+                                              {area.name}
+                                            </Typography>
+                                          }
+                                          sx={{ my: 0 }}
+                                        />
+                                        {areaScore !== null ? (
+                                          <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                                            {areaScore.toFixed(1)}
+                                          </Typography>
+                                        ) : (
+                                          <Typography variant="caption" color="text.disabled">
+                                            —
+                                          </Typography>
+                                        )}
+                                      </ListItemButton>
+                                    );
+                                  })}
+                                </Fragment>
+                              ))
+                            : allAreas.map((area) => {
+                                const areaScore = getCapabilityScore(area.id);
+                                const isSelected = selectedAreaId === area.id;
+                                const isFinalized = getCapabilityStatus(area.id) === 'finalized';
+                                return (
+                                  <ListItemButton
+                                    key={area.id}
+                                    selected={isSelected}
+                                    onClick={() => onSelectArea(area.id, area.name)}
+                                    sx={{
+                                      pl: 3.5,
+                                      py: 0.25,
+                                      minHeight: 28,
+                                      opacity: isFinalized ? 1 : 0.7,
+                                    }}
+                                  >
+                                    <ListItemText
+                                      primary={
+                                        <Typography
+                                          variant="body2"
+                                          sx={{
+                                            fontSize: '0.8rem',
+                                            fontStyle: isFinalized ? 'normal' : 'italic',
+                                          }}
+                                        >
+                                          {area.name}
+                                        </Typography>
+                                      }
+                                      sx={{ my: 0 }}
+                                    />
+                                    {areaScore !== null ? (
+                                      <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                                        {areaScore.toFixed(1)}
+                                      </Typography>
+                                    ) : (
+                                      <Typography variant="caption" color="text.disabled">
+                                        —
+                                      </Typography>
+                                    )}
+                                  </ListItemButton>
+                                );
+                              })}
+                        </List>
+                      </Collapse>
+                    </Fragment>
+                  );
+                })}
               </Collapse>
             </Fragment>
           );

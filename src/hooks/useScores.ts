@@ -16,7 +16,10 @@ import {
   getAspectsForDimension,
   getAspectsForSubDimension,
   isEnterpriseDomain,
+  getOrganizationalAspects,
+  getOrganizationalAssessment,
 } from '../services/orbit';
+import { getOrganizationalAssessmentType } from '../constants';
 import type { OrbitRating, OrbitDimensionId, DimensionScore, SubDimensionScore } from '../types';
 
 /**
@@ -78,6 +81,10 @@ export interface UseScoresReturn {
     total: number;
   };
   getDimensionScoresForAssessment: (assessmentId: string) => DimensionScore[] | undefined;
+  getOrganizationalScoresForAssessment: (
+    assessmentId: string,
+    areaId: string
+  ) => DimensionScore[] | undefined;
   getAggregateDimensionScore: (dimensionId: OrbitDimensionId) => AggregateDimensionScore;
 }
 
@@ -442,6 +449,59 @@ export function useScores(): UseScoresReturn {
     };
   };
 
+  /**
+   * Get dimension scores for an organizational assessment (Outcomes or Roles).
+   * Returns a single "dimension" representing the organizational assessment type.
+   */
+  const getOrganizationalScoresForAssessment = (
+    assessmentId: string,
+    areaId: string
+  ): DimensionScore[] | undefined => {
+    if (!data) return undefined;
+
+    const ratings = data.ratingsByAssessment.get(assessmentId);
+    if (!ratings) return undefined;
+
+    // Get the organizational assessment type for this area
+    const orgType = getOrganizationalAssessmentType(areaId);
+    if (!orgType) return undefined;
+
+    // Get the organizational assessment definition
+    const orgAssessment = getOrganizationalAssessment(orgType);
+    const orgAspects = getOrganizationalAspects(orgType);
+
+    // Filter ratings to only those for this organizational assessment type
+    const orgRatings = ratings.filter((r) => r.dimensionId === orgType);
+
+    // Build aspect scores
+    const aspectScores = orgAspects.map((aspect) => {
+      const rating = orgRatings.find((r) => r.aspectId === aspect.id);
+      return {
+        aspectId: aspect.id,
+        aspectName: aspect.name,
+        dimensionId: orgType as OrbitDimensionId, // Cast for compatibility
+        subDimensionId: undefined,
+        currentLevel: rating?.currentLevel ?? 0,
+        isAssessed: rating ? rating.currentLevel !== 0 : false,
+      };
+    });
+
+    // Calculate average
+    const assessed = aspectScores.filter((a) => a.currentLevel > 0);
+    const avgLevel = calculateAverageScore(assessed.map((a) => a.currentLevel));
+
+    return [
+      {
+        dimensionId: orgType as OrbitDimensionId, // Cast for compatibility
+        dimensionName: orgAssessment.name,
+        required: true,
+        averageLevel: avgLevel,
+        aspectScores,
+        subDimensionScores: undefined,
+      },
+    ];
+  };
+
   return {
     scoresByArea: data?.scoresByArea ?? new Map(),
     getCapabilityScoreData,
@@ -457,6 +517,7 @@ export function useScores(): UseScoresReturn {
     getStatusCounts,
     getDomainStatusCounts,
     getDimensionScoresForAssessment,
+    getOrganizationalScoresForAssessment,
     getAggregateDimensionScore,
   };
 }
