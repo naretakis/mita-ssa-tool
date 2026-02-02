@@ -3,6 +3,8 @@
  *
  * Core service for exporting assessment data in various formats.
  * Supports JSON, ZIP (with attachments), PDF, and CSV exports.
+ * Handles both standard capability assessments (B-I-T) and
+ * organizational assessments (Outcomes/Roles).
  */
 
 import JSZip from 'jszip';
@@ -10,7 +12,12 @@ import JSZip from 'jszip';
 import { db } from '../db';
 import { getDomainById, getAreaById } from '../capabilities';
 import { calculateAverageScore, calculateDimensionScore } from '../scoring';
-import { isEnterpriseDomain, getAggregatedDimensionForDomain } from '../orbit';
+import {
+  isEnterpriseDomain,
+  getAggregatedDimensionForDomain,
+  getOrganizationalAspects,
+} from '../orbit';
+import { getOrganizationalAssessmentType } from '../../constants';
 import { getAreasFromDomain } from '../../types';
 import type {
   ExportOptions,
@@ -28,7 +35,7 @@ import type {
   AssessmentHistory,
   Tag,
   OrbitDimensionId,
-  RatingDimensionId,
+  OrganizationalAssessmentId,
 } from '../../types';
 import { generatePdfReport } from './pdfExport';
 import { generateMaturityProfileCsv, generateCombinedMaturityProfileCsv } from './csvExport';
@@ -520,6 +527,7 @@ async function generateDomainMaturityProfile(
 
 /**
  * Generates a profile for a single capability area.
+ * Handles both standard assessments (B-I-T dimensions) and organizational assessments (direct aspects).
  * For enterprise domains, includes aggregate dimension data with indicator.
  *
  * @param assessment - The capability assessment
@@ -531,12 +539,67 @@ function generateCapabilityAreaProfile(
   ratings: OrbitRating[],
   aggregateData?: { dimensionId: OrbitDimensionId; score: number | null; contributingCount: number }
 ): CapabilityAreaProfile {
-  // Map dimension IDs to display names (matches MITA 4.0 ORBIT model)
-  // Note: Outcomes and Roles are now organizational assessments, not per-capability dimensions
-  // We use RatingDimensionId to handle both standard and organizational assessments in ratings
-  const dimensionMap: Record<RatingDimensionId, string> = {
-    outcomes: 'Outcomes',
-    roles: 'Roles',
+  // Check if this is an organizational assessment
+  const orgType = getOrganizationalAssessmentType(assessment.capabilityAreaId);
+
+  if (orgType) {
+    // Organizational assessment - generate aspect-based profile
+    return generateOrganizationalAreaProfile(assessment, ratings, orgType);
+  }
+
+  // Standard assessment - generate dimension-based profile
+  return generateStandardAreaProfile(assessment, ratings, aggregateData);
+}
+
+/**
+ * Generates a profile for an organizational assessment (Outcomes/Roles).
+ * Shows aspects directly instead of dimensions.
+ */
+function generateOrganizationalAreaProfile(
+  assessment: CapabilityAssessment,
+  ratings: OrbitRating[],
+  orgType: OrganizationalAssessmentId
+): CapabilityAreaProfile {
+  const aspects = getOrganizationalAspects(orgType);
+  const rows: MaturityProfileRow[] = [];
+
+  for (const aspect of aspects) {
+    // Find the rating for this aspect
+    const rating = ratings.find((r) => r.dimensionId === orgType && r.aspectId === aspect.id);
+
+    const asIs = rating && rating.currentLevel > 0 ? rating.currentLevel.toString() : '';
+    const toBe = rating?.targetLevel && rating.targetLevel > 0 ? rating.targetLevel.toString() : '';
+
+    rows.push({
+      dimension: aspect.name, // Using 'dimension' field for aspect name in CSV
+      asIs,
+      toBe,
+      notes: rating?.notes ?? '',
+      barriers: rating?.barriers ?? '',
+      plans: rating?.plans ?? '',
+    });
+  }
+
+  return {
+    domainName: assessment.capabilityDomainName,
+    areaName: assessment.capabilityAreaName,
+    rows,
+    isOrganizationalAssessment: true,
+    organizationalType: orgType,
+  };
+}
+
+/**
+ * Generates a profile for a standard capability assessment (B-I-T dimensions).
+ * For enterprise domains, includes aggregate dimension data with indicator.
+ */
+function generateStandardAreaProfile(
+  assessment: CapabilityAssessment,
+  ratings: OrbitRating[],
+  aggregateData?: { dimensionId: OrbitDimensionId; score: number | null; contributingCount: number }
+): CapabilityAreaProfile {
+  // Map dimension IDs to display names (B-I-T only)
+  const dimensionMap: Record<OrbitDimensionId, string> = {
     businessArchitecture: 'Business Architecture',
     information: 'Information',
     technology: 'Technology',
@@ -565,9 +628,14 @@ function generateCapabilityAreaProfile(
     };
   }
 
-  // Aggregate data from ratings
+  // Aggregate data from ratings (only B-I-T dimensions)
   for (const rating of ratings) {
-    const dimName = dimensionMap[rating.dimensionId];
+    // Skip organizational assessment ratings (outcomes/roles) in standard assessments
+    if (rating.dimensionId === 'outcomes' || rating.dimensionId === 'roles') {
+      continue;
+    }
+
+    const dimName = dimensionMap[rating.dimensionId as OrbitDimensionId];
     if (!dimName) continue;
 
     const dimData = dimensionData[dimName];
@@ -593,7 +661,7 @@ function generateCapabilityAreaProfile(
     }
   }
 
-  // Build rows for each dimension
+  // Build rows for each dimension (B-I-T only)
   const rows: MaturityProfileRow[] = [];
 
   for (const [dimId, dimName] of Object.entries(dimensionMap)) {

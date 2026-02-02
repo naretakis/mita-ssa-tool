@@ -5,6 +5,9 @@
  * Uses "Merge with History" strategy:
  * - Newer imports become current, existing moves to history
  * - Older imports are added to history, existing stays current
+ *
+ * Supports both standard capability assessments (B-I-T) and
+ * organizational assessments (Outcomes/Roles).
  */
 
 import JSZip from 'jszip';
@@ -13,8 +16,14 @@ import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db';
 import { createHistorySnapshot, calculateDimensionScores, toHistoricalRatings } from '../history';
 import { extractAttachmentIdFromFileName } from './exportService';
+import { isOrganizationalAssessmentArea } from '../../constants';
 import type { ExportData, ImportResult, ImportItemResult, ImportProgressCallback } from './types';
-import type { CapabilityAssessment, Attachment, OrbitDimensionId } from '../../types';
+import type {
+  CapabilityAssessment,
+  Attachment,
+  OrbitDimensionId,
+  RatingDimensionId,
+} from '../../types';
 
 /** Current supported export version */
 const SUPPORTED_VERSIONS = ['1.0'];
@@ -28,12 +37,49 @@ const LEGACY_DIMENSION_ID_MAP: Record<string, OrbitDimensionId> = {
 };
 
 /**
+ * Valid dimension IDs for standard capability assessments (B-I-T only).
+ * Outcomes and Roles are only valid for organizational assessments.
+ */
+const STANDARD_DIMENSION_IDS: OrbitDimensionId[] = [
+  'businessArchitecture',
+  'information',
+  'technology',
+];
+
+/**
+ * Organizational assessment dimension IDs.
+ */
+const ORGANIZATIONAL_DIMENSION_IDS: RatingDimensionId[] = ['outcomes', 'roles'];
+
+/**
  * Normalizes a dimension ID, mapping legacy IDs to current ones.
  * @param dimensionId - The dimension ID from imported data
  * @returns The normalized dimension ID
  */
-function normalizeDimensionId(dimensionId: string): OrbitDimensionId {
-  return (LEGACY_DIMENSION_ID_MAP[dimensionId] ?? dimensionId) as OrbitDimensionId;
+function normalizeDimensionId(dimensionId: string): RatingDimensionId {
+  return (LEGACY_DIMENSION_ID_MAP[dimensionId] ?? dimensionId) as RatingDimensionId;
+}
+
+/**
+ * Checks if a rating should be imported for a given assessment.
+ * - For organizational assessments: only import 'outcomes' or 'roles' ratings
+ * - For standard assessments: only import B-I-T ratings, skip orphaned O&R
+ *
+ * @param rating - The rating to check
+ * @param isOrganizational - Whether the assessment is organizational
+ * @returns True if the rating should be imported
+ */
+function shouldImportRating(rating: { dimensionId: string }, isOrganizational: boolean): boolean {
+  const normalizedDimId = normalizeDimensionId(rating.dimensionId);
+
+  if (isOrganizational) {
+    // Organizational assessments only accept outcomes/roles ratings
+    return ORGANIZATIONAL_DIMENSION_IDS.includes(normalizedDimId);
+  } else {
+    // Standard assessments only accept B-I-T ratings
+    // Skip orphaned O&R ratings from old exports
+    return STANDARD_DIMENSION_IDS.includes(normalizedDimId as OrbitDimensionId);
+  }
 }
 
 /**
@@ -363,10 +409,13 @@ async function processAssessmentImport(
 ): Promise<ImportItemResult> {
   const areaId = importedAssessment.capabilityAreaId;
 
-  // Get imported ratings for this assessment
-  const importedRatings = data.data.ratings.filter(
-    (r) => r.capabilityAssessmentId === importedAssessment.id
-  );
+  // Check if this is an organizational assessment
+  const isOrganizational = isOrganizationalAssessmentArea(areaId);
+
+  // Get imported ratings for this assessment, filtering based on assessment type
+  const importedRatings = data.data.ratings
+    .filter((r) => r.capabilityAssessmentId === importedAssessment.id)
+    .filter((r) => shouldImportRating(r, isOrganizational));
 
   // Check for existing assessment
   const existingAssessment = await db.capabilityAssessments

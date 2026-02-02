@@ -15,6 +15,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Assessment sidebar adapts to organizational assessments, showing aspects directly instead of dimensions
 - Updated type system: `OrbitDimensionId` now only includes B-I-T; new `OrganizationalAssessmentId` for O&R
 - New `RatingDimensionId` union type for flexible rating storage supporting both assessment types
+- CSV export now generates B-I-T only rows for standard assessments (was O-R-B-I-T)
+- CSV export uses "Aspect" column header for organizational assessments instead of "ORBIT"
+- CSV parser now handles both "ORBIT" and "Aspect" column headers for import compatibility
+- Area Results page now shows radar chart for B-I-T dimensions (standard) or bar chart for aspects (organizational)
+- Area Results page displays aspect-level table for organizational assessments instead of dimension scores table
 
 ### Added
 
@@ -25,6 +30,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New helper functions in `constants/index.ts`: `isOrganizationalAssessmentArea`, `getOrganizationalAssessmentType`
 - Layer grouping in dashboard with color-coded headers (Strategic: blue, Core: green, Support: purple)
 - Organizational assessment navigation mode in AssessmentSidebar for direct aspect selection
+- Import service now filters ratings based on assessment type:
+  - Standard assessments: only import B-I-T ratings, skip orphaned O&R ratings from old exports
+  - Organizational assessments: only import outcomes/roles ratings, skip B-I-T ratings
+- New tests for B-I-T only filtering and organizational assessment import handling
+- New tests for organizational assessment CSV format with "Aspect" header
 
 ---
 

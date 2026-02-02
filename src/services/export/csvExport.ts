@@ -3,21 +3,21 @@
  *
  * Generates CSV files in the CMS Maturity Profile format.
  * Format follows the MITA 4.0 Maturity Profile template structure.
+ * Supports both standard capability assessments (B-I-T dimensions) and
+ * organizational assessments (Outcomes/Roles with direct aspects).
  */
 
 import type { MaturityProfile, CapabilityAreaProfile } from './types';
 
-/** CSV column headers */
-const CSV_HEADERS = 'ORBIT,As Is,To Be,Notes,Barriers & Challenges,Advancement Plans';
+/** CSV column headers for standard assessments */
+const CSV_HEADERS_STANDARD = 'ORBIT,As Is,To Be,Notes,Barriers & Challenges,Advancement Plans';
 
-/** Standard ORBIT dimension names for CSV output (matches MITA 4.0 ORBIT model) */
-const ORBIT_DIMENSIONS = [
-  'Outcomes',
-  'Roles',
-  'Business Architecture',
-  'Information',
-  'Technology',
-];
+/** CSV column headers for organizational assessments */
+const CSV_HEADERS_ORGANIZATIONAL =
+  'Aspect,As Is,To Be,Notes,Barriers & Challenges,Advancement Plans';
+
+/** Standard ORBIT dimension names for CSV output (B-I-T only) */
+const ORBIT_DIMENSIONS = ['Business Architecture', 'Information', 'Technology'];
 
 /**
  * Generates a CSV string from a maturity profile (single domain)
@@ -41,6 +41,7 @@ export function generateMaturityProfileCsv(profile: MaturityProfile): string {
 
 /**
  * Generates CSV lines for a single capability area
+ * Handles both standard (B-I-T dimensions) and organizational (direct aspects) assessments
  */
 function generateAreaSection(area: CapabilityAreaProfile): string[] {
   const lines: string[] = [];
@@ -49,19 +50,31 @@ function generateAreaSection(area: CapabilityAreaProfile): string[] {
   lines.push(`Capability Domain: ${escapeCSVField(area.domainName)},,,,,`);
   lines.push(`Capability Area: ${escapeCSVField(area.areaName)},,,,,`);
 
-  // Column headers
-  lines.push(CSV_HEADERS);
+  // Check if this is an organizational assessment
+  const isOrganizational = area.isOrganizationalAssessment ?? false;
 
-  // Data rows - ensure all dimensions are present in order
-  for (const dimName of ORBIT_DIMENSIONS) {
-    const row = area.rows.find((r) => r.dimension === dimName);
-    if (row) {
+  // Column headers - different for organizational vs standard
+  lines.push(isOrganizational ? CSV_HEADERS_ORGANIZATIONAL : CSV_HEADERS_STANDARD);
+
+  if (isOrganizational) {
+    // For organizational assessments, output aspect rows directly
+    for (const row of area.rows) {
       lines.push(
         `${row.dimension},${row.asIs},${row.toBe},${escapeCSVField(row.notes)},${escapeCSVField(row.barriers)},${escapeCSVField(row.plans)}`
       );
-    } else {
-      // Empty row for dimensions without data
-      lines.push(`${dimName},,,,,`);
+    }
+  } else {
+    // For standard assessments, ensure all B-I-T dimensions are present in order
+    for (const dimName of ORBIT_DIMENSIONS) {
+      const row = area.rows.find((r) => r.dimension === dimName);
+      if (row) {
+        lines.push(
+          `${row.dimension},${row.asIs},${row.toBe},${escapeCSVField(row.notes)},${escapeCSVField(row.barriers)},${escapeCSVField(row.plans)}`
+        );
+      } else {
+        // Empty row for dimensions without data
+        lines.push(`${dimName},,,,,`);
+      }
     }
   }
 
@@ -159,8 +172,8 @@ export function parseMaturityProfileCsv(csv: string): MaturityProfile | null {
       continue;
     }
 
-    // Check for column headers
-    if (line.startsWith('ORBIT,')) {
+    // Check for column headers (ORBIT for standard, Aspect for organizational)
+    if (line.startsWith('ORBIT,') || line.startsWith('Aspect,')) {
       inDataSection = true;
       continue;
     }

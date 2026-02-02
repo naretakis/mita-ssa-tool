@@ -1,5 +1,9 @@
 /**
  * CSV Export Service Tests
+ *
+ * Tests for CSV generation and parsing of maturity profiles.
+ * Standard assessments use B-I-T dimensions only.
+ * Organizational assessments use direct aspects with "Aspect" header.
  */
 
 import { describe, it, expect } from 'vitest';
@@ -11,8 +15,10 @@ import {
 import type { MaturityProfile, CapabilityAreaProfile } from './types';
 
 describe('csvExport', () => {
-  // Test data
-  const createAreaProfile = (
+  /**
+   * Creates a standard capability area profile with B-I-T dimensions
+   */
+  const createStandardAreaProfile = (
     domainName: string,
     areaName: string,
     rows: CapabilityAreaProfile['rows'] = []
@@ -23,22 +29,6 @@ describe('csvExport', () => {
       rows.length > 0
         ? rows
         : [
-            {
-              dimension: 'Outcomes',
-              asIs: '3.0',
-              toBe: '4.0',
-              notes: 'Test notes',
-              barriers: 'Test barriers',
-              plans: 'Test plans',
-            },
-            {
-              dimension: 'Roles',
-              asIs: '2.5',
-              toBe: '3.5',
-              notes: '',
-              barriers: '',
-              plans: '',
-            },
             {
               dimension: 'Business Architecture',
               asIs: '3.5',
@@ -66,6 +56,42 @@ describe('csvExport', () => {
           ],
   });
 
+  /**
+   * Creates an organizational assessment profile (Outcomes or Roles)
+   */
+  const createOrganizationalAreaProfile = (
+    domainName: string,
+    areaName: string,
+    organizationalType: 'outcomes' | 'roles',
+    rows: CapabilityAreaProfile['rows'] = []
+  ): CapabilityAreaProfile => ({
+    domainName,
+    areaName,
+    isOrganizationalAssessment: true,
+    organizationalType,
+    rows:
+      rows.length > 0
+        ? rows
+        : [
+            {
+              dimension: 'Aspect 1',
+              asIs: '3.0',
+              toBe: '4.0',
+              notes: 'Aspect 1 notes',
+              barriers: '',
+              plans: '',
+            },
+            {
+              dimension: 'Aspect 2',
+              asIs: '2.5',
+              toBe: '3.5',
+              notes: '',
+              barriers: 'Some barriers',
+              plans: 'Some plans',
+            },
+          ],
+  });
+
   const createProfile = (
     stateName: string,
     domainName: string,
@@ -76,10 +102,10 @@ describe('csvExport', () => {
     areas,
   });
 
-  describe('generateMaturityProfileCsv', () => {
+  describe('generateMaturityProfileCsv - Standard Assessments', () => {
     it('should generate CSV with correct header', () => {
       const profile = createProfile('Test State', 'Provider Management', [
-        createAreaProfile('Provider Management', 'Provider Enrollment'),
+        createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
       ]);
 
       const csv = generateMaturityProfileCsv(profile);
@@ -89,7 +115,7 @@ describe('csvExport', () => {
 
     it('should include domain and area headers', () => {
       const profile = createProfile('Test State', 'Provider Management', [
-        createAreaProfile('Provider Management', 'Provider Enrollment'),
+        createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
       ]);
 
       const csv = generateMaturityProfileCsv(profile);
@@ -98,9 +124,9 @@ describe('csvExport', () => {
       expect(csv).toContain('Capability Area: Provider Enrollment');
     });
 
-    it('should include column headers', () => {
+    it('should include ORBIT column headers for standard assessments', () => {
       const profile = createProfile('Test State', 'Provider Management', [
-        createAreaProfile('Provider Management', 'Provider Enrollment'),
+        createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
       ]);
 
       const csv = generateMaturityProfileCsv(profile);
@@ -108,9 +134,9 @@ describe('csvExport', () => {
       expect(csv).toContain('ORBIT,As Is,To Be,Notes,Barriers & Challenges,Advancement Plans');
     });
 
-    it('should include all ORBIT dimensions in order', () => {
+    it('should include B-I-T dimensions in order', () => {
       const profile = createProfile('Test State', 'Provider Management', [
-        createAreaProfile('Provider Management', 'Provider Enrollment'),
+        createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
       ]);
 
       const csv = generateMaturityProfileCsv(profile);
@@ -120,29 +146,49 @@ describe('csvExport', () => {
       const headerIndex = lines.findIndex((l) => l.startsWith('ORBIT,'));
       expect(headerIndex).toBeGreaterThan(-1);
 
+      const dataLines = lines.slice(headerIndex + 1, headerIndex + 4);
+      expect(dataLines[0]).toContain('Business Architecture');
+      expect(dataLines[1]).toContain('Information');
+      expect(dataLines[2]).toContain('Technology');
+    });
+
+    it('should NOT include Outcomes or Roles dimensions', () => {
+      const profile = createProfile('Test State', 'Provider Management', [
+        createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
+      ]);
+
+      const csv = generateMaturityProfileCsv(profile);
+      const lines = csv.split('\n');
+
+      // Find data rows
+      const headerIndex = lines.findIndex((l) => l.startsWith('ORBIT,'));
       const dataLines = lines.slice(headerIndex + 1, headerIndex + 6);
-      expect(dataLines[0]).toContain('Outcomes');
-      expect(dataLines[1]).toContain('Roles');
-      expect(dataLines[2]).toContain('Business Architecture');
-      expect(dataLines[3]).toContain('Information');
-      expect(dataLines[4]).toContain('Technology');
+
+      // Should only have 3 dimension rows (B-I-T)
+      const dimensionRows = dataLines.filter((l) => l && !l.startsWith(',,,,,') && l.trim() !== '');
+      expect(dimensionRows.length).toBe(3);
+
+      // Should not contain Outcomes or Roles
+      expect(csv).not.toMatch(/^Outcomes,/m);
+      expect(csv).not.toMatch(/^Roles,/m);
     });
 
     it('should include score values', () => {
       const profile = createProfile('Test State', 'Provider Management', [
-        createAreaProfile('Provider Management', 'Provider Enrollment'),
+        createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
       ]);
 
       const csv = generateMaturityProfileCsv(profile);
 
-      expect(csv).toContain('Outcomes,3.0,4.0');
-      expect(csv).toContain('Roles,2.5,3.5');
+      expect(csv).toContain('Business Architecture,3.5,4.5');
+      expect(csv).toContain('Information,2.0,3.0');
+      expect(csv).toContain('Technology,3.0,4.0');
     });
 
     it('should handle multiple capability areas', () => {
       const profile = createProfile('Test State', 'Provider Management', [
-        createAreaProfile('Provider Management', 'Provider Enrollment'),
-        createAreaProfile('Provider Management', 'Provider Screening'),
+        createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
+        createStandardAreaProfile('Provider Management', 'Provider Screening'),
       ]);
 
       const csv = generateMaturityProfileCsv(profile);
@@ -152,9 +198,9 @@ describe('csvExport', () => {
     });
 
     it('should escape fields with commas', () => {
-      const areaProfile = createAreaProfile('Provider Management', 'Provider Enrollment', [
+      const areaProfile = createStandardAreaProfile('Provider Management', 'Provider Enrollment', [
         {
-          dimension: 'Outcomes',
+          dimension: 'Business Architecture',
           asIs: '3.0',
           toBe: '4.0',
           notes: 'Note with, comma',
@@ -170,9 +216,9 @@ describe('csvExport', () => {
     });
 
     it('should escape fields with quotes', () => {
-      const areaProfile = createAreaProfile('Provider Management', 'Provider Enrollment', [
+      const areaProfile = createStandardAreaProfile('Provider Management', 'Provider Enrollment', [
         {
-          dimension: 'Outcomes',
+          dimension: 'Business Architecture',
           asIs: '3.0',
           toBe: '4.0',
           notes: 'Note with "quotes"',
@@ -188,9 +234,9 @@ describe('csvExport', () => {
     });
 
     it('should escape fields with newlines', () => {
-      const areaProfile = createAreaProfile('Provider Management', 'Provider Enrollment', [
+      const areaProfile = createStandardAreaProfile('Provider Management', 'Provider Enrollment', [
         {
-          dimension: 'Outcomes',
+          dimension: 'Business Architecture',
           asIs: '3.0',
           toBe: '4.0',
           notes: 'Note with\nnewline',
@@ -206,9 +252,9 @@ describe('csvExport', () => {
     });
 
     it('should handle empty notes/barriers/plans', () => {
-      const areaProfile = createAreaProfile('Provider Management', 'Provider Enrollment', [
+      const areaProfile = createStandardAreaProfile('Provider Management', 'Provider Enrollment', [
         {
-          dimension: 'Outcomes',
+          dimension: 'Business Architecture',
           asIs: '3.0',
           toBe: '4.0',
           notes: '',
@@ -220,7 +266,50 @@ describe('csvExport', () => {
 
       const csv = generateMaturityProfileCsv(profile);
 
-      expect(csv).toContain('Outcomes,3.0,4.0,,,');
+      expect(csv).toContain('Business Architecture,3.0,4.0,,,');
+    });
+  });
+
+  describe('generateMaturityProfileCsv - Organizational Assessments', () => {
+    it('should use Aspect column header for organizational assessments', () => {
+      const profile = createProfile('Test State', 'Enterprise Governance', [
+        createOrganizationalAreaProfile('Enterprise Governance', 'Outcomes Assessment', 'outcomes'),
+      ]);
+
+      const csv = generateMaturityProfileCsv(profile);
+
+      expect(csv).toContain('Aspect,As Is,To Be,Notes,Barriers & Challenges,Advancement Plans');
+      expect(csv).not.toContain('ORBIT,');
+    });
+
+    it('should include aspect rows for organizational assessments', () => {
+      const profile = createProfile('Test State', 'Enterprise Governance', [
+        createOrganizationalAreaProfile('Enterprise Governance', 'Outcomes Assessment', 'outcomes'),
+      ]);
+
+      const csv = generateMaturityProfileCsv(profile);
+
+      expect(csv).toContain('Aspect 1,3.0,4.0');
+      expect(csv).toContain('Aspect 2,2.5,3.5');
+    });
+
+    it('should handle organizational assessment notes and barriers', () => {
+      const profile = createProfile('Test State', 'Enterprise Governance', [
+        createOrganizationalAreaProfile('Enterprise Governance', 'Roles Assessment', 'roles', [
+          {
+            dimension: 'Role Aspect',
+            asIs: '2.0',
+            toBe: '3.0',
+            notes: 'Role notes',
+            barriers: 'Role barriers',
+            plans: 'Role plans',
+          },
+        ]),
+      ]);
+
+      const csv = generateMaturityProfileCsv(profile);
+
+      expect(csv).toContain('Role Aspect,2.0,3.0,Role notes,Role barriers,Role plans');
     });
   });
 
@@ -228,10 +317,10 @@ describe('csvExport', () => {
     it('should combine multiple profiles into one CSV', () => {
       const profiles: MaturityProfile[] = [
         createProfile('Test State', 'Provider Management', [
-          createAreaProfile('Provider Management', 'Provider Enrollment'),
+          createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
         ]),
         createProfile('Test State', 'Member Management', [
-          createAreaProfile('Member Management', 'Member Enrollment'),
+          createStandardAreaProfile('Member Management', 'Member Enrollment'),
         ]),
       ];
 
@@ -247,7 +336,7 @@ describe('csvExport', () => {
     it('should use provided state name', () => {
       const profiles: MaturityProfile[] = [
         createProfile('Original State', 'Provider Management', [
-          createAreaProfile('Provider Management', 'Provider Enrollment'),
+          createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
         ]),
       ];
 
@@ -264,12 +353,33 @@ describe('csvExport', () => {
       const lines = csv.split('\n').filter((l) => l.trim() !== '' && l !== ',,,,,');
       expect(lines.length).toBe(1);
     });
+
+    it('should handle mixed standard and organizational assessments', () => {
+      const profiles: MaturityProfile[] = [
+        createProfile('Test State', 'Provider Management', [
+          createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
+        ]),
+        createProfile('Test State', 'Enterprise Governance', [
+          createOrganizationalAreaProfile(
+            'Enterprise Governance',
+            'Outcomes Assessment',
+            'outcomes'
+          ),
+        ]),
+      ];
+
+      const csv = generateCombinedMaturityProfileCsv(profiles, 'Test State');
+
+      // Should have both ORBIT and Aspect headers
+      expect(csv).toContain('ORBIT,As Is,To Be');
+      expect(csv).toContain('Aspect,As Is,To Be');
+    });
   });
 
   describe('parseMaturityProfileCsv', () => {
     it('should parse a valid CSV back to MaturityProfile', () => {
       const originalProfile = createProfile('Test State', 'Provider Management', [
-        createAreaProfile('Provider Management', 'Provider Enrollment'),
+        createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
       ]);
 
       const csv = generateMaturityProfileCsv(originalProfile);
@@ -281,25 +391,25 @@ describe('csvExport', () => {
       expect(parsed?.areas[0]?.areaName).toBe('Provider Enrollment');
     });
 
-    it('should parse dimension rows correctly', () => {
+    it('should parse dimension rows correctly for B-I-T', () => {
       const originalProfile = createProfile('Test State', 'Provider Management', [
-        createAreaProfile('Provider Management', 'Provider Enrollment'),
+        createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
       ]);
 
       const csv = generateMaturityProfileCsv(originalProfile);
       const parsed = parseMaturityProfileCsv(csv);
 
-      expect(parsed?.areas[0]?.rows.length).toBe(5);
-      const outcomesRow = parsed?.areas[0]?.rows.find((r) => r.dimension === 'Outcomes');
-      expect(outcomesRow?.asIs).toBe('3.0');
-      expect(outcomesRow?.toBe).toBe('4.0');
-      expect(outcomesRow?.notes).toBe('Test notes');
+      expect(parsed?.areas[0]?.rows.length).toBe(3);
+      const baRow = parsed?.areas[0]?.rows.find((r) => r.dimension === 'Business Architecture');
+      expect(baRow?.asIs).toBe('3.5');
+      expect(baRow?.toBe).toBe('4.5');
+      expect(baRow?.notes).toBe('BA notes');
     });
 
     it('should handle multiple areas', () => {
       const originalProfile = createProfile('Test State', 'Provider Management', [
-        createAreaProfile('Provider Management', 'Provider Enrollment'),
-        createAreaProfile('Provider Management', 'Provider Screening'),
+        createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
+        createStandardAreaProfile('Provider Management', 'Provider Screening'),
       ]);
 
       const csv = generateMaturityProfileCsv(originalProfile);
@@ -326,9 +436,9 @@ describe('csvExport', () => {
     });
 
     it('should handle quoted fields with commas', () => {
-      const areaProfile = createAreaProfile('Provider Management', 'Provider Enrollment', [
+      const areaProfile = createStandardAreaProfile('Provider Management', 'Provider Enrollment', [
         {
-          dimension: 'Outcomes',
+          dimension: 'Business Architecture',
           asIs: '3.0',
           toBe: '4.0',
           notes: 'Note with, comma',
@@ -345,9 +455,9 @@ describe('csvExport', () => {
     });
 
     it('should handle quoted fields with escaped quotes', () => {
-      const areaProfile = createAreaProfile('Provider Management', 'Provider Enrollment', [
+      const areaProfile = createStandardAreaProfile('Provider Management', 'Provider Enrollment', [
         {
-          dimension: 'Outcomes',
+          dimension: 'Business Architecture',
           asIs: '3.0',
           toBe: '4.0',
           notes: 'Note with "quotes"',
@@ -369,34 +479,35 @@ describe('csvExport', () => {
 Capability Domain: Test Domain,,,,,
 Capability Area: Test Area,,,,,
 ORBIT,As Is,To Be,Notes,Barriers & Challenges,Advancement Plans
-Outcomes,3.0,4.0,,,`;
+Business Architecture,3.0,4.0,,,`;
 
       const parsed = parseMaturityProfileCsv(csv);
 
       expect(parsed?.stateName).toBe('California');
     });
+
+    it('should parse organizational assessment CSV with Aspect header', () => {
+      const csv = `MITA 4.0 Maturity Profile: Test State,,,,,
+,,,,,
+Capability Domain: Enterprise Governance,,,,,
+Capability Area: Outcomes Assessment,,,,,
+Aspect,As Is,To Be,Notes,Barriers & Challenges,Advancement Plans
+Aspect 1,3.0,4.0,Notes here,,
+Aspect 2,2.5,3.5,,,Plans here`;
+
+      const parsed = parseMaturityProfileCsv(csv);
+
+      expect(parsed).not.toBeNull();
+      expect(parsed?.areas[0]?.rows.length).toBe(2);
+      expect(parsed?.areas[0]?.rows[0]?.dimension).toBe('Aspect 1');
+      expect(parsed?.areas[0]?.rows[1]?.dimension).toBe('Aspect 2');
+    });
   });
 
   describe('round-trip parsing', () => {
-    it('should preserve data through generate -> parse cycle', () => {
+    it('should preserve data through generate -> parse cycle for standard assessments', () => {
       const original = createProfile('Round Trip State', 'Test Domain', [
-        createAreaProfile('Test Domain', 'Test Area', [
-          {
-            dimension: 'Outcomes',
-            asIs: '2.5',
-            toBe: '4.0',
-            notes: 'Important notes here',
-            barriers: 'Some barriers',
-            plans: 'Future plans',
-          },
-          {
-            dimension: 'Roles',
-            asIs: '3.0',
-            toBe: '3.5',
-            notes: '',
-            barriers: '',
-            plans: '',
-          },
+        createStandardAreaProfile('Test Domain', 'Test Area', [
           {
             dimension: 'Business Architecture',
             asIs: '4.0',
@@ -432,14 +543,61 @@ Outcomes,3.0,4.0,,,`;
       expect(parsed?.areas[0]?.areaName).toBe('Test Area');
 
       const rows = parsed?.areas[0]?.rows ?? [];
-      expect(rows.length).toBe(5);
+      expect(rows.length).toBe(3);
 
-      const outcomes = rows.find((r) => r.dimension === 'Outcomes');
-      expect(outcomes?.asIs).toBe('2.5');
-      expect(outcomes?.toBe).toBe('4.0');
-      expect(outcomes?.notes).toBe('Important notes here');
-      expect(outcomes?.barriers).toBe('Some barriers');
-      expect(outcomes?.plans).toBe('Future plans');
+      const ba = rows.find((r) => r.dimension === 'Business Architecture');
+      expect(ba?.asIs).toBe('4.0');
+      expect(ba?.toBe).toBe('5.0');
+      expect(ba?.notes).toBe('BA specific');
+
+      const info = rows.find((r) => r.dimension === 'Information');
+      expect(info?.barriers).toBe('Data challenges');
+
+      const tech = rows.find((r) => r.dimension === 'Technology');
+      expect(tech?.plans).toBe('Tech roadmap');
+    });
+
+    it('should preserve data through generate -> parse cycle for organizational assessments', () => {
+      const original = createProfile('Round Trip State', 'Enterprise Governance', [
+        createOrganizationalAreaProfile(
+          'Enterprise Governance',
+          'Outcomes Assessment',
+          'outcomes',
+          [
+            {
+              dimension: 'Outcome Aspect 1',
+              asIs: '3.0',
+              toBe: '4.0',
+              notes: 'Important notes',
+              barriers: 'Some barriers',
+              plans: 'Future plans',
+            },
+            {
+              dimension: 'Outcome Aspect 2',
+              asIs: '2.5',
+              toBe: '3.5',
+              notes: '',
+              barriers: '',
+              plans: '',
+            },
+          ]
+        ),
+      ]);
+
+      const csv = generateMaturityProfileCsv(original);
+      const parsed = parseMaturityProfileCsv(csv);
+
+      expect(parsed?.stateName).toBe('Round Trip State');
+      expect(parsed?.areas[0]?.areaName).toBe('Outcomes Assessment');
+
+      const rows = parsed?.areas[0]?.rows ?? [];
+      expect(rows.length).toBe(2);
+
+      expect(rows[0]?.dimension).toBe('Outcome Aspect 1');
+      expect(rows[0]?.asIs).toBe('3.0');
+      expect(rows[0]?.notes).toBe('Important notes');
+      expect(rows[0]?.barriers).toBe('Some barriers');
+      expect(rows[0]?.plans).toBe('Future plans');
     });
   });
 });
