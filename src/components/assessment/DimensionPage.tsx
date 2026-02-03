@@ -8,6 +8,7 @@
 import { JSX, useState, useCallback, useMemo, useEffect, useRef } from 'react';
 import { Box, Typography, Chip, Paper, alpha, useTheme } from '@mui/material';
 import { AspectCard } from './AspectCard';
+import { calculateAverageScore } from '../../services/scoring';
 import type {
   OrbitAspect,
   OrbitRating,
@@ -88,28 +89,16 @@ export function DimensionPage({
     });
   }, []);
 
-  // Calculate progress
-  const progress = useMemo(() => {
-    const assessed = aspects.filter((a) => {
-      const rating = ratings.get(a.id);
-      return rating && (rating.currentLevel > 0 || rating.currentLevel === -1);
-    }).length;
-    return {
-      assessed,
-      total: aspects.length,
-      percentage: aspects.length > 0 ? Math.round((assessed / aspects.length) * 100) : 0,
-    };
-  }, [aspects, ratings]);
-
-  // Calculate average score
+  // Calculate average score using shared scoring utility
   const averageScore = useMemo(() => {
-    const scoredRatings = aspects
-      .map((a) => ratings.get(a.id))
-      .filter((r): r is OrbitRating => r !== undefined && r.currentLevel > 0);
-
-    if (scoredRatings.length === 0) return null;
-    const sum = scoredRatings.reduce((acc, r) => acc + r.currentLevel, 0);
-    return Math.round((sum / scoredRatings.length) * 10) / 10;
+    const levels: number[] = [];
+    for (const aspect of aspects) {
+      const level = ratings.get(aspect.id)?.currentLevel;
+      if (level !== undefined && level > 0) {
+        levels.push(level);
+      }
+    }
+    return calculateAverageScore(levels);
   }, [aspects, ratings]);
 
   return (
@@ -119,7 +108,7 @@ export function DimensionPage({
         elevation={0}
         sx={{
           px: 3,
-          py: 1.5,
+          py: 1,
           borderBottom: '1px solid',
           borderColor: 'divider',
           bgcolor: 'background.paper',
@@ -128,10 +117,9 @@ export function DimensionPage({
         <Box
           sx={{
             display: 'flex',
-            alignItems: 'flex-start',
+            alignItems: 'center',
             justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: 1.5,
+            gap: 2,
           }}
         >
           <Box
@@ -139,7 +127,6 @@ export function DimensionPage({
               display: 'flex',
               alignItems: 'center',
               gap: 1.5,
-              flexWrap: 'wrap',
               flex: 1,
               minWidth: 0,
             }}
@@ -153,41 +140,43 @@ export function DimensionPage({
                 size="small"
                 variant="outlined"
                 color="info"
-                sx={{ flexShrink: 0 }}
+                sx={{ flexShrink: 0, height: 22 }}
               />
             )}
-            <Typography variant="body2" color="text.secondary" sx={{ minWidth: 0 }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                minWidth: 0,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}
+            >
               {dimensionDescription}
             </Typography>
           </Box>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
-            <Box sx={{ textAlign: 'right' }}>
-              <Typography variant="caption" color="text.secondary">
-                Progress
+          {averageScore !== null && (
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 0.75,
+                px: 1.5,
+                py: 0.5,
+                bgcolor: alpha(theme.palette.primary.main, 0.1),
+                borderRadius: 1.5,
+                flexShrink: 0,
+              }}
+            >
+              <Typography variant="body2" color="text.secondary">
+                Avg Score
               </Typography>
-              <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                {progress.assessed}/{progress.total}
+              <Typography variant="body1" sx={{ fontWeight: 700, color: 'primary.main' }}>
+                {averageScore}
               </Typography>
             </Box>
-            {averageScore !== null && (
-              <Box
-                sx={{
-                  textAlign: 'center',
-                  px: 2,
-                  py: 0.5,
-                  bgcolor: alpha(theme.palette.primary.main, 0.1),
-                  borderRadius: 2,
-                }}
-              >
-                <Typography variant="caption" color="text.secondary">
-                  Avg Score
-                </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                  {averageScore}
-                </Typography>
-              </Box>
-            )}
-          </Box>
+          )}
         </Box>
       </Paper>
 

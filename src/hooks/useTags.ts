@@ -5,8 +5,14 @@
  */
 
 import { useLiveQuery } from 'dexie-react-hooks';
-import { v4 as uuidv4 } from 'uuid';
 import { db } from '../services/db';
+import {
+  incrementTagUsage as incrementUsageService,
+  createTag as createTagService,
+  deleteTag as deleteTagService,
+  renameTag as renameTagService,
+  cleanupUnusedTags as cleanupUnusedTagsService,
+} from '../services/tags';
 import type { Tag } from '../types';
 
 /**
@@ -70,21 +76,7 @@ export function useTags(): UseTagsReturn {
    * @param name - Tag name
    */
   const createTag = async (name: string): Promise<Tag> => {
-    const existing = await db.tags.where('name').equals(name).first();
-    if (existing) {
-      return existing;
-    }
-
-    const now = new Date();
-    const tag: Tag = {
-      id: uuidv4(),
-      name,
-      usageCount: 0,
-      lastUsed: now,
-    };
-
-    await db.tags.add(tag);
-    return tag;
+    return createTagService(name);
   };
 
   /**
@@ -92,22 +84,7 @@ export function useTags(): UseTagsReturn {
    * @param name - Tag name
    */
   const incrementUsage = async (name: string): Promise<void> => {
-    const existing = await db.tags.where('name').equals(name).first();
-    const now = new Date();
-
-    if (existing) {
-      await db.tags.update(existing.id, {
-        usageCount: existing.usageCount + 1,
-        lastUsed: now,
-      });
-    } else {
-      await db.tags.add({
-        id: uuidv4(),
-        name,
-        usageCount: 1,
-        lastUsed: now,
-      });
-    }
+    return incrementUsageService(name);
   };
 
   /**
@@ -116,7 +93,7 @@ export function useTags(): UseTagsReturn {
    * @param tagId - Tag ID to delete
    */
   const deleteTag = async (tagId: string): Promise<void> => {
-    await db.tags.delete(tagId);
+    return deleteTagService(tagId);
   };
 
   /**
@@ -125,23 +102,7 @@ export function useTags(): UseTagsReturn {
    * @param newName - New tag name
    */
   const renameTag = async (oldName: string, newName: string): Promise<void> => {
-    await db.transaction('rw', [db.tags, db.capabilityAssessments], async () => {
-      // Update tag record
-      const tag = await db.tags.where('name').equals(oldName).first();
-      if (tag) {
-        await db.tags.update(tag.id, { name: newName });
-      }
-
-      // Update all assessments with this tag
-      const assessments = await db.capabilityAssessments
-        .filter((a) => a.tags.includes(oldName))
-        .toArray();
-
-      for (const assessment of assessments) {
-        const newTags = assessment.tags.map((t) => (t === oldName ? newName : t));
-        await db.capabilityAssessments.update(assessment.id, { tags: newTags });
-      }
-    });
+    return renameTagService(oldName, newName);
   };
 
   /**
@@ -171,9 +132,7 @@ export function useTags(): UseTagsReturn {
    * Clean up unused tags (usageCount = 0)
    */
   const cleanupUnusedTags = async (): Promise<number> => {
-    const unused = await db.tags.where('usageCount').equals(0).toArray();
-    await db.tags.bulkDelete(unused.map((t) => t.id));
-    return unused.length;
+    return cleanupUnusedTagsService();
   };
 
   return {

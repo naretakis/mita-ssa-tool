@@ -8,6 +8,7 @@
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/db';
 import { getTotalAreaCount, getAreasByDomainId } from '../services/capabilities';
+import { calculateAverageScore } from '../services/scoring';
 import {
   getAllDimensionIds,
   getTotalAspectCount,
@@ -134,9 +135,7 @@ export function useScores(): UseScoresReturn {
       }
     }
 
-    if (domainScores.length === 0) return null;
-    const avg = domainScores.reduce((a, b) => a + b, 0) / domainScores.length;
-    return Math.round(avg * 10) / 10;
+    return calculateAverageScore(domainScores);
   };
 
   /**
@@ -152,9 +151,7 @@ export function useScores(): UseScoresReturn {
       }
     }
 
-    if (scores.length === 0) return null;
-    const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
-    return Math.round(avg * 10) / 10;
+    return calculateAverageScore(scores);
   };
 
   /**
@@ -336,15 +333,12 @@ export function useScores(): UseScoresReturn {
           });
 
           const assessed = subDimAspectScores.filter((a) => a.currentLevel > 0);
-          const subAvg =
-            assessed.length > 0
-              ? assessed.reduce((sum, a) => sum + a.currentLevel, 0) / assessed.length
-              : null;
+          const subAvg = calculateAverageScore(assessed.map((a) => a.currentLevel));
 
           return {
             subDimensionId: subDim.id,
             subDimensionName: subDim.name,
-            averageLevel: subAvg ? Math.round(subAvg * 10) / 10 : null,
+            averageLevel: subAvg,
             aspectScores: subDimAspectScores,
           };
         });
@@ -353,20 +347,11 @@ export function useScores(): UseScoresReturn {
         const validSubScores = subDimensionScores
           .map((s) => s.averageLevel)
           .filter((v): v is number => v !== null);
-        avgLevel =
-          validSubScores.length > 0
-            ? Math.round((validSubScores.reduce((a, b) => a + b, 0) / validSubScores.length) * 10) /
-              10
-            : null;
+        avgLevel = calculateAverageScore(validSubScores);
       } else {
         // For non-Technology dimensions: simple average of aspect scores
         const assessed = aspectScores.filter((a) => a.currentLevel > 0);
-        avgLevel =
-          assessed.length > 0
-            ? Math.round(
-                (assessed.reduce((sum, a) => sum + a.currentLevel, 0) / assessed.length) * 10
-              ) / 10
-            : null;
+        avgLevel = calculateAverageScore(assessed.map((a) => a.currentLevel));
       }
 
       return {

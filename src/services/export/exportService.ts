@@ -9,6 +9,7 @@ import JSZip from 'jszip';
 
 import { db } from '../db';
 import { getDomainById, getAreaById } from '../capabilities';
+import { calculateAverageScore } from '../scoring';
 import { getAreasFromDomain } from '../../types';
 import type {
   ExportOptions,
@@ -32,8 +33,8 @@ import { generateMaturityProfileCsv, generateCombinedMaturityProfileCsv } from '
 /** Current export format version */
 const EXPORT_VERSION = '1.0';
 
-/** App version from package.json */
-const APP_VERSION = '0.1.0';
+/** App version injected at build time */
+const APP_VERSION = __APP_VERSION__;
 
 /**
  * Generates a unique filename for an attachment in the ZIP export.
@@ -454,16 +455,11 @@ function generateCapabilityAreaProfile(
     const dimData = dimensionData[dimName];
     if (!dimData) continue;
 
-    // Calculate averages
-    const asIsAvg =
-      dimData.asIs.length > 0
-        ? (dimData.asIs.reduce((a, b) => a + b, 0) / dimData.asIs.length).toFixed(1)
-        : '';
-
-    const toBeAvg =
-      dimData.toBe.length > 0
-        ? (dimData.toBe.reduce((a, b) => a + b, 0) / dimData.toBe.length).toFixed(1)
-        : '';
+    // Calculate averages using shared scoring utility
+    const asIsScore = calculateAverageScore(dimData.asIs);
+    const toBeScore = calculateAverageScore(dimData.toBe);
+    const asIsAvg = asIsScore !== null ? asIsScore.toFixed(1) : '';
+    const toBeAvg = toBeScore !== null ? toBeScore.toFixed(1) : '';
 
     // Combine text fields (join multiple entries with semicolon)
     const notes = dimData.notes.join('; ');
