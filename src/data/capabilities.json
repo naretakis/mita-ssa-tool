@@ -299,17 +299,6 @@
             "Agreement Versions",
             "Oversight Reporting"
           ]
-        },
-        {
-          "id": "contractor-grievance-appeal",
-          "name": "Contractor Grievance and Appeal",
-          "description": "The ability to process and resolve contractor grievances and appeals.",
-          "topics": [
-            "Grievance Handling",
-            "Appeal Processing",
-            "Resolution Tracking",
-            "Compliance Documentation"
-          ]
         }
       ]
     },
