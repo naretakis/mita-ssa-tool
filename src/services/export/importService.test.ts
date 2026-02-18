@@ -552,4 +552,310 @@ describe('importService', () => {
       expect(result.importedAsHistory).toBe(1); // area-1 older version
     });
   });
+
+  describe('B-I-T only filtering for standard assessments', () => {
+    it('should skip orphaned Outcomes ratings when importing standard assessments', async () => {
+      const assessmentId = uuidv4();
+      const exportData = createExportData(
+        [
+          {
+            id: assessmentId,
+            capabilityAreaId: 'provider-enrollment', // Standard assessment
+            status: 'finalized',
+            overallScore: 3.5,
+          },
+        ],
+        [
+          // Valid B-I-T ratings
+          {
+            capabilityAssessmentId: assessmentId,
+            dimensionId: 'businessArchitecture',
+            aspectId: 'process-standardization',
+            currentLevel: 3,
+          },
+          {
+            capabilityAssessmentId: assessmentId,
+            dimensionId: 'information',
+            aspectId: 'data-quality',
+            currentLevel: 4,
+          },
+          // Orphaned O&R ratings (should be skipped)
+          {
+            capabilityAssessmentId: assessmentId,
+            dimensionId: 'outcomes' as OrbitRating['dimensionId'],
+            aspectId: 'some-outcome-aspect',
+            currentLevel: 3,
+          },
+          {
+            capabilityAssessmentId: assessmentId,
+            dimensionId: 'roles' as OrbitRating['dimensionId'],
+            aspectId: 'some-role-aspect',
+            currentLevel: 2,
+          },
+        ]
+      );
+
+      const result = await importFromJson(JSON.stringify(exportData));
+
+      expect(result.success).toBe(true);
+      expect(result.importedAsCurrent).toBe(1);
+
+      // Verify only B-I-T ratings were imported
+      const ratings = await db.orbitRatings.toArray();
+      expect(ratings.length).toBe(2);
+      expect(
+        ratings.every((r) => ['businessArchitecture', 'information'].includes(r.dimensionId))
+      ).toBe(true);
+      expect(ratings.some((r) => r.dimensionId === 'outcomes')).toBe(false);
+      expect(ratings.some((r) => r.dimensionId === 'roles')).toBe(false);
+    });
+
+    it('should import all B-I-T dimensions for standard assessments', async () => {
+      const assessmentId = uuidv4();
+      const exportData = createExportData(
+        [
+          {
+            id: assessmentId,
+            capabilityAreaId: 'provider-enrollment',
+            status: 'finalized',
+            overallScore: 3.5,
+          },
+        ],
+        [
+          {
+            capabilityAssessmentId: assessmentId,
+            dimensionId: 'businessArchitecture',
+            aspectId: 'process-standardization',
+            currentLevel: 3,
+          },
+          {
+            capabilityAssessmentId: assessmentId,
+            dimensionId: 'information',
+            aspectId: 'data-quality',
+            currentLevel: 4,
+          },
+          {
+            capabilityAssessmentId: assessmentId,
+            dimensionId: 'technology',
+            aspectId: 'infrastructure',
+            currentLevel: 2,
+          },
+        ]
+      );
+
+      const result = await importFromJson(JSON.stringify(exportData));
+
+      expect(result.success).toBe(true);
+
+      const ratings = await db.orbitRatings.toArray();
+      expect(ratings.length).toBe(3);
+      expect(ratings.map((r) => r.dimensionId).sort()).toEqual([
+        'businessArchitecture',
+        'information',
+        'technology',
+      ]);
+    });
+  });
+
+  describe('organizational assessment import', () => {
+    it('should import outcomes ratings for outcomes organizational assessment', async () => {
+      const assessmentId = uuidv4();
+      const exportData = createExportData(
+        [
+          {
+            id: assessmentId,
+            capabilityDomainId: 'enterprise-governance',
+            capabilityDomainName: 'Enterprise Governance',
+            capabilityAreaId: 'organizational-outcomes', // Organizational assessment
+            capabilityAreaName: 'Organizational Outcomes',
+            status: 'finalized',
+            overallScore: 3.5,
+          },
+        ],
+        [
+          // Valid outcomes rating
+          {
+            capabilityAssessmentId: assessmentId,
+            dimensionId: 'outcomes' as OrbitRating['dimensionId'],
+            aspectId: 'member-health-outcomes',
+            currentLevel: 3,
+          },
+          // Invalid B-I-T rating for organizational assessment (should be skipped)
+          {
+            capabilityAssessmentId: assessmentId,
+            dimensionId: 'businessArchitecture',
+            aspectId: 'process-standardization',
+            currentLevel: 4,
+          },
+        ]
+      );
+
+      const result = await importFromJson(JSON.stringify(exportData));
+
+      expect(result.success).toBe(true);
+      expect(result.importedAsCurrent).toBe(1);
+
+      // Verify only outcomes rating was imported
+      const ratings = await db.orbitRatings.toArray();
+      expect(ratings.length).toBe(1);
+      expect(ratings[0]?.dimensionId).toBe('outcomes');
+    });
+
+    it('should import roles ratings for roles organizational assessment', async () => {
+      const assessmentId = uuidv4();
+      const exportData = createExportData(
+        [
+          {
+            id: assessmentId,
+            capabilityDomainId: 'enterprise-governance',
+            capabilityDomainName: 'Enterprise Governance',
+            capabilityAreaId: 'organizational-roles', // Organizational assessment
+            capabilityAreaName: 'Organizational Roles',
+            status: 'finalized',
+            overallScore: 3.0,
+          },
+        ],
+        [
+          // Valid roles rating
+          {
+            capabilityAssessmentId: assessmentId,
+            dimensionId: 'roles' as OrbitRating['dimensionId'],
+            aspectId: 'stakeholder-engagement',
+            currentLevel: 3,
+          },
+          // Invalid B-I-T rating for organizational assessment (should be skipped)
+          {
+            capabilityAssessmentId: assessmentId,
+            dimensionId: 'technology',
+            aspectId: 'infrastructure',
+            currentLevel: 2,
+          },
+        ]
+      );
+
+      const result = await importFromJson(JSON.stringify(exportData));
+
+      expect(result.success).toBe(true);
+
+      // Verify only roles rating was imported
+      const ratings = await db.orbitRatings.toArray();
+      expect(ratings.length).toBe(1);
+      expect(ratings[0]?.dimensionId).toBe('roles');
+    });
+  });
+
+  describe('backwards compatibility', () => {
+    it('should map legacy informationData dimension ID to information', async () => {
+      const assessmentId = uuidv4();
+      const exportData = createExportData(
+        [{ id: assessmentId, capabilityAreaId: 'area-1', status: 'finalized', overallScore: 3.5 }],
+        [
+          {
+            capabilityAssessmentId: assessmentId,
+            // Use legacy dimension ID
+            dimensionId: 'informationData' as OrbitRating['dimensionId'],
+            aspectId: 'data-quality',
+            currentLevel: 3,
+          },
+        ]
+      );
+
+      const result = await importFromJson(JSON.stringify(exportData));
+
+      expect(result.success).toBe(true);
+      expect(result.importedAsCurrent).toBe(1);
+
+      // Verify the rating was imported with the normalized dimension ID
+      const ratings = await db.orbitRatings.toArray();
+      expect(ratings.length).toBe(1);
+      expect(ratings[0]?.dimensionId).toBe('information');
+    });
+
+    it('should preserve current dimension IDs unchanged', async () => {
+      const assessmentId = uuidv4();
+      const exportData = createExportData(
+        [{ id: assessmentId, capabilityAreaId: 'area-1', status: 'finalized', overallScore: 3.5 }],
+        [
+          {
+            capabilityAssessmentId: assessmentId,
+            dimensionId: 'information',
+            aspectId: 'data-quality',
+            currentLevel: 3,
+          },
+          {
+            capabilityAssessmentId: assessmentId,
+            dimensionId: 'businessArchitecture',
+            aspectId: 'process-standardization',
+            currentLevel: 4,
+          },
+        ]
+      );
+
+      const result = await importFromJson(JSON.stringify(exportData));
+
+      expect(result.success).toBe(true);
+
+      const ratings = await db.orbitRatings.toArray();
+      expect(ratings.length).toBe(2);
+      expect(ratings.find((r) => r.aspectId === 'data-quality')?.dimensionId).toBe('information');
+      expect(ratings.find((r) => r.aspectId === 'process-standardization')?.dimensionId).toBe(
+        'businessArchitecture'
+      );
+    });
+
+    it('should normalize dimension IDs when adding older import to history', async () => {
+      // Create existing assessment (newer)
+      const newDate = new Date('2024-06-01');
+      await db.capabilityAssessments.add({
+        id: uuidv4(),
+        capabilityDomainId: 'provider-management',
+        capabilityDomainName: 'Provider Management',
+        capabilityAreaId: 'area-1',
+        capabilityAreaName: 'Area 1',
+        status: 'finalized',
+        tags: [],
+        createdAt: newDate,
+        updatedAt: newDate,
+        finalizedAt: newDate,
+        overallScore: 4.0,
+      });
+
+      // Import older assessment with legacy dimension ID
+      const oldDate = new Date('2024-01-01');
+      const assessmentId = uuidv4();
+      const exportData = createExportData(
+        [
+          {
+            id: assessmentId,
+            capabilityAreaId: 'area-1',
+            status: 'finalized',
+            overallScore: 2.0,
+            updatedAt: oldDate,
+            finalizedAt: oldDate,
+          },
+        ],
+        [
+          {
+            capabilityAssessmentId: assessmentId,
+            dimensionId: 'informationData' as OrbitRating['dimensionId'],
+            aspectId: 'data-quality',
+            currentLevel: 2,
+          },
+        ]
+      );
+
+      const result = await importFromJson(JSON.stringify(exportData));
+
+      expect(result.importedAsHistory).toBe(1);
+
+      // Verify history entry has normalized dimension ID in ratings
+      const history = await db.assessmentHistory.toArray();
+      expect(history.length).toBe(1);
+      expect(history[0]?.ratings[0]?.dimensionId).toBe('information');
+
+      // Verify dimension scores use normalized ID
+      expect(history[0]?.dimensionScores['information']).toBeDefined();
+      expect(history[0]?.dimensionScores['informationData']).toBeUndefined();
+    });
+  });
 });

@@ -97,14 +97,22 @@ export interface CapabilityReferenceModel {
 // =============================================================================
 
 /**
- * The five ORBIT dimension IDs
+ * The three ORBIT dimension IDs (B-I-T)
+ * Note: Outcomes and Roles are now organizational assessments, not per-capability dimensions
  */
-export type OrbitDimensionId =
-  | 'outcomes'
-  | 'roles'
-  | 'businessArchitecture'
-  | 'informationData'
-  | 'technology';
+export type OrbitDimensionId = 'businessArchitecture' | 'information' | 'technology';
+
+/**
+ * Organizational assessment type IDs (formerly O&R dimensions)
+ * These are assessed at the organizational level, not per capability area
+ */
+export type OrganizationalAssessmentId = 'outcomes' | 'roles';
+
+/**
+ * Combined type for rating storage - allows both dimension and organizational assessment IDs
+ * Used in OrbitRating.dimensionId to support both standard and organizational assessments
+ */
+export type RatingDimensionId = OrbitDimensionId | OrganizationalAssessmentId;
 
 /**
  * Technology sub-dimension IDs
@@ -205,6 +213,18 @@ export interface TechnologyDimension {
 }
 
 /**
+ * Organizational assessment definition (from orbit-model.json)
+ * Used for Outcomes and Roles which are assessed at the organizational level
+ */
+export interface OrganizationalAssessmentDefinition {
+  id: OrganizationalAssessmentId;
+  name: string;
+  description: string;
+  capabilityAreaId: string;
+  aspects: OrbitAspect[];
+}
+
+/**
  * Maturity level metadata
  */
 export interface MaturityLevelMeta {
@@ -228,11 +248,13 @@ export interface OrbitModel {
     notApplicable: MaturityLevelMeta;
   };
   dimensions: {
-    outcomes: OrbitDimension;
-    roles: OrbitDimension;
     businessArchitecture: OrbitDimension;
-    informationData: OrbitDimension;
+    information: OrbitDimension;
     technology: TechnologyDimension;
+  };
+  organizationalAssessments: {
+    outcomes: OrganizationalAssessmentDefinition;
+    roles: OrganizationalAssessmentDefinition;
   };
 }
 
@@ -282,11 +304,13 @@ export interface EvidenceResponse {
 
 /**
  * ORBIT Rating - one per aspect per capability assessment
+ * For standard assessments: dimensionId is OrbitDimensionId (B, I, T)
+ * For organizational assessments: dimensionId is OrganizationalAssessmentId ('outcomes' | 'roles')
  */
 export interface OrbitRating {
   id: string;
   capabilityAssessmentId: string;
-  dimensionId: OrbitDimensionId;
+  dimensionId: RatingDimensionId;
   subDimensionId?: TechnologySubDimensionId;
   aspectId: string;
   currentLevel: MaturityLevelWithNA;
@@ -321,7 +345,7 @@ export interface Attachment {
  * Historical rating snapshot (without attachment blobs)
  */
 export interface HistoricalRating {
-  dimensionId: OrbitDimensionId;
+  dimensionId: RatingDimensionId;
   subDimensionId?: TechnologySubDimensionId;
   aspectId: string;
   currentLevel: MaturityLevelWithNA;
@@ -331,6 +355,21 @@ export interface HistoricalRating {
   notes: string;
   barriers: string;
   plans: string;
+}
+
+/**
+ * Aggregate dimension metadata stored in history snapshots.
+ * Captures point-in-time aggregate data for enterprise domains.
+ */
+export interface AggregateSnapshotData {
+  /** The dimension that was aggregated (e.g., 'information' or 'technology') */
+  dimensionId: RatingDimensionId;
+  /** The aggregate score at snapshot time */
+  score: number | null;
+  /** Number of assessments that contributed to the aggregate */
+  contributingCount: number;
+  /** IDs of assessments that contributed (for traceability) */
+  contributingAssessmentIds: string[];
 }
 
 /**
@@ -345,6 +384,8 @@ export interface AssessmentHistory {
   overallScore: number;
   dimensionScores: Record<string, number>;
   ratings: HistoricalRating[];
+  /** Aggregate dimension data for enterprise domains (stored at snapshot time) */
+  aggregateData?: AggregateSnapshotData;
 }
 
 /**
@@ -367,7 +408,7 @@ export interface Tag {
 export interface AspectScore {
   aspectId: string;
   aspectName: string;
-  dimensionId: OrbitDimensionId;
+  dimensionId: RatingDimensionId;
   subDimensionId?: TechnologySubDimensionId;
   currentLevel: MaturityLevelWithNA;
   isAssessed: boolean;
@@ -377,7 +418,7 @@ export interface AspectScore {
  * Score for a dimension
  */
 export interface DimensionScore {
-  dimensionId: OrbitDimensionId;
+  dimensionId: RatingDimensionId;
   dimensionName: string;
   required: boolean;
   averageLevel: number | null;

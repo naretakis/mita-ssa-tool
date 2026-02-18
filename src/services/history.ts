@@ -11,6 +11,7 @@ import type {
   OrbitRating,
   AssessmentHistory,
   HistoricalRating,
+  AggregateSnapshotData,
 } from '../types';
 
 /**
@@ -74,14 +75,16 @@ export function toHistoricalRatings(ratings: OrbitRating[]): HistoricalRating[] 
  * @param assessment - The capability assessment to snapshot
  * @param ratings - All ratings associated with the assessment
  * @param overallScore - The overall maturity score for the assessment
+ * @param aggregateData - Optional aggregate dimension data for enterprise domains
  * @returns AssessmentHistory record ready for database insertion
  */
 export function createHistorySnapshot(
   assessment: CapabilityAssessment,
   ratings: OrbitRating[],
-  overallScore: number
+  overallScore: number,
+  aggregateData?: AggregateSnapshotData
 ): AssessmentHistory {
-  return {
+  const snapshot: AssessmentHistory = {
     id: uuidv4(),
     capabilityAssessmentId: assessment.id,
     capabilityAreaId: assessment.capabilityAreaId,
@@ -91,4 +94,11 @@ export function createHistorySnapshot(
     dimensionScores: calculateDimensionScores(ratings),
     ratings: toHistoricalRatings(ratings),
   };
+
+  // Include aggregate data for enterprise domains
+  if (aggregateData) {
+    snapshot.aggregateData = aggregateData;
+  }
+
+  return snapshot;
 }

@@ -2,9 +2,10 @@
 
 ## Version History
 
-| Version | Date           | Author             | Notes                              |
-| ------- | -------------- | ------------------ | ---------------------------------- |
-| 0.1     | August 8, 2025 | Z. Rioux, S. Lucas | Initial Release for pilot approval |
+| Version | Date             | Author             | Notes                                                       |
+| ------- | ---------------- | ------------------ | ----------------------------------------------------------- |
+| 0.1     | August 8, 2025   | Z. Rioux, S. Lucas | Initial Release for pilot approval                          |
+| 0.2     | January 30, 2026 | NextGen Leads      | Added note for Security and Identity Level 5 overview error |
 
 ---
 
@@ -2150,6 +2151,8 @@ _Level 5:_
 - A single SIEM tool provides view of enterprise security events
 
 **Level 5 (Optimized)**
+
+> **Note:** The original reference document (Table 10) contains a copy-paste error for the Security and Identity Level 5 overview description—it incorrectly repeats the Application Architecture Level 5 content. The aspect-level descriptions for Level 5 (Identity and Access Services, Consent Management, System and Data Protection, Security Monitoring) are accurate and should be used for assessment.
 
 - The architecture is fully composable, adaptive, and event driven
 - Interfaces are personalized and continuously improved using analytics

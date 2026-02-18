@@ -25,11 +25,17 @@ import AttachFileIcon from '@mui/icons-material/AttachFile';
 import NotesIcon from '@mui/icons-material/Notes';
 import WarningIcon from '@mui/icons-material/Warning';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
-import type { DimensionScore, OrbitRating, Attachment, MaturityLevelWithNA } from '../../types';
+import type {
+  DimensionScore,
+  OrbitRating,
+  Attachment,
+  MaturityLevelWithNA,
+  OrbitDimensionId,
+} from '../../types';
 import { MATURITY_LEVEL_NAMES } from '../../types';
-import { getAspect, getMaturityLevelMeta } from '../../services/orbit';
+import { getAspect, getMaturityLevelMeta, getOrganizationalAspect } from '../../services/orbit';
 import { getScoreColor } from '../../utils';
-import type { LevelKey } from '../../types';
+import type { LevelKey, OrganizationalAssessmentId } from '../../types';
 
 interface DimensionScoresTableProps {
   dimensionScores: DimensionScore[];
@@ -78,8 +84,20 @@ function AspectDetailRow({
   attachments: Attachment[];
   onDownloadAttachment: (attachment: Attachment) => void;
 }): JSX.Element {
-  // Get aspect name from ORBIT model
-  const aspect = getAspect(rating.dimensionId, rating.aspectId, rating.subDimensionId);
+  // Get aspect name from ORBIT model - handle both standard and organizational assessments
+  let aspect;
+  if (rating.dimensionId === 'outcomes' || rating.dimensionId === 'roles') {
+    aspect = getOrganizationalAspect(
+      rating.dimensionId as OrganizationalAssessmentId,
+      rating.aspectId
+    );
+  } else {
+    aspect = getAspect(
+      rating.dimensionId as OrbitDimensionId,
+      rating.aspectId,
+      rating.subDimensionId
+    );
+  }
   const aspectName = aspect?.name ?? rating.aspectId;
   const ratingAttachments = attachments.filter((a) => a.orbitRatingId === rating.id);
   const hasNotes = rating.notes.trim().length > 0;

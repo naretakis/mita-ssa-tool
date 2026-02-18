@@ -26,6 +26,12 @@ import {
   getSubDimensionForAspect,
   getAspectIdsForDimension,
   getAspectLocation,
+  getOrganizationalAssessment,
+  getOrganizationalAspects,
+  getOrganizationalAspectCount,
+  getOrganizationalAspect,
+  getOrganizationalAssessmentTypes,
+  getTotalOrganizationalAspectCount,
 } from './orbit';
 
 describe('orbit service', () => {
@@ -35,6 +41,7 @@ describe('orbit service', () => {
       expect(model).toBeDefined();
       expect(model.version).toBe('4.0');
       expect(model.dimensions).toBeDefined();
+      expect(model.organizationalAssessments).toBeDefined();
     });
   });
 
@@ -46,38 +53,39 @@ describe('orbit service', () => {
   });
 
   describe('getAllDimensionIds', () => {
-    it('should return all five dimension IDs', () => {
+    it('should return the three B-I-T dimension IDs', () => {
       const ids = getAllDimensionIds();
-      expect(ids).toEqual([
-        'outcomes',
-        'roles',
-        'businessArchitecture',
-        'informationData',
-        'technology',
-      ]);
+      expect(ids).toEqual(['businessArchitecture', 'information', 'technology']);
     });
   });
 
   describe('getRequiredDimensionIds', () => {
-    it('should return required dimension IDs', () => {
+    it('should return required dimension IDs (all B-I-T)', () => {
       const ids = getRequiredDimensionIds();
-      expect(ids).toEqual(['businessArchitecture', 'informationData', 'technology']);
+      expect(ids).toEqual(['businessArchitecture', 'information', 'technology']);
     });
   });
 
   describe('getOptionalDimensionIds', () => {
-    it('should return optional dimension IDs', () => {
+    it('should return empty array (O&R are now organizational assessments)', () => {
       const ids = getOptionalDimensionIds();
-      expect(ids).toEqual(['outcomes', 'roles']);
+      expect(ids).toEqual([]);
     });
   });
 
   describe('getDimension', () => {
-    it('should return a standard dimension', () => {
-      const dimension = getDimension('outcomes');
+    it('should return the businessArchitecture dimension', () => {
+      const dimension = getDimension('businessArchitecture');
       expect(dimension).toBeDefined();
-      expect(dimension?.name).toBe('Outcomes');
-      expect(dimension?.required).toBe(false);
+      expect(dimension?.name).toBe('Business Architecture');
+      expect(dimension?.required).toBe(true);
+    });
+
+    it('should return the information dimension', () => {
+      const dimension = getDimension('information');
+      expect(dimension).toBeDefined();
+      expect(dimension?.name).toBe('Information');
+      expect(dimension?.required).toBe(true);
     });
 
     it('should return the technology dimension', () => {
@@ -89,15 +97,10 @@ describe('orbit service', () => {
   });
 
   describe('getStandardDimensions', () => {
-    it('should return four standard dimensions', () => {
+    it('should return two standard dimensions (B, I)', () => {
       const dimensions = getStandardDimensions();
-      expect(dimensions.length).toBe(4);
-      expect(dimensions.map((d) => d.id)).toEqual([
-        'outcomes',
-        'roles',
-        'businessArchitecture',
-        'informationData',
-      ]);
+      expect(dimensions.length).toBe(2);
+      expect(dimensions.map((d) => d.id)).toEqual(['businessArchitecture', 'information']);
     });
   });
 
@@ -132,9 +135,14 @@ describe('orbit service', () => {
   });
 
   describe('getAspectsForDimension', () => {
-    it('should return aspects for a standard dimension', () => {
-      const aspects = getAspectsForDimension('outcomes');
-      expect(aspects.length).toBe(6);
+    it('should return aspects for businessArchitecture dimension', () => {
+      const aspects = getAspectsForDimension('businessArchitecture');
+      expect(aspects.length).toBeGreaterThan(0);
+    });
+
+    it('should return aspects for information dimension', () => {
+      const aspects = getAspectsForDimension('information');
+      expect(aspects.length).toBeGreaterThan(0);
     });
 
     it('should return all aspects for technology dimension', () => {
@@ -156,10 +164,14 @@ describe('orbit service', () => {
   });
 
   describe('getAspect', () => {
-    it('should return an aspect from a standard dimension', () => {
-      const aspect = getAspect('outcomes', 'culture-mindset');
+    it('should return an aspect from businessArchitecture dimension', () => {
+      const aspects = getAspectsForDimension('businessArchitecture');
+      expect(aspects.length).toBeGreaterThan(0);
+      const firstAspect = aspects[0];
+      expect(firstAspect).toBeDefined();
+      const aspect = getAspect('businessArchitecture', firstAspect!.id);
       expect(aspect).toBeDefined();
-      expect(aspect?.name).toBe('Culture & Mindset');
+      expect(aspect?.id).toBe(firstAspect!.id);
     });
 
     it('should return an aspect from a technology sub-dimension', () => {
@@ -168,7 +180,7 @@ describe('orbit service', () => {
     });
 
     it('should return undefined for invalid aspect', () => {
-      const aspect = getAspect('outcomes', 'invalid');
+      const aspect = getAspect('businessArchitecture', 'invalid');
       expect(aspect).toBeUndefined();
     });
   });
@@ -200,21 +212,21 @@ describe('orbit service', () => {
   });
 
   describe('getTotalAspectCount', () => {
-    it('should return total count of all aspects', () => {
+    it('should return total count of B-I-T aspects', () => {
       const count = getTotalAspectCount();
-      expect(count).toBeGreaterThan(40); // Should be around 52
+      expect(count).toBeGreaterThan(30); // Should be around 40 for B-I-T
     });
   });
 
   describe('getAspectCountForDimension', () => {
-    it('should return aspect count for outcomes', () => {
-      const count = getAspectCountForDimension('outcomes');
-      expect(count).toBe(6);
+    it('should return aspect count for businessArchitecture', () => {
+      const count = getAspectCountForDimension('businessArchitecture');
+      expect(count).toBeGreaterThan(0);
     });
 
-    it('should return aspect count for roles', () => {
-      const count = getAspectCountForDimension('roles');
-      expect(count).toBe(6);
+    it('should return aspect count for information', () => {
+      const count = getAspectCountForDimension('information');
+      expect(count).toBeGreaterThan(0);
     });
 
     it('should return aspect count for technology (all sub-dimensions)', () => {
@@ -227,27 +239,19 @@ describe('orbit service', () => {
     it('should return count of aspects in required dimensions only', () => {
       const count = getRequiredAspectCount();
       const businessCount = getAspectCountForDimension('businessArchitecture');
-      const infoCount = getAspectCountForDimension('informationData');
+      const infoCount = getAspectCountForDimension('information');
       const techCount = getAspectCountForDimension('technology');
       expect(count).toBe(businessCount + infoCount + techCount);
     });
   });
 
   describe('isDimensionRequired', () => {
-    it('should return false for outcomes', () => {
-      expect(isDimensionRequired('outcomes')).toBe(false);
-    });
-
-    it('should return false for roles', () => {
-      expect(isDimensionRequired('roles')).toBe(false);
-    });
-
     it('should return true for businessArchitecture', () => {
       expect(isDimensionRequired('businessArchitecture')).toBe(true);
     });
 
-    it('should return true for informationData', () => {
-      expect(isDimensionRequired('informationData')).toBe(true);
+    it('should return true for information', () => {
+      expect(isDimensionRequired('information')).toBe(true);
     });
 
     it('should return true for technology', () => {
@@ -263,24 +267,28 @@ describe('orbit service', () => {
     });
 
     it('should return undefined for non-technology aspect', () => {
-      const subDim = getSubDimensionForAspect('culture-mindset');
+      // Use a businessArchitecture aspect
+      const aspects = getAspectsForDimension('businessArchitecture');
+      expect(aspects.length).toBeGreaterThan(0);
+      const subDim = getSubDimensionForAspect(aspects[0]!.id);
       expect(subDim).toBeUndefined();
     });
   });
 
   describe('getAspectIdsForDimension', () => {
-    it('should return aspect IDs for a dimension', () => {
-      const ids = getAspectIdsForDimension('outcomes');
-      expect(ids.length).toBe(6);
-      expect(ids).toContain('culture-mindset');
+    it('should return aspect IDs for businessArchitecture dimension', () => {
+      const ids = getAspectIdsForDimension('businessArchitecture');
+      expect(ids.length).toBeGreaterThan(0);
     });
   });
 
   describe('getAspectLocation', () => {
-    it('should return location for a standard dimension aspect', () => {
-      const location = getAspectLocation('culture-mindset');
+    it('should return location for a businessArchitecture aspect', () => {
+      const aspects = getAspectsForDimension('businessArchitecture');
+      expect(aspects.length).toBeGreaterThan(0);
+      const location = getAspectLocation(aspects[0]!.id);
       expect(location).toBeDefined();
-      expect(location?.dimensionId).toBe('outcomes');
+      expect(location?.dimensionId).toBe('businessArchitecture');
       expect(location?.subDimensionId).toBeUndefined();
     });
 
@@ -294,6 +302,76 @@ describe('orbit service', () => {
     it('should return undefined for invalid aspect', () => {
       const location = getAspectLocation('invalid');
       expect(location).toBeUndefined();
+    });
+  });
+
+  // Organizational Assessment Tests
+  describe('getOrganizationalAssessment', () => {
+    it('should return outcomes organizational assessment', () => {
+      const assessment = getOrganizationalAssessment('outcomes');
+      expect(assessment).toBeDefined();
+      expect(assessment.id).toBe('outcomes');
+      expect(assessment.name).toBe('Organizational Outcomes');
+      expect(assessment.capabilityAreaId).toBe('organizational-outcomes');
+    });
+
+    it('should return roles organizational assessment', () => {
+      const assessment = getOrganizationalAssessment('roles');
+      expect(assessment).toBeDefined();
+      expect(assessment.id).toBe('roles');
+      expect(assessment.name).toBe('Organizational Roles');
+      expect(assessment.capabilityAreaId).toBe('organizational-roles');
+    });
+  });
+
+  describe('getOrganizationalAspects', () => {
+    it('should return aspects for outcomes', () => {
+      const aspects = getOrganizationalAspects('outcomes');
+      expect(aspects.length).toBe(6);
+    });
+
+    it('should return aspects for roles', () => {
+      const aspects = getOrganizationalAspects('roles');
+      expect(aspects.length).toBe(6);
+    });
+  });
+
+  describe('getOrganizationalAspectCount', () => {
+    it('should return 6 for outcomes', () => {
+      const count = getOrganizationalAspectCount('outcomes');
+      expect(count).toBe(6);
+    });
+
+    it('should return 6 for roles', () => {
+      const count = getOrganizationalAspectCount('roles');
+      expect(count).toBe(6);
+    });
+  });
+
+  describe('getOrganizationalAspect', () => {
+    it('should return a specific outcomes aspect', () => {
+      const aspect = getOrganizationalAspect('outcomes', 'culture-mindset');
+      expect(aspect).toBeDefined();
+      expect(aspect?.name).toBe('Culture & Mindset');
+    });
+
+    it('should return undefined for invalid aspect', () => {
+      const aspect = getOrganizationalAspect('outcomes', 'invalid');
+      expect(aspect).toBeUndefined();
+    });
+  });
+
+  describe('getOrganizationalAssessmentTypes', () => {
+    it('should return outcomes and roles', () => {
+      const types = getOrganizationalAssessmentTypes();
+      expect(types).toEqual(['outcomes', 'roles']);
+    });
+  });
+
+  describe('getTotalOrganizationalAspectCount', () => {
+    it('should return 12 (6 outcomes + 6 roles)', () => {
+      const count = getTotalOrganizationalAspectCount();
+      expect(count).toBe(12);
     });
   });
 });

@@ -3,13 +3,21 @@
  *
  * Core service for exporting assessment data in various formats.
  * Supports JSON, ZIP (with attachments), PDF, and CSV exports.
+ * Handles both standard capability assessments (B-I-T) and
+ * organizational assessments (Outcomes/Roles).
  */
 
 import JSZip from 'jszip';
 
 import { db } from '../db';
 import { getDomainById, getAreaById } from '../capabilities';
-import { calculateAverageScore } from '../scoring';
+import { calculateAverageScore, calculateDimensionScore } from '../scoring';
+import {
+  isEnterpriseDomain,
+  getAggregatedDimensionForDomain,
+  getOrganizationalAspects,
+} from '../orbit';
+import { getOrganizationalAssessmentType } from '../../constants';
 import { getAreasFromDomain } from '../../types';
 import type {
   ExportOptions,
@@ -19,6 +27,7 @@ import type {
   CapabilityAreaProfile,
   MaturityProfileRow,
   ExportProgressCallback,
+  ExportEnterpriseAssessment,
 } from './types';
 import type {
   CapabilityAssessment,
@@ -26,6 +35,7 @@ import type {
   AssessmentHistory,
   Tag,
   OrbitDimensionId,
+  OrganizationalAssessmentId,
 } from '../../types';
 import { generatePdfReport } from './pdfExport';
 import { generateMaturityProfileCsv, generateCombinedMaturityProfileCsv } from './csvExport';
@@ -170,6 +180,9 @@ async function collectExportData(options: ExportOptions): Promise<ExportData> {
     uploadedAt: a.uploadedAt.toISOString(),
   }));
 
+  // Calculate aggregate data for enterprise domain assessments
+  const enterpriseAggregates = await calculateEnterpriseAggregatesForExport(assessments, ratings);
+
   return {
     exportVersion: EXPORT_VERSION,
     exportDate: new Date().toISOString(),
@@ -190,6 +203,97 @@ async function collectExportData(options: ExportOptions): Promise<ExportData> {
       totalAttachments: attachments.length,
       capabilities: assessments.map((a) => `${a.capabilityDomainId}/${a.capabilityAreaId}`),
     },
+    enterpriseAggregates: enterpriseAggregates.length > 0 ? enterpriseAggregates : undefined,
+  };
+}
+
+/**
+ * Calculate aggregate data for enterprise domain assessments in the export.
+ * This captures the current aggregate scores for traceability.
+ */
+async function calculateEnterpriseAggregatesForExport(
+  assessments: CapabilityAssessment[],
+  allRatings: OrbitRating[]
+): Promise<ExportEnterpriseAssessment[]> {
+  const enterpriseAssessments = assessments.filter(
+    (a) => a.status === 'finalized' && isEnterpriseDomain(a.capabilityDomainId)
+  );
+
+  if (enterpriseAssessments.length === 0) {
+    return [];
+  }
+
+  // Get all finalized non-enterprise assessments for aggregate calculation
+  const qualifyingAssessments = assessments.filter(
+    (a) => a.status === 'finalized' && !isEnterpriseDomain(a.capabilityDomainId)
+  );
+
+  // Group ratings by assessment
+  const ratingsByAssessment = new Map<string, OrbitRating[]>();
+  for (const rating of allRatings) {
+    const existing = ratingsByAssessment.get(rating.capabilityAssessmentId) ?? [];
+    existing.push(rating);
+    ratingsByAssessment.set(rating.capabilityAssessmentId, existing);
+  }
+
+  const results: ExportEnterpriseAssessment[] = [];
+
+  for (const assessment of enterpriseAssessments) {
+    const aggregatedDimension = getAggregatedDimensionForDomain(assessment.capabilityDomainId);
+    if (!aggregatedDimension) continue;
+
+    // Calculate aggregate score
+    const aggregateResult = calculateAggregateDimensionScoreForExport(
+      aggregatedDimension,
+      qualifyingAssessments,
+      ratingsByAssessment
+    );
+
+    results.push({
+      assessmentId: assessment.id,
+      domainId: assessment.capabilityDomainId,
+      domainName: assessment.capabilityDomainName,
+      aggregateData: {
+        dimensionId: aggregatedDimension,
+        score: aggregateResult.score,
+        contributingCount: aggregateResult.contributingCount,
+        contributingAssessmentIds: aggregateResult.assessmentIds,
+      },
+    });
+  }
+
+  return results;
+}
+
+/**
+ * Calculate aggregate dimension score for export.
+ */
+function calculateAggregateDimensionScoreForExport(
+  dimensionId: OrbitDimensionId,
+  qualifyingAssessments: CapabilityAssessment[],
+  ratingsByAssessment: Map<string, OrbitRating[]>
+): { score: number | null; contributingCount: number; assessmentIds: string[] } {
+  const scoresWithIds: { id: string; score: number }[] = [];
+
+  for (const assessment of qualifyingAssessments) {
+    const ratings = ratingsByAssessment.get(assessment.id) ?? [];
+    const dimRatings = ratings.filter((r) => r.dimensionId === dimensionId);
+
+    const dimScore = calculateDimensionScore(dimensionId, dimRatings);
+    if (dimScore !== null) {
+      scoresWithIds.push({ id: assessment.id, score: dimScore });
+    }
+  }
+
+  if (scoresWithIds.length === 0) {
+    return { score: null, contributingCount: 0, assessmentIds: [] };
+  }
+
+  const avgScore = scoresWithIds.reduce((sum, s) => sum + s.score, 0) / scoresWithIds.length;
+  return {
+    score: Math.round(avgScore * 10) / 10,
+    contributingCount: scoresWithIds.length,
+    assessmentIds: scoresWithIds.map((s) => s.id),
   };
 }
 
@@ -365,12 +469,52 @@ async function generateDomainMaturityProfile(
     .anyOf(assessmentIds)
     .toArray();
 
+  // Check if this is an enterprise domain and calculate aggregate if needed
+  const aggregatedDimension = getAggregatedDimensionForDomain(domainId);
+  let aggregateData:
+    | { dimensionId: OrbitDimensionId; score: number | null; contributingCount: number }
+    | undefined;
+
+  if (aggregatedDimension) {
+    // Get all finalized non-enterprise assessments for aggregate calculation
+    const allAssessments = await db.capabilityAssessments.toArray();
+    const qualifyingAssessments = allAssessments.filter(
+      (a) => a.status === 'finalized' && !isEnterpriseDomain(a.capabilityDomainId)
+    );
+
+    const qualifyingIds = qualifyingAssessments.map((a) => a.id);
+    const qualifyingRatings = await db.orbitRatings
+      .where('capabilityAssessmentId')
+      .anyOf(qualifyingIds)
+      .toArray();
+
+    // Group ratings by assessment
+    const ratingsByAssessment = new Map<string, OrbitRating[]>();
+    for (const rating of qualifyingRatings) {
+      const existing = ratingsByAssessment.get(rating.capabilityAssessmentId) ?? [];
+      existing.push(rating);
+      ratingsByAssessment.set(rating.capabilityAssessmentId, existing);
+    }
+
+    const result = calculateAggregateDimensionScoreForExport(
+      aggregatedDimension,
+      qualifyingAssessments,
+      ratingsByAssessment
+    );
+
+    aggregateData = {
+      dimensionId: aggregatedDimension,
+      score: result.score,
+      contributingCount: result.contributingCount,
+    };
+  }
+
   // Build capability area profiles
   const areaProfiles: CapabilityAreaProfile[] = [];
 
   for (const assessment of assessments) {
     const areaRatings = allRatings.filter((r) => r.capabilityAssessmentId === assessment.id);
-    const areaProfile = generateCapabilityAreaProfile(assessment, areaRatings);
+    const areaProfile = generateCapabilityAreaProfile(assessment, areaRatings, aggregateData);
     areaProfiles.push(areaProfile);
   }
 
@@ -382,18 +526,82 @@ async function generateDomainMaturityProfile(
 }
 
 /**
- * Generates a profile for a single capability area
+ * Generates a profile for a single capability area.
+ * Handles both standard assessments (B-I-T dimensions) and organizational assessments (direct aspects).
+ * For enterprise domains, includes aggregate dimension data with indicator.
+ *
+ * @param assessment - The capability assessment
+ * @param ratings - Ratings for this assessment
+ * @param aggregateData - Optional aggregate data for enterprise domains
  */
 function generateCapabilityAreaProfile(
   assessment: CapabilityAssessment,
-  ratings: OrbitRating[]
+  ratings: OrbitRating[],
+  aggregateData?: { dimensionId: OrbitDimensionId; score: number | null; contributingCount: number }
 ): CapabilityAreaProfile {
-  // Map dimension IDs to display names (matches MITA 4.0 ORBIT model)
+  // Check if this is an organizational assessment
+  const orgType = getOrganizationalAssessmentType(assessment.capabilityAreaId);
+
+  if (orgType) {
+    // Organizational assessment - generate aspect-based profile
+    return generateOrganizationalAreaProfile(assessment, ratings, orgType);
+  }
+
+  // Standard assessment - generate dimension-based profile
+  return generateStandardAreaProfile(assessment, ratings, aggregateData);
+}
+
+/**
+ * Generates a profile for an organizational assessment (Outcomes/Roles).
+ * Shows aspects directly instead of dimensions.
+ */
+function generateOrganizationalAreaProfile(
+  assessment: CapabilityAssessment,
+  ratings: OrbitRating[],
+  orgType: OrganizationalAssessmentId
+): CapabilityAreaProfile {
+  const aspects = getOrganizationalAspects(orgType);
+  const rows: MaturityProfileRow[] = [];
+
+  for (const aspect of aspects) {
+    // Find the rating for this aspect
+    const rating = ratings.find((r) => r.dimensionId === orgType && r.aspectId === aspect.id);
+
+    const asIs = rating && rating.currentLevel > 0 ? rating.currentLevel.toString() : '';
+    const toBe = rating?.targetLevel && rating.targetLevel > 0 ? rating.targetLevel.toString() : '';
+
+    rows.push({
+      dimension: aspect.name, // Using 'dimension' field for aspect name in CSV
+      asIs,
+      toBe,
+      notes: rating?.notes ?? '',
+      barriers: rating?.barriers ?? '',
+      plans: rating?.plans ?? '',
+    });
+  }
+
+  return {
+    domainName: assessment.capabilityDomainName,
+    areaName: assessment.capabilityAreaName,
+    rows,
+    isOrganizationalAssessment: true,
+    organizationalType: orgType,
+  };
+}
+
+/**
+ * Generates a profile for a standard capability assessment (B-I-T dimensions).
+ * For enterprise domains, includes aggregate dimension data with indicator.
+ */
+function generateStandardAreaProfile(
+  assessment: CapabilityAssessment,
+  ratings: OrbitRating[],
+  aggregateData?: { dimensionId: OrbitDimensionId; score: number | null; contributingCount: number }
+): CapabilityAreaProfile {
+  // Map dimension IDs to display names (B-I-T only)
   const dimensionMap: Record<OrbitDimensionId, string> = {
-    outcomes: 'Outcomes',
-    roles: 'Roles',
     businessArchitecture: 'Business Architecture',
-    informationData: 'Information & Data',
+    information: 'Information',
     technology: 'Technology',
   };
 
@@ -420,9 +628,14 @@ function generateCapabilityAreaProfile(
     };
   }
 
-  // Aggregate data from ratings
+  // Aggregate data from ratings (only B-I-T dimensions)
   for (const rating of ratings) {
-    const dimName = dimensionMap[rating.dimensionId];
+    // Skip organizational assessment ratings (outcomes/roles) in standard assessments
+    if (rating.dimensionId === 'outcomes' || rating.dimensionId === 'roles') {
+      continue;
+    }
+
+    const dimName = dimensionMap[rating.dimensionId as OrbitDimensionId];
     if (!dimName) continue;
 
     const dimData = dimensionData[dimName];
@@ -448,21 +661,35 @@ function generateCapabilityAreaProfile(
     }
   }
 
-  // Build rows for each dimension
+  // Build rows for each dimension (B-I-T only)
   const rows: MaturityProfileRow[] = [];
 
-  for (const [, dimName] of Object.entries(dimensionMap)) {
+  for (const [dimId, dimName] of Object.entries(dimensionMap)) {
     const dimData = dimensionData[dimName];
     if (!dimData) continue;
 
-    // Calculate averages using shared scoring utility
-    const asIsScore = calculateAverageScore(dimData.asIs);
-    const toBeScore = calculateAverageScore(dimData.toBe);
-    const asIsAvg = asIsScore !== null ? asIsScore.toFixed(1) : '';
-    const toBeAvg = toBeScore !== null ? toBeScore.toFixed(1) : '';
+    // Check if this is an aggregate dimension for this assessment
+    const isAggregate = aggregateData?.dimensionId === dimId;
+
+    let asIsAvg: string;
+    let toBeAvg: string;
+    let notes: string;
+
+    if (isAggregate && aggregateData) {
+      // Use aggregate score for enterprise domains
+      asIsAvg = aggregateData.score !== null ? aggregateData.score.toFixed(1) : '';
+      toBeAvg = ''; // Aggregate doesn't have target level
+      notes = `(Aggregate from ${aggregateData.contributingCount} assessments)`;
+    } else {
+      // Calculate averages using shared scoring utility
+      const asIsScore = calculateAverageScore(dimData.asIs);
+      const toBeScore = calculateAverageScore(dimData.toBe);
+      asIsAvg = asIsScore !== null ? asIsScore.toFixed(1) : '';
+      toBeAvg = toBeScore !== null ? toBeScore.toFixed(1) : '';
+      notes = dimData.notes.join('; ');
+    }
 
     // Combine text fields (join multiple entries with semicolon)
-    const notes = dimData.notes.join('; ');
     const barriers = dimData.barriers.join('; ');
     const plans = dimData.plans.join('; ');
 

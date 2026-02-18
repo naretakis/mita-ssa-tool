@@ -5,6 +5,9 @@
  * Uses "Merge with History" strategy:
  * - Newer imports become current, existing moves to history
  * - Older imports are added to history, existing stays current
+ *
+ * Supports both standard capability assessments (B-I-T) and
+ * organizational assessments (Outcomes/Roles).
  */
 
 import JSZip from 'jszip';
@@ -13,11 +16,71 @@ import { v4 as uuidv4 } from 'uuid';
 import { db } from '../db';
 import { createHistorySnapshot, calculateDimensionScores, toHistoricalRatings } from '../history';
 import { extractAttachmentIdFromFileName } from './exportService';
+import { isOrganizationalAssessmentArea, TIMESTAMP_TOLERANCE_MS } from '../../constants';
 import type { ExportData, ImportResult, ImportItemResult, ImportProgressCallback } from './types';
-import type { CapabilityAssessment, Attachment } from '../../types';
+import type {
+  CapabilityAssessment,
+  Attachment,
+  OrbitDimensionId,
+  RatingDimensionId,
+} from '../../types';
 
 /** Current supported export version */
 const SUPPORTED_VERSIONS = ['1.0'];
+
+/**
+ * Maps legacy dimension IDs to current dimension IDs.
+ * Used for backwards compatibility when importing older exports.
+ */
+const LEGACY_DIMENSION_ID_MAP: Record<string, OrbitDimensionId> = {
+  informationData: 'information',
+};
+
+/**
+ * Valid dimension IDs for standard capability assessments (B-I-T only).
+ * Outcomes and Roles are only valid for organizational assessments.
+ */
+const STANDARD_DIMENSION_IDS: OrbitDimensionId[] = [
+  'businessArchitecture',
+  'information',
+  'technology',
+];
+
+/**
+ * Organizational assessment dimension IDs.
+ */
+const ORGANIZATIONAL_DIMENSION_IDS: RatingDimensionId[] = ['outcomes', 'roles'];
+
+/**
+ * Normalizes a dimension ID, mapping legacy IDs to current ones.
+ * @param dimensionId - The dimension ID from imported data
+ * @returns The normalized dimension ID
+ */
+function normalizeDimensionId(dimensionId: string): RatingDimensionId {
+  return (LEGACY_DIMENSION_ID_MAP[dimensionId] ?? dimensionId) as RatingDimensionId;
+}
+
+/**
+ * Checks if a rating should be imported for a given assessment.
+ * - For organizational assessments: only import 'outcomes' or 'roles' ratings
+ * - For standard assessments: only import B-I-T ratings, skip orphaned O&R
+ *
+ * @param rating - The rating to check
+ * @param isOrganizational - Whether the assessment is organizational
+ * @returns True if the rating should be imported
+ */
+function shouldImportRating(rating: { dimensionId: string }, isOrganizational: boolean): boolean {
+  const normalizedDimId = normalizeDimensionId(rating.dimensionId);
+
+  if (isOrganizational) {
+    // Organizational assessments only accept outcomes/roles ratings
+    return ORGANIZATIONAL_DIMENSION_IDS.includes(normalizedDimId);
+  } else {
+    // Standard assessments only accept B-I-T ratings
+    // Skip orphaned O&R ratings from old exports
+    return STANDARD_DIMENSION_IDS.includes(normalizedDimId as OrbitDimensionId);
+  }
+}
 
 /**
  * Validates export data structure
@@ -217,7 +280,7 @@ export async function importFromZip(
                     );
                     return (
                       originalRating &&
-                      r.dimensionId === originalRating.dimensionId &&
+                      r.dimensionId === normalizeDimensionId(originalRating.dimensionId) &&
                       r.aspectId === originalRating.aspectId
                     );
                   })
@@ -246,8 +309,8 @@ export async function importFromZip(
             }
           }
         }
-      } catch (error) {
-        console.error('Failed to import attachment:', path, error);
+      } catch {
+        // Silently skip failed attachment imports - non-critical
       }
     }
   }
@@ -346,10 +409,13 @@ async function processAssessmentImport(
 ): Promise<ImportItemResult> {
   const areaId = importedAssessment.capabilityAreaId;
 
-  // Get imported ratings for this assessment
-  const importedRatings = data.data.ratings.filter(
-    (r) => r.capabilityAssessmentId === importedAssessment.id
-  );
+  // Check if this is an organizational assessment
+  const isOrganizational = isOrganizationalAssessmentArea(areaId);
+
+  // Get imported ratings for this assessment, filtering based on assessment type
+  const importedRatings = data.data.ratings
+    .filter((r) => r.capabilityAssessmentId === importedAssessment.id)
+    .filter((r) => shouldImportRating(r, isOrganizational));
 
   // Check for existing assessment
   const existingAssessment = await db.capabilityAssessments
@@ -380,6 +446,7 @@ async function processAssessmentImport(
         ...rating,
         id: uuidv4(),
         capabilityAssessmentId: newAssessmentId,
+        dimensionId: normalizeDimensionId(rating.dimensionId),
         updatedAt: new Date(rating.updatedAt),
         attachmentIds: [], // Attachments handled separately
       });
@@ -396,9 +463,9 @@ async function processAssessmentImport(
   const existingDate = existingAssessment.updatedAt;
   const timeDiff = Math.abs(importedDate.getTime() - existingDate.getTime());
 
-  // Check if this is essentially the same data (same timestamp within 1 second and same score)
+  // Check if this is essentially the same data (same timestamp within tolerance and same score)
   const isSameData =
-    timeDiff < 1000 &&
+    timeDiff < TIMESTAMP_TOLERANCE_MS &&
     importedAssessment.overallScore !== undefined &&
     existingAssessment.overallScore !== undefined &&
     Math.abs(importedAssessment.overallScore - existingAssessment.overallScore) < 0.01;
@@ -452,6 +519,7 @@ async function processAssessmentImport(
         ...rating,
         id: uuidv4(),
         capabilityAssessmentId: existingAssessment.id,
+        dimensionId: normalizeDimensionId(rating.dimensionId),
         updatedAt: new Date(rating.updatedAt),
         attachmentIds: [],
       });
@@ -475,7 +543,7 @@ async function processAssessmentImport(
 
       const alreadyExists = existingHistory.some(
         (h) =>
-          Math.abs(h.snapshotDate.getTime() - importedDate.getTime()) < 1000 &&
+          Math.abs(h.snapshotDate.getTime() - importedDate.getTime()) < TIMESTAMP_TOLERANCE_MS &&
           Math.abs(h.overallScore - importedAssessment.overallScore!) < 0.01
       );
 
@@ -491,6 +559,11 @@ async function processAssessmentImport(
       // Create history entry from imported data using shared utilities
       // Note: We construct a temporary assessment object with the imported date
       // since the imported assessment has a different ID than the existing one
+      // Normalize dimension IDs for backwards compatibility with older exports
+      const normalizedRatings = importedRatings.map((r) => ({
+        ...r,
+        dimensionId: normalizeDimensionId(r.dimensionId),
+      }));
       await db.assessmentHistory.add({
         id: uuidv4(),
         capabilityAssessmentId: existingAssessment.id,
@@ -498,8 +571,8 @@ async function processAssessmentImport(
         snapshotDate: importedDate,
         tags: importedAssessment.tags,
         overallScore: importedAssessment.overallScore,
-        dimensionScores: calculateDimensionScores(importedRatings),
-        ratings: toHistoricalRatings(importedRatings),
+        dimensionScores: calculateDimensionScores(normalizedRatings),
+        ratings: toHistoricalRatings(normalizedRatings),
       });
 
       return {

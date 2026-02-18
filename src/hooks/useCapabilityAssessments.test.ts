@@ -155,12 +155,12 @@ describe('useCapabilityAssessments', () => {
         createAssessment({ id: 'with-ratings', status: 'in_progress' })
       );
 
-      // Add some ratings
+      // Add some ratings (using B-I-T dimensions)
       await db.orbitRatings.bulkAdd([
         {
           id: 'r1',
           capabilityAssessmentId: 'with-ratings',
-          dimensionId: 'outcomes',
+          dimensionId: 'businessArchitecture',
           aspectId: 'a1',
           currentLevel: 3,
           questionResponses: [],
@@ -175,7 +175,7 @@ describe('useCapabilityAssessments', () => {
         {
           id: 'r2',
           capabilityAssessmentId: 'with-ratings',
-          dimensionId: 'roles',
+          dimensionId: 'information',
           aspectId: 'a2',
           currentLevel: 5,
           questionResponses: [],
@@ -212,7 +212,7 @@ describe('useCapabilityAssessments', () => {
         {
           id: 'r1',
           capabilityAssessmentId: 'with-na',
-          dimensionId: 'outcomes',
+          dimensionId: 'businessArchitecture',
           aspectId: 'a1',
           currentLevel: 4,
           questionResponses: [],
@@ -227,7 +227,7 @@ describe('useCapabilityAssessments', () => {
         {
           id: 'r2',
           capabilityAssessmentId: 'with-na',
-          dimensionId: 'roles',
+          dimensionId: 'information',
           aspectId: 'a2',
           currentLevel: -1, // N/A
           questionResponses: [],
@@ -309,7 +309,7 @@ describe('useCapabilityAssessments', () => {
       await db.orbitRatings.add({
         id: 'r1',
         capabilityAssessmentId: 'to-edit',
-        dimensionId: 'outcomes',
+        dimensionId: 'businessArchitecture',
         aspectId: 'a1',
         currentLevel: 3,
         questionResponses: [],
@@ -350,7 +350,7 @@ describe('useCapabilityAssessments', () => {
       await db.orbitRatings.add({
         id: 'r1',
         capabilityAssessmentId: 'to-edit',
-        dimensionId: 'outcomes',
+        dimensionId: 'businessArchitecture',
         aspectId: 'a1',
         currentLevel: 3,
         questionResponses: [],
@@ -425,7 +425,7 @@ describe('useCapabilityAssessments', () => {
       await db.orbitRatings.add({
         id: 'r1',
         capabilityAssessmentId: 'to-delete',
-        dimensionId: 'outcomes',
+        dimensionId: 'businessArchitecture',
         aspectId: 'a1',
         currentLevel: 3,
         questionResponses: [],
@@ -488,7 +488,7 @@ describe('useCapabilityAssessments', () => {
         dimensionScores: {},
         ratings: [
           {
-            dimensionId: 'outcomes',
+            dimensionId: 'businessArchitecture',
             aspectId: 'a1',
             currentLevel: 3,
             questionResponses: [],

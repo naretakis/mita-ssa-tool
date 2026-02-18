@@ -5,6 +5,7 @@
 export { useCapabilityAssessments } from './useCapabilityAssessments';
 export { useOrbitRatings } from './useOrbitRatings';
 export { useScores } from './useScores';
+export type { AggregateDimensionScore } from './useScores';
 export { useTags } from './useTags';
 export { useHistory } from './useHistory';
 export { useAttachments } from './useAttachments';

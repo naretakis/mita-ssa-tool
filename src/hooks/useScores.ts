@@ -7,15 +7,19 @@
 
 import { useLiveQuery } from 'dexie-react-hooks';
 import { db } from '../services/db';
-import { getTotalAreaCount, getAreasByDomainId } from '../services/capabilities';
-import { calculateAverageScore } from '../services/scoring';
+import { getTotalAreaCount, getAreasByDomainId, getAreaWithDomain } from '../services/capabilities';
+import { calculateAverageScore, calculateDimensionScore } from '../services/scoring';
 import {
   getAllDimensionIds,
   getTotalAspectCount,
   getTechnologySubDimensions,
   getAspectsForDimension,
   getAspectsForSubDimension,
+  isEnterpriseDomain,
+  getOrganizationalAspects,
+  getOrganizationalAssessment,
 } from '../services/orbit';
+import { getOrganizationalAssessmentType } from '../constants';
 import type { OrbitRating, OrbitDimensionId, DimensionScore, SubDimensionScore } from '../types';
 
 /**
@@ -30,6 +34,23 @@ export interface CapabilityScoreData {
   tags: string[];
   status: 'not_started' | 'in_progress' | 'finalized';
   completionPercentage: number;
+}
+
+/**
+ * Aggregate dimension score details
+ */
+export interface AggregateDimensionScore {
+  score: number | null;
+  contributingCount: number;
+  assessmentIds: string[];
+  breakdown: Array<{
+    assessmentId: string;
+    capabilityAreaId: string;
+    capabilityAreaName: string;
+    capabilityDomainId: string;
+    capabilityDomainName: string;
+    dimensionScore: number;
+  }>;
 }
 
 /**
@@ -60,6 +81,11 @@ export interface UseScoresReturn {
     total: number;
   };
   getDimensionScoresForAssessment: (assessmentId: string) => DimensionScore[] | undefined;
+  getOrganizationalScoresForAssessment: (
+    assessmentId: string,
+    areaId: string
+  ) => DimensionScore[] | undefined;
+  getAggregateDimensionScore: (dimensionId: OrbitDimensionId) => AggregateDimensionScore;
 }
 
 /**
@@ -365,6 +391,117 @@ export function useScores(): UseScoresReturn {
     });
   };
 
+  /**
+   * Calculate aggregate score for a dimension across all qualifying finalized assessments.
+   * Used for enterprise domains (Enterprise Data Management, Enterprise Technology).
+   * Excludes enterprise domains from the calculation to prevent circular dependencies.
+   *
+   * @param dimensionId - The dimension to aggregate (e.g., 'information' or 'technology')
+   * @returns Aggregate score details including breakdown by contributing assessment
+   */
+  const getAggregateDimensionScore = (dimensionId: OrbitDimensionId): AggregateDimensionScore => {
+    if (!data) {
+      return { score: null, contributingCount: 0, assessmentIds: [], breakdown: [] };
+    }
+
+    // Filter to finalized, non-enterprise domain assessments
+    const qualifyingAssessments = data.assessments.filter(
+      (a) => a.status === 'finalized' && !isEnterpriseDomain(a.capabilityDomainId)
+    );
+
+    const breakdown: AggregateDimensionScore['breakdown'] = [];
+
+    for (const assessment of qualifyingAssessments) {
+      const ratings = data.ratingsByAssessment.get(assessment.id) ?? [];
+      const dimRatings = ratings.filter((r) => r.dimensionId === dimensionId);
+
+      // Calculate dimension score using shared function
+      const dimScore = calculateDimensionScore(dimensionId, dimRatings);
+
+      if (dimScore !== null) {
+        // Get area info for breakdown
+        const areaInfo = getAreaWithDomain(assessment.capabilityAreaId);
+        breakdown.push({
+          assessmentId: assessment.id,
+          capabilityAreaId: assessment.capabilityAreaId,
+          capabilityAreaName: areaInfo?.area.name ?? assessment.capabilityAreaName,
+          capabilityDomainId: assessment.capabilityDomainId,
+          capabilityDomainName: areaInfo?.domain.name ?? assessment.capabilityDomainName,
+          dimensionScore: dimScore,
+        });
+      }
+    }
+
+    if (breakdown.length === 0) {
+      return { score: null, contributingCount: 0, assessmentIds: [], breakdown: [] };
+    }
+
+    const avgScore =
+      Math.round(
+        (breakdown.reduce((sum, b) => sum + b.dimensionScore, 0) / breakdown.length) * 10
+      ) / 10;
+
+    return {
+      score: avgScore,
+      contributingCount: breakdown.length,
+      assessmentIds: breakdown.map((b) => b.assessmentId),
+      breakdown,
+    };
+  };
+
+  /**
+   * Get dimension scores for an organizational assessment (Outcomes or Roles).
+   * Returns a single "dimension" representing the organizational assessment type.
+   */
+  const getOrganizationalScoresForAssessment = (
+    assessmentId: string,
+    areaId: string
+  ): DimensionScore[] | undefined => {
+    if (!data) return undefined;
+
+    const ratings = data.ratingsByAssessment.get(assessmentId);
+    if (!ratings) return undefined;
+
+    // Get the organizational assessment type for this area
+    const orgType = getOrganizationalAssessmentType(areaId);
+    if (!orgType) return undefined;
+
+    // Get the organizational assessment definition
+    const orgAssessment = getOrganizationalAssessment(orgType);
+    const orgAspects = getOrganizationalAspects(orgType);
+
+    // Filter ratings to only those for this organizational assessment type
+    const orgRatings = ratings.filter((r) => r.dimensionId === orgType);
+
+    // Build aspect scores
+    const aspectScores = orgAspects.map((aspect) => {
+      const rating = orgRatings.find((r) => r.aspectId === aspect.id);
+      return {
+        aspectId: aspect.id,
+        aspectName: aspect.name,
+        dimensionId: orgType as OrbitDimensionId, // Cast for compatibility
+        subDimensionId: undefined,
+        currentLevel: rating?.currentLevel ?? 0,
+        isAssessed: rating ? rating.currentLevel !== 0 : false,
+      };
+    });
+
+    // Calculate average
+    const assessed = aspectScores.filter((a) => a.currentLevel > 0);
+    const avgLevel = calculateAverageScore(assessed.map((a) => a.currentLevel));
+
+    return [
+      {
+        dimensionId: orgType as OrbitDimensionId, // Cast for compatibility
+        dimensionName: orgAssessment.name,
+        required: true,
+        averageLevel: avgLevel,
+        aspectScores,
+        subDimensionScores: undefined,
+      },
+    ];
+  };
+
   return {
     scoresByArea: data?.scoresByArea ?? new Map(),
     getCapabilityScoreData,
@@ -380,6 +517,8 @@ export function useScores(): UseScoresReturn {
     getStatusCounts,
     getDomainStatusCounts,
     getDimensionScoresForAssessment,
+    getOrganizationalScoresForAssessment,
+    getAggregateDimensionScore,
   };
 }
 
@@ -388,10 +527,8 @@ export function useScores(): UseScoresReturn {
  */
 function getDimensionDisplayName(dimensionId: OrbitDimensionId): string {
   const names: Record<OrbitDimensionId, string> = {
-    outcomes: 'Outcomes',
-    roles: 'Roles',
     businessArchitecture: 'Business Architecture',
-    informationData: 'Information & Data',
+    information: 'Information',
     technology: 'Technology',
   };
   return names[dimensionId];
@@ -403,7 +540,7 @@ function getDimensionDisplayName(dimensionId: OrbitDimensionId): string {
 function isDimensionRequired(dimensionId: OrbitDimensionId): boolean {
   return (
     dimensionId === 'businessArchitecture' ||
-    dimensionId === 'informationData' ||
+    dimensionId === 'information' ||
     dimensionId === 'technology'
   );
 }

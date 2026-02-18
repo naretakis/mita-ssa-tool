@@ -4,7 +4,13 @@
  * Type definitions for the export and import system.
  */
 
-import type { CapabilityAssessment, OrbitRating, AssessmentHistory, Tag } from '../../types';
+import type {
+  CapabilityAssessment,
+  OrbitRating,
+  AssessmentHistory,
+  Tag,
+  OrbitDimensionId,
+} from '../../types';
 
 /**
  * Export scope options
@@ -44,6 +50,30 @@ export interface AttachmentMetadata {
 }
 
 /**
+ * Aggregate dimension metadata for export
+ */
+export interface ExportAggregateData {
+  /** The dimension that is aggregated */
+  dimensionId: OrbitDimensionId;
+  /** The aggregate score */
+  score: number | null;
+  /** Number of contributing assessments */
+  contributingCount: number;
+  /** IDs of contributing assessments */
+  contributingAssessmentIds: string[];
+}
+
+/**
+ * Enterprise domain aggregate info for export
+ */
+export interface ExportEnterpriseAssessment {
+  assessmentId: string;
+  domainId: string;
+  domainName: string;
+  aggregateData: ExportAggregateData;
+}
+
+/**
  * Export data structure (JSON format)
  */
 export interface ExportData {
@@ -71,6 +101,8 @@ export interface ExportData {
     totalAttachments: number;
     capabilities: string[];
   };
+  /** Aggregate data for enterprise domain assessments */
+  enterpriseAggregates?: ExportEnterpriseAssessment[];
 }
 
 /**
@@ -114,6 +146,10 @@ export interface CapabilityAreaProfile {
   domainName: string;
   areaName: string;
   rows: MaturityProfileRow[];
+  /** True if this is an organizational assessment (Outcomes/Roles) */
+  isOrganizationalAssessment?: boolean;
+  /** The organizational assessment type if applicable */
+  organizationalType?: 'outcomes' | 'roles';
 }
 
 /**

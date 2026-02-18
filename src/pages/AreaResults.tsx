@@ -3,6 +3,8 @@
  *
  * Shows detailed assessment results for a specific capability area.
  * Displays dimension scores, history, and detailed breakdown.
+ * Handles both standard assessments (B-I-T dimensions) and
+ * organizational assessments (Outcomes/Roles aspects).
  */
 
 import { JSX, useMemo } from 'react';
@@ -36,6 +38,8 @@ import {
   useAttachments,
 } from '../hooks';
 import { getAreaWithDomain } from '../services/capabilities';
+import { getOrganizationalAspects } from '../services/orbit';
+import { getOrganizationalAssessmentType } from '../constants';
 import { DimensionScoresTable } from '../components/results';
 import { getScoreColor } from '../utils';
 import {
@@ -51,7 +55,7 @@ import {
   LineElement,
   Filler,
 } from 'chart.js';
-import { Radar, Line } from 'react-chartjs-2';
+import { Radar, Line, Bar } from 'react-chartjs-2';
 
 // Register Chart.js components
 ChartJS.register(
@@ -68,13 +72,11 @@ ChartJS.register(
 );
 
 /**
- * Short labels for compact radar chart
+ * Short labels for compact radar chart (B-I-T only)
  */
 const SHORT_DIMENSION_LABELS: Record<string, string> = {
-  Outcomes: 'Outcomes',
-  Roles: 'Roles',
   'Business Architecture': 'Bus. Arch.',
-  'Information & Data': 'Info/Data',
+  Information: 'Info',
   Technology: 'Tech',
 };
 
@@ -102,23 +104,46 @@ export default function AreaResults(): JSX.Element {
   const { ratings } = useOrbitRatings(assessment?.id);
   const { attachments, downloadAttachment } = useAttachments(assessment?.id);
 
-  // Build dimension data for radar chart - just the 5 ORBIT dimensions
+  // Check if this is an organizational assessment
+  const organizationalType = areaId ? getOrganizationalAssessmentType(areaId) : null;
+  const isOrganizationalAssessment = organizationalType !== null;
+
+  // Build aspect data for organizational assessments
+  const aspectChartData = useMemo(() => {
+    if (!isOrganizationalAssessment || !organizationalType || !ratings) return null;
+
+    const aspects = getOrganizationalAspects(organizationalType);
+    const labels: string[] = [];
+    const scores: number[] = [];
+
+    for (const aspect of aspects) {
+      const rating = ratings.find(
+        (r) => r.dimensionId === organizationalType && r.aspectId === aspect.id
+      );
+      labels.push(aspect.name);
+      scores.push(rating?.currentLevel ?? 0);
+    }
+
+    return { labels, scores };
+  }, [isOrganizationalAssessment, organizationalType, ratings]);
+
+  // Build dimension data for radar chart - B-I-T dimensions only (standard assessments)
   const dimensionChartData = useMemo(() => {
-    if (!dimensionScores) return null;
+    if (isOrganizationalAssessment || !dimensionScores) return null;
 
     const labels: string[] = [];
     const scores: number[] = [];
 
-    // Add all 5 ORBIT dimensions (Technology is already aggregated in dimensionScores)
+    // Add B-I-T dimensions
     for (const dim of dimensionScores) {
       labels.push(SHORT_DIMENSION_LABELS[dim.dimensionName] ?? dim.dimensionName);
       scores.push(dim.averageLevel ?? 0);
     }
 
     return { labels, scores };
-  }, [dimensionScores]);
+  }, [isOrganizationalAssessment, dimensionScores]);
 
-  // Radar chart data
+  // Radar chart data (for standard assessments)
   const radarChartData = useMemo(() => {
     if (!dimensionChartData) return null;
     return {
@@ -136,6 +161,43 @@ export default function AreaResults(): JSX.Element {
       ],
     };
   }, [dimensionChartData]);
+
+  // Bar chart data (for organizational assessments)
+  const aspectBarChartData = useMemo(() => {
+    if (!aspectChartData) return null;
+    return {
+      labels: aspectChartData.labels,
+      datasets: [
+        {
+          label: 'Maturity Level',
+          data: aspectChartData.scores,
+          backgroundColor: aspectChartData.scores.map((s) => getScoreColor(s > 0 ? s : null)),
+          borderRadius: 4,
+          barThickness: 20,
+        },
+      ],
+    };
+  }, [aspectChartData]);
+
+  const aspectBarChartOptions = {
+    indexAxis: 'y' as const,
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+    },
+    scales: {
+      x: {
+        min: 0,
+        max: 5,
+        ticks: { stepSize: 1 },
+        title: { display: true, text: 'Maturity Level' },
+      },
+      y: {
+        ticks: { font: { size: 10 } },
+      },
+    },
+  };
 
   // Custom plugin to draw score labels on radar chart points
   const radarDataLabelsPlugin = useMemo(
@@ -342,7 +404,7 @@ export default function AreaResults(): JSX.Element {
           </Box>
         </Box>
 
-        {/* Right: Radar Chart + Score side by side */}
+        {/* Right: Chart + Score side by side */}
         <Paper
           elevation={1}
           sx={{
@@ -352,18 +414,29 @@ export default function AreaResults(): JSX.Element {
             gap: 2,
           }}
         >
-          {/* Radar Chart (left) */}
-          {radarChartData && (
+          {/* Radar Chart for standard assessments */}
+          {radarChartData && !isOrganizationalAssessment && (
             <Box
               sx={{ width: 180, height: 180 }}
               role="img"
-              aria-label="Radar chart showing maturity levels across ORBIT dimensions"
+              aria-label="Radar chart showing maturity levels across B-I-T dimensions"
             >
               <Radar
                 data={radarChartData}
                 options={radarChartOptions}
                 plugins={[radarDataLabelsPlugin]}
               />
+            </Box>
+          )}
+
+          {/* Bar Chart for organizational assessments */}
+          {aspectBarChartData && isOrganizationalAssessment && (
+            <Box
+              sx={{ width: 220, height: 180 }}
+              role="img"
+              aria-label={`Bar chart showing maturity levels for ${organizationalType} aspects`}
+            >
+              <Bar data={aspectBarChartData} options={aspectBarChartOptions} />
             </Box>
           )}
 
@@ -408,14 +481,75 @@ export default function AreaResults(): JSX.Element {
         </Paper>
       )}
 
-      {/* Dimension Scores Table */}
-      {dimensionScores && (
+      {/* Dimension Scores Table (for standard assessments) */}
+      {dimensionScores && !isOrganizationalAssessment && (
         <DimensionScoresTable
           dimensionScores={dimensionScores}
           ratings={ratings}
           attachments={attachments}
           onDownloadAttachment={downloadAttachment}
         />
+      )}
+
+      {/* Aspect Scores Table (for organizational assessments) */}
+      {isOrganizationalAssessment && organizationalType && (
+        <Paper sx={{ mb: 4 }}>
+          <Box sx={{ p: 2 }}>
+            <Typography variant="h6">
+              {organizationalType === 'outcomes' ? 'Outcomes' : 'Roles'} Aspect Scores
+            </Typography>
+          </Box>
+          <Divider />
+          <TableContainer>
+            <Table aria-label="Organizational assessment aspect scores">
+              <TableHead>
+                <TableRow>
+                  <TableCell component="th" scope="col">
+                    Aspect
+                  </TableCell>
+                  <TableCell component="th" scope="col" align="center" sx={{ width: 100 }}>
+                    Score
+                  </TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {getOrganizationalAspects(organizationalType).map((aspect) => {
+                  const rating = ratings.find(
+                    (r) => r.dimensionId === organizationalType && r.aspectId === aspect.id
+                  );
+                  const score = rating?.currentLevel ?? 0;
+                  return (
+                    <TableRow key={aspect.id}>
+                      <TableCell>
+                        <Typography variant="body2" fontWeight={500}>
+                          {aspect.name}
+                        </Typography>
+                        {rating?.notes && (
+                          <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                            {rating.notes}
+                          </Typography>
+                        )}
+                      </TableCell>
+                      <TableCell align="center">
+                        <Chip
+                          label={score > 0 ? score.toFixed(0) : '—'}
+                          size="small"
+                          sx={{
+                            bgcolor: score > 0 ? getScoreColor(score) : 'transparent',
+                            color: score > 0 ? 'white' : 'text.secondary',
+                            fontWeight: 600,
+                            border: score <= 0 ? '1px solid' : 'none',
+                            borderColor: 'divider',
+                          }}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Paper>
       )}
 
       {/* History */}

@@ -11,7 +11,7 @@ import { db } from '../services/db';
 import { calculateAverageScore } from '../services/scoring';
 import type {
   OrbitRating,
-  OrbitDimensionId,
+  RatingDimensionId,
   TechnologySubDimensionId,
   MaturityLevelWithNA,
   QuestionResponse,
@@ -24,7 +24,7 @@ import type {
 export interface UseOrbitRatingsReturn {
   ratings: OrbitRating[];
   saveRating: (params: {
-    dimensionId: OrbitDimensionId;
+    dimensionId: RatingDimensionId;
     subDimensionId?: TechnologySubDimensionId;
     aspectId: string;
     currentLevel: MaturityLevelWithNA;
@@ -36,46 +36,46 @@ export interface UseOrbitRatingsReturn {
     plans?: string;
   }) => Promise<void>;
   updateLevel: (
-    dimensionId: OrbitDimensionId,
+    dimensionId: RatingDimensionId,
     aspectId: string,
     currentLevel: MaturityLevelWithNA,
     subDimensionId?: TechnologySubDimensionId
   ) => Promise<void>;
   updateTargetLevel: (
-    dimensionId: OrbitDimensionId,
+    dimensionId: RatingDimensionId,
     aspectId: string,
     targetLevel: MaturityLevelWithNA | undefined,
     subDimensionId?: TechnologySubDimensionId
   ) => Promise<void>;
   updateNotes: (
-    dimensionId: OrbitDimensionId,
+    dimensionId: RatingDimensionId,
     aspectId: string,
     notes: string,
     subDimensionId?: TechnologySubDimensionId
   ) => Promise<void>;
   updateBarriers: (
-    dimensionId: OrbitDimensionId,
+    dimensionId: RatingDimensionId,
     aspectId: string,
     barriers: string,
     subDimensionId?: TechnologySubDimensionId
   ) => Promise<void>;
   updatePlans: (
-    dimensionId: OrbitDimensionId,
+    dimensionId: RatingDimensionId,
     aspectId: string,
     plans: string,
     subDimensionId?: TechnologySubDimensionId
   ) => Promise<void>;
   getRating: (
-    dimensionId: OrbitDimensionId,
+    dimensionId: RatingDimensionId,
     aspectId: string,
     subDimensionId?: TechnologySubDimensionId
   ) => OrbitRating | undefined;
-  getRatingsForDimension: (dimensionId: OrbitDimensionId) => OrbitRating[];
+  getRatingsForDimension: (dimensionId: RatingDimensionId) => OrbitRating[];
   getRatingsForSubDimension: (subDimensionId: TechnologySubDimensionId) => OrbitRating[];
   getAssessedCount: () => number;
-  getAssessedCountForDimension: (dimensionId: OrbitDimensionId) => number;
-  isDimensionComplete: (dimensionId: OrbitDimensionId, totalAspects: number) => boolean;
-  getAverageLevelForDimension: (dimensionId: OrbitDimensionId) => number | null;
+  getAssessedCountForDimension: (dimensionId: RatingDimensionId) => number;
+  isDimensionComplete: (dimensionId: RatingDimensionId, totalAspects: number) => boolean;
+  getAverageLevelForDimension: (dimensionId: RatingDimensionId) => number | null;
   getOverallAverageLevel: () => number | null;
 }
 
@@ -96,7 +96,7 @@ export function useOrbitRatings(capabilityAssessmentId: string | undefined): Use
    * Save or update a rating for an aspect
    */
   const saveRating = async (params: {
-    dimensionId: OrbitDimensionId;
+    dimensionId: RatingDimensionId;
     subDimensionId?: TechnologySubDimensionId;
     aspectId: string;
     currentLevel: MaturityLevelWithNA;
@@ -177,7 +177,7 @@ export function useOrbitRatings(capabilityAssessmentId: string | undefined): Use
    * Update just the maturity level for an aspect
    */
   const updateLevel = async (
-    dimensionId: OrbitDimensionId,
+    dimensionId: RatingDimensionId,
     aspectId: string,
     currentLevel: MaturityLevelWithNA,
     subDimensionId?: TechnologySubDimensionId
@@ -227,7 +227,7 @@ export function useOrbitRatings(capabilityAssessmentId: string | undefined): Use
    * Update the target (To Be) maturity level for an aspect
    */
   const updateTargetLevel = async (
-    dimensionId: OrbitDimensionId,
+    dimensionId: RatingDimensionId,
     aspectId: string,
     targetLevel: MaturityLevelWithNA | undefined,
     subDimensionId?: TechnologySubDimensionId
@@ -278,7 +278,7 @@ export function useOrbitRatings(capabilityAssessmentId: string | undefined): Use
    * Update notes for an aspect
    */
   const updateNotes = async (
-    dimensionId: OrbitDimensionId,
+    dimensionId: RatingDimensionId,
     aspectId: string,
     notes: string,
     subDimensionId?: TechnologySubDimensionId
@@ -304,7 +304,7 @@ export function useOrbitRatings(capabilityAssessmentId: string | undefined): Use
    * Update barriers for an aspect
    */
   const updateBarriers = async (
-    dimensionId: OrbitDimensionId,
+    dimensionId: RatingDimensionId,
     aspectId: string,
     barriers: string,
     subDimensionId?: TechnologySubDimensionId
@@ -330,7 +330,7 @@ export function useOrbitRatings(capabilityAssessmentId: string | undefined): Use
    * Update advancement plans for an aspect
    */
   const updatePlans = async (
-    dimensionId: OrbitDimensionId,
+    dimensionId: RatingDimensionId,
     aspectId: string,
     plans: string,
     subDimensionId?: TechnologySubDimensionId
@@ -356,7 +356,7 @@ export function useOrbitRatings(capabilityAssessmentId: string | undefined): Use
    * Get rating for a specific aspect
    */
   const getRating = (
-    dimensionId: OrbitDimensionId,
+    dimensionId: RatingDimensionId,
     aspectId: string,
     subDimensionId?: TechnologySubDimensionId
   ): OrbitRating | undefined => {
@@ -371,7 +371,7 @@ export function useOrbitRatings(capabilityAssessmentId: string | undefined): Use
   /**
    * Get all ratings for a dimension
    */
-  const getRatingsForDimension = (dimensionId: OrbitDimensionId): OrbitRating[] => {
+  const getRatingsForDimension = (dimensionId: RatingDimensionId): OrbitRating[] => {
     return ratings?.filter((r) => r.dimensionId === dimensionId) ?? [];
   };
 
@@ -396,7 +396,7 @@ export function useOrbitRatings(capabilityAssessmentId: string | undefined): Use
   /**
    * Get count of assessed aspects for a dimension
    */
-  const getAssessedCountForDimension = (dimensionId: OrbitDimensionId): number => {
+  const getAssessedCountForDimension = (dimensionId: RatingDimensionId): number => {
     return (
       ratings?.filter(
         (r) => r.dimensionId === dimensionId && (r.currentLevel > 0 || r.currentLevel === -1)
@@ -407,14 +407,14 @@ export function useOrbitRatings(capabilityAssessmentId: string | undefined): Use
   /**
    * Check if all aspects in a dimension are assessed
    */
-  const isDimensionComplete = (dimensionId: OrbitDimensionId, totalAspects: number): boolean => {
+  const isDimensionComplete = (dimensionId: RatingDimensionId, totalAspects: number): boolean => {
     return getAssessedCountForDimension(dimensionId) >= totalAspects;
   };
 
   /**
    * Calculate average level for a dimension (excluding N/A and not assessed)
    */
-  const getAverageLevelForDimension = (dimensionId: OrbitDimensionId): number | null => {
+  const getAverageLevelForDimension = (dimensionId: RatingDimensionId): number | null => {
     const dimRatings = getRatingsForDimension(dimensionId).filter((r) => r.currentLevel > 0);
     if (dimRatings.length === 0) return null;
     return calculateAverageScore(dimRatings.map((r) => r.currentLevel));
@@ -453,7 +453,7 @@ export function useOrbitRatings(capabilityAssessmentId: string | undefined): Use
  */
 async function findExistingRating(
   capabilityAssessmentId: string,
-  dimensionId: OrbitDimensionId,
+  dimensionId: RatingDimensionId,
   aspectId: string,
   subDimensionId?: TechnologySubDimensionId
 ): Promise<OrbitRating | undefined> {

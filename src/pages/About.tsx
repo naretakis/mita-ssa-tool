@@ -69,7 +69,7 @@ export default function About(): JSX.Element {
             </ListItemIcon>
             <ListItemText
               primary="Complete the ORBIT Assessment"
-              secondary="Each capability is assessed across five ORBIT dimensions: Outcomes, Roles, Business Architecture, Information & Data, and Technology. For each dimension, you'll rate your current maturity level (1-5) and can optionally set a target level. The tool provides guiding questions to help you determine the appropriate level."
+              secondary="Each capability is assessed across five ORBIT dimensions: Outcomes, Roles, Business Architecture, Information, and Technology. For each dimension, you'll rate your current maturity level (1-5) and can optionally set a target level. The tool provides guiding questions to help you determine the appropriate level."
             />
           </ListItem>
 
@@ -218,7 +218,7 @@ export default function About(): JSX.Element {
             <ListItemText
               primary={
                 <>
-                  <strong>Information & Data</strong> (Required)
+                  <strong>Information</strong> (Required)
                 </>
               }
               secondary="Data governance and management"

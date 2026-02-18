@@ -299,17 +299,6 @@
             "Agreement Versions",
             "Oversight Reporting"
           ]
-        },
-        {
-          "id": "contractor-grievance-appeal",
-          "name": "Contractor Grievance and Appeal",
-          "description": "The ability to process and resolve contractor grievances and appeals.",
-          "topics": [
-            "Grievance Handling",
-            "Appeal Processing",
-            "Resolution Tracking",
-            "Compliance Documentation"
-          ]
         }
       ]
     },
@@ -593,9 +582,9 @@
     },
     {
       "id": "data-management",
-      "name": "Data Management",
+      "name": "Enterprise Data Management",
       "layer": "support",
-      "description": "The Data Management Capability Domain represents the SMA's ability to manage its data. The domain encompasses key data management capability areas organized into Foundational (oversight and structure) and Lifecycle (data through planning, design, use, enhancement, enablement, and maintenance) categories.",
+      "description": "The Enterprise Data Management Capability Domain represents the SMA's ability to manage its data. The domain encompasses key data management capability areas organized into Foundational (oversight and structure) and Lifecycle (data through planning, design, use, enhancement, enablement, and maintenance) categories.",
       "categories": [
         {
           "id": "foundational",
@@ -739,9 +728,9 @@
     },
     {
       "id": "technical",
-      "name": "Technical",
+      "name": "Enterprise Technology",
       "layer": "support",
-      "description": "The Technical Capability Domain represents the SMA's technology capabilities that enable and support core and strategic capabilities. Organized into seven categories: Infrastructure, Integration, Platform Services, Application Architecture, Security and Identity, Operations and Maintenance, and Development and Release.",
+      "description": "The Enterprise Technology Capability Domain represents the SMA's technology capabilities that enable and support core and strategic capabilities. Organized into seven categories: Infrastructure, Integration, Platform Services, Application Architecture, Security and Identity, Operations and Maintenance, and Development and Release.",
       "categories": [
         {
           "id": "infrastructure",
@@ -961,6 +950,40 @@
                 "Adhering to Compliance Standards"
               ]
             }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "enterprise-governance",
+      "name": "Enterprise Governance",
+      "layer": "support",
+      "description": "The Enterprise Governance domain assesses organizational maturity in defining outcomes and managing roles across the Medicaid enterprise. These capabilities apply at the organizational level rather than to specific business functions.",
+      "areas": [
+        {
+          "id": "organizational-outcomes",
+          "name": "Organizational Outcomes",
+          "description": "Assesses the organization's maturity in defining, tracking, and achieving desired outcomes across the Medicaid enterprise. Covers culture, capability, quality, alignment, metrics, and reusability of outcome practices.",
+          "topics": [
+            "Culture & Mindset",
+            "Outcome Development Capability",
+            "Quality & Consistency",
+            "Goal Alignment",
+            "Metrics & Measurement",
+            "Reusability & Integration"
+          ]
+        },
+        {
+          "id": "organizational-roles",
+          "name": "Organizational Roles",
+          "description": "Assesses the organization's maturity in managing roles, resources, governance, and capacity across the Medicaid enterprise. Covers technology resources, goal alignment, governance, communication, leadership, and staffing.",
+          "topics": [
+            "Technology Resources",
+            "Organizational Goals Alignment",
+            "Governance & Standardization",
+            "Communication",
+            "Culture & Leadership",
+            "Resourcing Capacity"
           ]
         }
       ]

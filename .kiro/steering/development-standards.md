@@ -16,15 +16,15 @@ The MITA 4.0 State Self-Assessment Tool is a Progressive Web App (PWA) that enab
 
 ### Key Domain Terminology
 
-| Term                  | Definition                                                                                                       |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Capability Domain** | High-level capability grouping (e.g., "Provider Management"). 14 domains across 3 layers.                        |
-| **Capability Area**   | Specific capability being assessed (e.g., "Provider Enrollment"). 75 total areas.                                |
-| **ORBIT**             | Assessment framework: **O**utcomes, **R**oles, **B**usiness Architecture, **I**nformation & Data, **T**echnology |
-| **Dimension**         | One of the 5 ORBIT categories. Business Architecture, Information & Data, and Technology are required.           |
-| **Sub-Dimension**     | Only applies to Technology (7 sub-dimensions: Infrastructure, Integration, etc.)                                 |
-| **Aspect**            | Individual assessment criteria within a dimension (52 total aspects)                                             |
-| **Maturity Level**    | Rating from 1 (Initial) to 5 (Optimized), or N/A (-1)                                                            |
+| Term                  | Definition                                                                                                |
+| --------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Capability Domain** | High-level capability grouping (e.g., "Provider Management"). 14 domains across 3 layers.                 |
+| **Capability Area**   | Specific capability being assessed (e.g., "Provider Enrollment"). 75 total areas.                         |
+| **ORBIT**             | Assessment framework: **O**utcomes, **R**oles, **B**usiness Architecture, **I**nformation, **T**echnology |
+| **Dimension**         | One of the 5 ORBIT categories. Business Architecture, Information, and Technology are required.           |
+| **Sub-Dimension**     | Only applies to Technology (7 sub-dimensions: Infrastructure, Integration, etc.)                          |
+| **Aspect**            | Individual assessment criteria within a dimension (52 total aspects)                                      |
+| **Maturity Level**    | Rating from 1 (Initial) to 5 (Optimized), or N/A (-1)                                                     |
 
 ### Primary Data Files
 
@@ -273,7 +273,7 @@ type OrbitDimensionId =
   | 'outcomes'
   | 'roles'
   | 'businessArchitecture'
-  | 'informationData'
+  | 'information'
   | 'technology';
 type MaturityLevelWithNA = -1 | 0 | 1 | 2 | 3 | 4 | 5;
 type ScoreMap = Record<string, number>;

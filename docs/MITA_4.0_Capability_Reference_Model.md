@@ -2,10 +2,11 @@
 
 ## Version History
 
-| Version | Date              | Author        | Notes           |
-| ------- | ----------------- | ------------- | --------------- |
-| 0.1     | August 8, 2025    | D. Carter     | Initial Outline |
-| 1.0     | December 17, 2025 | NextGen Leads | Initial Draft   |
+| Version | Date              | Author        | Notes                              |
+| ------- | ----------------- | ------------- | ---------------------------------- |
+| 0.1     | August 8, 2025    | D. Carter     | Initial Outline                    |
+| 1.0     | December 17, 2025 | NextGen Leads | Initial Draft                      |
+| 1.1     | January 21, 2026  | NextGen Leads | Added Enterprise Governance domain |
 
 ---
 
@@ -25,6 +26,7 @@
 - [5 Support Capability Areas](#5-support-capability-areas)
   - [5.1 Data Management Capability Domain](#51-data-management-capability-domain)
   - [5.2 Technical Capability Areas](#52-technical-capability-areas)
+  - [5.3 Enterprise Governance](#53-enterprise-governance)
 
 ---
 
@@ -951,7 +953,7 @@ The Data Management Capability model makes a distinction between managing data a
 - Audit Support
 - Compliance with CMS and NIST Security Standards
 
-#### Operations and Monitoring
+#### Operations and Maintenance
 
 ##### Systems Monitoring
 
@@ -1000,3 +1002,35 @@ The Data Management Capability model makes a distinction between managing data a
 
 - Incorporating Security Checks before Deployment
 - Adhering to Compliance Standards
+
+---
+
+### 5.3 Enterprise Governance
+
+The Enterprise Governance domain assesses organizational maturity in defining outcomes and managing roles across the Medicaid enterprise. These capabilities apply at the organizational level rather than to specific business functions.
+
+#### Organizational Outcomes
+
+**Definition:** Assesses the organization's maturity in defining, tracking, and achieving desired outcomes across the Medicaid enterprise. Covers culture, capability, quality, alignment, metrics, and reusability of outcome practices.
+
+**Topics:**
+
+- Culture & Mindset
+- Outcome Development Capability
+- Quality & Consistency
+- Goal Alignment
+- Metrics & Measurement
+- Reusability & Integration
+
+#### Organizational Roles
+
+**Definition:** Assesses the organization's maturity in managing roles, resources, governance, and capacity across the Medicaid enterprise. Covers technology resources, goal alignment, governance, communication, leadership, and staffing.
+
+**Topics:**
+
+- Technology Resources
+- Organizational Goals Alignment
+- Governance & Standardization
+- Communication
+- Culture & Leadership
+- Resourcing Capacity

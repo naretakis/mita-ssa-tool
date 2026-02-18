@@ -5,15 +5,72 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-02-02
+
+### Changed
+
+- Extracted Outcomes and Roles from per-capability ORBIT dimensions to organizational-level assessments
+- Standard capability assessments now use B-I-T dimensions only (Business Architecture, Information, Technology)
+- Dashboard now groups domains by layer (Strategic, Core, Support) with visual section headers
+- Assessment sidebar adapts to organizational assessments, showing aspects directly instead of dimensions
+- Updated type system: `OrbitDimensionId` now only includes B-I-T; new `OrganizationalAssessmentId` for O&R
+- New `RatingDimensionId` union type for flexible rating storage supporting both assessment types
+- CSV export now generates B-I-T only rows for standard assessments (was O-R-B-I-T)
+- CSV export uses "Aspect" column header for organizational assessments instead of "ORBIT"
+- CSV parser now handles both "ORBIT" and "Aspect" column headers for import compatibility
+- Area Results page now shows radar chart for B-I-T dimensions (standard) or bar chart for aspects (organizational)
+- Area Results page displays aspect-level table for organizational assessments instead of dimension scores table
+
+### Added
+
+- New "Enterprise Governance" domain in Support Layer with two capability areas:
+  - Organizational Outcomes: Assesses enterprise-wide outcome maturity (6 aspects)
+  - Organizational Roles: Assesses enterprise-wide role management maturity (6 aspects)
+- New organizational assessment functions in `orbit.ts`: `getOrganizationalAssessment`, `getOrganizationalAspects`, `getOrganizationalAspectCount`, `getOrganizationalAspect`
+- New helper functions in `constants/index.ts`: `isOrganizationalAssessmentArea`, `getOrganizationalAssessmentType`
+- Layer grouping in dashboard with color-coded headers (Strategic: blue, Core: green, Support: purple)
+- Organizational assessment navigation mode in AssessmentSidebar for direct aspect selection
+- Import service now filters ratings based on assessment type:
+  - Standard assessments: only import B-I-T ratings, skip orphaned O&R ratings from old exports
+  - Organizational assessments: only import outcomes/roles ratings, skip B-I-T ratings
+- New tests for B-I-T only filtering and organizational assessment import handling
+- New tests for organizational assessment CSV format with "Aspect" header
+
+---
+
 ## [2.0.5] - 2026-01-28
 
 ### Changed
 
+- Renamed ORBIT dimension "Information & Data" to "Information" (ID: `informationData` → `information`)
+- Renamed domain "Data Management" to "Enterprise Data Management"
+- Renamed domain "Technical" to "Enterprise Technology"
+- Enterprise Data Management domain now assesses B-T only; Information dimension shows aggregate score from all other finalized assessments
+- Enterprise Technology domain now assesses B-I only; Technology dimension shows aggregate score from all other finalized assessments
+- Aggregate dimension scores are included in overall capability score calculations for enterprise domains
+- Updated CSV export template to use "Information" instead of "Information & Data"
+- Updated PDF export to reflect new dimension and domain names
+- History snapshots for enterprise domains now store aggregate score at snapshot time for point-in-time accuracy
+- CSV export now includes "(Aggregate from X assessments)" note for aggregate dimensions
+- JSON/ZIP export now includes `enterpriseAggregates` metadata with contributing assessment IDs
 - Improved assessment sidebar layout with column headers (Dimension, Prog, Score) for better clarity
 - Technology dimension now displays as a parent row with rolled-up progress and score, with sub-dimensions indented underneath
 - Progress indicators now use color-coded chips: plain text for not started, amber for in progress, green with checkmark for complete
 - Streamlined dimension header in assessment view by removing redundant progress display (already shown in sidebar)
 - Dimension header now uses inline layout for more compact appearance
+
+### Added
+
+- New `AggregateDimensionView` component for displaying aggregate scores in enterprise domains
+- Aggregate dimension indicator in assessment sidebar with score preview
+- Score breakdown view showing contributing assessments for aggregate dimensions
+- New helper functions in `orbit.ts`: `getAggregatedDimensionForDomain`, `isAggregatedDimension`, `hasAggregatedDimension`, `isEnterpriseDomain`
+- New `getAggregateDimensionScore` function in `useScores` hook for calculating aggregate scores
+- Enterprise domain configuration constants: `ENTERPRISE_DOMAIN_IDS`, `DOMAIN_AGGREGATE_DIMENSIONS`
+- `AggregateSnapshotData` type for storing aggregate metadata in history snapshots
+- `ExportAggregateData` and `ExportEnterpriseAssessment` types for export metadata
+- History view now properly displays stored aggregate scores for enterprise domain snapshots
+- Import backwards compatibility: files exported with old `informationData` dimension ID are automatically mapped to `information` during import
 
 ### Removed
 

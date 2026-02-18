@@ -27,11 +27,30 @@ import WarningIcon from '@mui/icons-material/Warning';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import type { DimensionScore, OrbitRating, Attachment, MaturityLevelWithNA } from '../../types';
+import type {
+  DimensionScore,
+  OrbitRating,
+  Attachment,
+  MaturityLevelWithNA,
+  OrbitDimensionId,
+  OrganizationalAssessmentId,
+  LevelKey,
+} from '../../types';
 import { MATURITY_LEVEL_NAMES } from '../../types';
-import { getAspect, getMaturityLevelMeta } from '../../services/orbit';
+import { getAspect, getMaturityLevelMeta, getOrganizationalAspect } from '../../services/orbit';
 import { SCORE_COLORS } from '../../utils';
-import type { LevelKey } from '../../types';
+
+/**
+ * Extended dimension score with optional aggregate metadata.
+ * Used when displaying enterprise domain assessments where one dimension
+ * is aggregated from other assessments.
+ */
+export interface ExtendedDimensionScore extends DimensionScore {
+  /** Whether this dimension score is an aggregate from multiple assessments */
+  isAggregate?: boolean;
+  /** Number of assessments contributing to the aggregate score */
+  aggregateContributingCount?: number;
+}
 
 interface TargetDimScore {
   dimensionId: string;
@@ -39,7 +58,7 @@ interface TargetDimScore {
 }
 
 interface DimensionScoresTableWithTargetProps {
-  dimensionScores: DimensionScore[];
+  dimensionScores: ExtendedDimensionScore[];
   targetDimScores: TargetDimScore[];
   ratings: OrbitRating[];
   attachments: Attachment[];
@@ -94,7 +113,20 @@ function AspectDetailRow({
   attachments: Attachment[];
   onDownloadAttachment: (attachment: Attachment) => void;
 }): JSX.Element {
-  const aspect = getAspect(rating.dimensionId, rating.aspectId, rating.subDimensionId);
+  // Get aspect name from ORBIT model - handle both standard and organizational assessments
+  let aspect;
+  if (rating.dimensionId === 'outcomes' || rating.dimensionId === 'roles') {
+    aspect = getOrganizationalAspect(
+      rating.dimensionId as OrganizationalAssessmentId,
+      rating.aspectId
+    );
+  } else {
+    aspect = getAspect(
+      rating.dimensionId as OrbitDimensionId,
+      rating.aspectId,
+      rating.subDimensionId
+    );
+  }
   const aspectName = aspect?.name ?? rating.aspectId;
   const ratingAttachments = attachments.filter((a) => a.orbitRatingId === rating.id);
   const hasNotes = rating.notes.trim().length > 0;
@@ -260,6 +292,8 @@ function DimensionRow({
   onDownloadAttachment,
   isSubDimension = false,
   subDimensionId,
+  isAggregate = false,
+  aggregateContributingCount,
 }: {
   dimensionName: string;
   dimensionId: string;
@@ -272,6 +306,8 @@ function DimensionRow({
   onDownloadAttachment: (attachment: Attachment) => void;
   isSubDimension?: boolean;
   subDimensionId?: string;
+  isAggregate?: boolean;
+  aggregateContributingCount?: number;
 }): JSX.Element {
   const [open, setOpen] = useState(false);
   const detailsId = `dimension-details-${subDimensionId ?? dimensionId}`;
@@ -283,7 +319,8 @@ function DimensionRow({
     return r.dimensionId === dimensionId && !r.subDimensionId;
   });
 
-  const hasRatings = dimensionRatings.length > 0;
+  // Aggregate dimensions don't have individual ratings to expand
+  const hasRatings = !isAggregate && dimensionRatings.length > 0;
 
   const handleToggle = (): void => {
     if (hasRatings) {
@@ -361,12 +398,28 @@ function DimensionRow({
               </Typography>
             </Box>
           ) : (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
               <Box sx={{ width: 24, mr: 0.5 }} />
               {dimensionName}
-              <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
-                ({assessedCount}/{totalCount})
-              </Typography>
+              {isAggregate ? (
+                <Chip
+                  label={`Aggregate (${aggregateContributingCount ?? 0} areas)`}
+                  size="small"
+                  variant="outlined"
+                  sx={{
+                    ml: 1,
+                    height: 20,
+                    fontSize: '0.65rem',
+                    borderColor: 'info.main',
+                    color: 'info.main',
+                  }}
+                  aria-label={`Aggregate score from ${aggregateContributingCount ?? 0} capability areas`}
+                />
+              ) : (
+                <Typography variant="caption" color="text.secondary" sx={{ ml: 1 }}>
+                  ({assessedCount}/{totalCount})
+                </Typography>
+              )}
             </Box>
           )}
         </TableCell>
@@ -631,8 +684,9 @@ export function DimensionScoresTableWithTarget({
           <TableBody>
             {dimensionScores.map((dim, idx) => {
               const targetLevel = targetDimScores[idx]?.targetLevel ?? null;
+              const extendedDim = dim as ExtendedDimensionScore;
 
-              if (dim.dimensionId === 'technology') {
+              if (dim.dimensionId === 'technology' && !extendedDim.isAggregate) {
                 return (
                   <TechnologyDimensionRows
                     key={dim.dimensionId}
@@ -658,6 +712,8 @@ export function DimensionScoresTableWithTarget({
                   ratings={ratings}
                   attachments={attachments}
                   onDownloadAttachment={onDownloadAttachment}
+                  isAggregate={extendedDim.isAggregate}
+                  aggregateContributingCount={extendedDim.aggregateContributingCount}
                 />
               );
             })}
