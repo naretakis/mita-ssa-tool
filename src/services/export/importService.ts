@@ -309,8 +309,8 @@ export async function importFromZip(
             }
           }
         }
-      } catch (error) {
-        console.error('Failed to import attachment:', path, error);
+      } catch {
+        // Silently skip failed attachment imports - non-critical
       }
     }
   }

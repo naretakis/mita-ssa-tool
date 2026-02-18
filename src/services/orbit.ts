@@ -209,14 +209,6 @@ export function getTotalAspectCount(): number {
 }
 
 /**
- * Get aspect count for standard assessments (B-I-T dimensions only)
- * @returns Total number of aspects in B-I-T dimensions
- */
-export function getStandardAspectCount(): number {
-  return getTotalAspectCount();
-}
-
-/**
  * Get aspect count for a specific dimension
  * @param dimensionId - The dimension ID
  * @returns Number of aspects in the dimension
@@ -325,27 +317,6 @@ export function getAspectLocation(aspectId: string):
  */
 export function getAggregatedDimensionForDomain(domainId: string): OrbitDimensionId | null {
   return DOMAIN_AGGREGATE_DIMENSIONS[domainId] ?? null;
-}
-
-/**
- * Check if a dimension should show aggregate scores for a given domain.
- *
- * @param domainId - The domain ID
- * @param dimensionId - The dimension ID to check
- * @returns True if this dimension is aggregated for this domain
- */
-export function isAggregatedDimension(domainId: string, dimensionId: OrbitDimensionId): boolean {
-  return DOMAIN_AGGREGATE_DIMENSIONS[domainId] === dimensionId;
-}
-
-/**
- * Check if a domain has any aggregated dimensions (is an enterprise domain).
- *
- * @param domainId - The domain ID to check
- * @returns True if this domain has an aggregated dimension
- */
-export function hasAggregatedDimension(domainId: string): boolean {
-  return domainId in DOMAIN_AGGREGATE_DIMENSIONS;
 }
 
 /**

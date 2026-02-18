@@ -46,11 +46,6 @@ export const DOMAIN_AGGREGATE_DIMENSIONS: Partial<Record<string, OrbitDimensionI
 // =============================================================================
 
 /**
- * Domain ID for Enterprise Governance (organizational assessments).
- */
-export const ENTERPRISE_GOVERNANCE_DOMAIN_ID = 'enterprise-governance';
-
-/**
  * Capability area IDs that use organizational assessment mode.
  * These areas assess Outcomes/Roles aspects directly, not through ORBIT dimensions.
  */

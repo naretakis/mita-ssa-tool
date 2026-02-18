@@ -60,9 +60,8 @@ export default function Dashboard(): JSX.Element {
       try {
         const assessmentId = await startAssessment(areaId);
         navigate(`/assessment/${assessmentId}`);
-      } catch (error) {
+      } catch {
         showSnackbar('Failed to start assessment', 'error');
-        console.error('Failed to start assessment:', error);
       }
     },
     [startAssessment, navigate]
@@ -85,9 +84,8 @@ export default function Dashboard(): JSX.Element {
         try {
           await editAssessment(assessment.id);
           navigate(`/assessment/${assessment.id}`);
-        } catch (error) {
+        } catch {
           showSnackbar('Failed to edit assessment', 'error');
-          console.error('Failed to edit assessment:', error);
         }
       }
     },
@@ -141,9 +139,8 @@ export default function Dashboard(): JSX.Element {
         await deleteHistoryEntry(deleteTarget.historyId);
         showSnackbar('History entry deleted', 'success');
       }
-    } catch (error) {
+    } catch {
       showSnackbar('Failed to delete', 'error');
-      console.error('Delete failed:', error);
     } finally {
       setDeleteTarget(null);
     }

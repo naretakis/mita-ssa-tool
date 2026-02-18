@@ -527,7 +527,7 @@ describe('useScores', () => {
       const counts = result.current.getStatusCounts();
       expect(counts.inProgress).toBe(1);
       expect(counts.finalized).toBe(2);
-      expect(counts.total).toBe(77); // Total capability areas (75 original + 2 organizational)
+      expect(counts.total).toBe(76); // Total capability areas (74 original + 2 organizational)
     });
   });
 
