@@ -953,7 +953,7 @@ The Data Management Capability model makes a distinction between managing data a
 - Audit Support
 - Compliance with CMS and NIST Security Standards
 
-#### Operations and Monitoring
+#### Operations and Maintenance
 
 ##### Systems Monitoring
 
