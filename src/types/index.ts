@@ -97,10 +97,14 @@ export interface CapabilityReferenceModel {
 // =============================================================================
 
 /**
- * The three ORBIT dimension IDs (B-I-T)
+ * The four ORBIT dimension IDs (B-EA-I-T)
  * Note: Outcomes and Roles are now organizational assessments, not per-capability dimensions
  */
-export type OrbitDimensionId = 'businessArchitecture' | 'information' | 'technology';
+export type OrbitDimensionId =
+  | 'businessArchitecture'
+  | 'enterpriseArchitecture'
+  | 'information'
+  | 'technology';
 
 /**
  * Organizational assessment type IDs (formerly O&R dimensions)
@@ -118,13 +122,8 @@ export type RatingDimensionId = OrbitDimensionId | OrganizationalAssessmentId;
  * Technology sub-dimension IDs
  */
 export type TechnologySubDimensionId =
-  | 'infrastructure'
-  | 'integration'
-  | 'platformServices'
-  | 'applicationArchitecture'
-  | 'securityIdentity'
-  | 'operationsMaintenance'
-  | 'developmentRelease';
+  | 'technologyInfrastructureManagement'
+  | 'applicationManagement';
 
 /**
  * Maturity levels 1-5, 0 for not assessed, -1 for N/A
@@ -249,6 +248,7 @@ export interface OrbitModel {
   };
   dimensions: {
     businessArchitecture: OrbitDimension;
+    enterpriseArchitecture: OrbitDimension;
     information: OrbitDimension;
     technology: TechnologyDimension;
   };
@@ -304,7 +304,7 @@ export interface EvidenceResponse {
 
 /**
  * ORBIT Rating - one per aspect per capability assessment
- * For standard assessments: dimensionId is OrbitDimensionId (B, I, T)
+ * For standard assessments: dimensionId is OrbitDimensionId (B, EA, I, T)
  * For organizational assessments: dimensionId is OrganizationalAssessmentId ('outcomes' | 'roles')
  */
 export interface OrbitRating {

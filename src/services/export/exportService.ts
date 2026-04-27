@@ -598,9 +598,10 @@ function generateStandardAreaProfile(
   ratings: OrbitRating[],
   aggregateData?: { dimensionId: OrbitDimensionId; score: number | null; contributingCount: number }
 ): CapabilityAreaProfile {
-  // Map dimension IDs to display names (B-I-T only)
+  // Map dimension IDs to display names (B-EA-I-T)
   const dimensionMap: Record<OrbitDimensionId, string> = {
     businessArchitecture: 'Business Architecture',
+    enterpriseArchitecture: 'Enterprise Architecture',
     information: 'Information',
     technology: 'Technology',
   };

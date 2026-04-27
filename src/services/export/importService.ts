@@ -26,22 +26,15 @@ import type {
 } from '../../types';
 
 /** Current supported export version */
-const SUPPORTED_VERSIONS = ['1.0'];
+const SUPPORTED_VERSIONS = ['1.0', '2.0'];
 
 /**
- * Maps legacy dimension IDs to current dimension IDs.
- * Used for backwards compatibility when importing older exports.
- */
-const LEGACY_DIMENSION_ID_MAP: Record<string, OrbitDimensionId> = {
-  informationData: 'information',
-};
-
-/**
- * Valid dimension IDs for standard capability assessments (B-I-T only).
+ * Valid dimension IDs for standard capability assessments (B-EA-I-T).
  * Outcomes and Roles are only valid for organizational assessments.
  */
 const STANDARD_DIMENSION_IDS: OrbitDimensionId[] = [
   'businessArchitecture',
+  'enterpriseArchitecture',
   'information',
   'technology',
 ];
@@ -52,33 +45,23 @@ const STANDARD_DIMENSION_IDS: OrbitDimensionId[] = [
 const ORGANIZATIONAL_DIMENSION_IDS: RatingDimensionId[] = ['outcomes', 'roles'];
 
 /**
- * Normalizes a dimension ID, mapping legacy IDs to current ones.
- * @param dimensionId - The dimension ID from imported data
- * @returns The normalized dimension ID
- */
-function normalizeDimensionId(dimensionId: string): RatingDimensionId {
-  return (LEGACY_DIMENSION_ID_MAP[dimensionId] ?? dimensionId) as RatingDimensionId;
-}
-
-/**
  * Checks if a rating should be imported for a given assessment.
  * - For organizational assessments: only import 'outcomes' or 'roles' ratings
- * - For standard assessments: only import B-I-T ratings, skip orphaned O&R
+ * - For standard assessments: only import B-EA-I-T ratings, skip orphaned O&R
  *
  * @param rating - The rating to check
  * @param isOrganizational - Whether the assessment is organizational
  * @returns True if the rating should be imported
  */
 function shouldImportRating(rating: { dimensionId: string }, isOrganizational: boolean): boolean {
-  const normalizedDimId = normalizeDimensionId(rating.dimensionId);
+  const dimId = rating.dimensionId as RatingDimensionId;
 
   if (isOrganizational) {
     // Organizational assessments only accept outcomes/roles ratings
-    return ORGANIZATIONAL_DIMENSION_IDS.includes(normalizedDimId);
+    return ORGANIZATIONAL_DIMENSION_IDS.includes(dimId);
   } else {
-    // Standard assessments only accept B-I-T ratings
-    // Skip orphaned O&R ratings from old exports
-    return STANDARD_DIMENSION_IDS.includes(normalizedDimId as OrbitDimensionId);
+    // Standard assessments only accept B-EA-I-T ratings
+    return STANDARD_DIMENSION_IDS.includes(dimId as OrbitDimensionId);
   }
 }
 
@@ -280,7 +263,7 @@ export async function importFromZip(
                     );
                     return (
                       originalRating &&
-                      r.dimensionId === normalizeDimensionId(originalRating.dimensionId) &&
+                      r.dimensionId === (originalRating.dimensionId as RatingDimensionId) &&
                       r.aspectId === originalRating.aspectId
                     );
                   })
@@ -446,7 +429,7 @@ async function processAssessmentImport(
         ...rating,
         id: uuidv4(),
         capabilityAssessmentId: newAssessmentId,
-        dimensionId: normalizeDimensionId(rating.dimensionId),
+        dimensionId: rating.dimensionId as RatingDimensionId,
         updatedAt: new Date(rating.updatedAt),
         attachmentIds: [], // Attachments handled separately
       });
@@ -519,7 +502,7 @@ async function processAssessmentImport(
         ...rating,
         id: uuidv4(),
         capabilityAssessmentId: existingAssessment.id,
-        dimensionId: normalizeDimensionId(rating.dimensionId),
+        dimensionId: rating.dimensionId as RatingDimensionId,
         updatedAt: new Date(rating.updatedAt),
         attachmentIds: [],
       });
@@ -562,7 +545,7 @@ async function processAssessmentImport(
       // Normalize dimension IDs for backwards compatibility with older exports
       const normalizedRatings = importedRatings.map((r) => ({
         ...r,
-        dimensionId: normalizeDimensionId(r.dimensionId),
+        dimensionId: r.dimensionId as RatingDimensionId,
       }));
       await db.assessmentHistory.add({
         id: uuidv4(),

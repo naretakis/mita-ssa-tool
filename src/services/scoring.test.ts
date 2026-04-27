@@ -138,11 +138,11 @@ describe('scoring', () => {
     describe('Technology dimension', () => {
       it('should average sub-dimension scores, then average those', () => {
         const ratings = [
-          // Infrastructure: avg = 3.5
-          { currentLevel: 3, subDimensionId: 'infrastructure' },
-          { currentLevel: 4, subDimensionId: 'infrastructure' },
-          // Integration: avg = 5
-          { currentLevel: 5, subDimensionId: 'integration' },
+          // Technology Infrastructure Management: avg = 3.5
+          { currentLevel: 3, subDimensionId: 'technologyInfrastructureManagement' },
+          { currentLevel: 4, subDimensionId: 'technologyInfrastructureManagement' },
+          // Application Management: avg = 5
+          { currentLevel: 5, subDimensionId: 'applicationManagement' },
         ];
         // Sub-dim averages: 3.5, 5 -> overall = 4.25 -> rounds to 4.3
         expect(calculateDimensionScore('technology', ratings)).toBe(4.3);
@@ -150,54 +150,49 @@ describe('scoring', () => {
 
       it('should handle single sub-dimension', () => {
         const ratings = [
-          { currentLevel: 4, subDimensionId: 'infrastructure' },
-          { currentLevel: 4, subDimensionId: 'infrastructure' },
+          { currentLevel: 4, subDimensionId: 'technologyInfrastructureManagement' },
+          { currentLevel: 4, subDimensionId: 'technologyInfrastructureManagement' },
         ];
         expect(calculateDimensionScore('technology', ratings)).toBe(4);
       });
 
       it('should exclude unassessed ratings within sub-dimensions', () => {
         const ratings = [
-          { currentLevel: 3, subDimensionId: 'infrastructure' },
-          { currentLevel: 0, subDimensionId: 'infrastructure' }, // Not assessed
-          { currentLevel: 5, subDimensionId: 'integration' },
+          { currentLevel: 3, subDimensionId: 'technologyInfrastructureManagement' },
+          { currentLevel: 0, subDimensionId: 'technologyInfrastructureManagement' }, // Not assessed
+          { currentLevel: 5, subDimensionId: 'applicationManagement' },
         ];
-        // Infrastructure: only 3 counts -> 3
-        // Integration: 5
+        // Technology Infrastructure Management: only 3 counts -> 3
+        // Application Management: 5
         // Average: (3 + 5) / 2 = 4
         expect(calculateDimensionScore('technology', ratings)).toBe(4);
       });
 
       it('should skip sub-dimensions with no assessed ratings', () => {
         const ratings = [
-          { currentLevel: 4, subDimensionId: 'infrastructure' },
-          { currentLevel: 0, subDimensionId: 'integration' }, // Not assessed
-          { currentLevel: -1, subDimensionId: 'integration' }, // N/A
+          { currentLevel: 4, subDimensionId: 'technologyInfrastructureManagement' },
+          { currentLevel: 0, subDimensionId: 'applicationManagement' }, // Not assessed
+          { currentLevel: -1, subDimensionId: 'applicationManagement' }, // N/A
         ];
-        // Only infrastructure has assessed ratings -> 4
+        // Only technologyInfrastructureManagement has assessed ratings -> 4
         expect(calculateDimensionScore('technology', ratings)).toBe(4);
       });
 
       it('should return null when no sub-dimensions have assessed ratings', () => {
         const ratings = [
-          { currentLevel: 0, subDimensionId: 'infrastructure' },
-          { currentLevel: 0, subDimensionId: 'integration' },
+          { currentLevel: 0, subDimensionId: 'technologyInfrastructureManagement' },
+          { currentLevel: 0, subDimensionId: 'applicationManagement' },
         ];
         expect(calculateDimensionScore('technology', ratings)).toBeNull();
       });
 
-      it('should handle all seven sub-dimensions', () => {
+      it('should handle both sub-dimensions', () => {
         const ratings = [
-          { currentLevel: 3, subDimensionId: 'infrastructure' },
-          { currentLevel: 4, subDimensionId: 'integration' },
-          { currentLevel: 3, subDimensionId: 'platform-services' },
-          { currentLevel: 4, subDimensionId: 'application-architecture' },
-          { currentLevel: 3, subDimensionId: 'security-identity' },
-          { currentLevel: 4, subDimensionId: 'operations-maintenance' },
-          { currentLevel: 3, subDimensionId: 'development-release' },
+          { currentLevel: 3, subDimensionId: 'technologyInfrastructureManagement' },
+          { currentLevel: 4, subDimensionId: 'applicationManagement' },
         ];
-        // All sub-dims have one rating each: 3,4,3,4,3,4,3 -> avg = 24/7 = 3.428... -> 3.4
-        expect(calculateDimensionScore('technology', ratings)).toBe(3.4);
+        // All sub-dims have one rating each: 3, 4 -> avg = 7/2 = 3.5
+        expect(calculateDimensionScore('technology', ratings)).toBe(3.5);
       });
     });
   });

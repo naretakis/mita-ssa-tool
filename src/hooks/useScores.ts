@@ -528,6 +528,7 @@ export function useScores(): UseScoresReturn {
 function getDimensionDisplayName(dimensionId: OrbitDimensionId): string {
   const names: Record<OrbitDimensionId, string> = {
     businessArchitecture: 'Business Architecture',
+    enterpriseArchitecture: 'Enterprise Architecture',
     information: 'Information',
     technology: 'Technology',
   };
@@ -540,6 +541,7 @@ function getDimensionDisplayName(dimensionId: OrbitDimensionId): string {
 function isDimensionRequired(dimensionId: OrbitDimensionId): boolean {
   return (
     dimensionId === 'businessArchitecture' ||
+    dimensionId === 'enterpriseArchitecture' ||
     dimensionId === 'information' ||
     dimensionId === 'technology'
   );

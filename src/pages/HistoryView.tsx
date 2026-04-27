@@ -50,8 +50,8 @@ function buildNavItems(domainId?: string): NavItem[] {
   // Get the aggregated dimension for this domain (if any)
   const aggregatedDimension = domainId ? getAggregatedDimensionForDomain(domainId) : null;
 
-  // Standard dimensions (B, I - non-Technology)
-  for (const dimId of ['businessArchitecture', 'information'] as const) {
+  // Standard dimensions (B, EA, I - non-Technology)
+  for (const dimId of ['businessArchitecture', 'enterpriseArchitecture', 'information'] as const) {
     const dim = orbitModel.dimensions[dimId];
     const isAggregate = aggregatedDimension === dimId;
 

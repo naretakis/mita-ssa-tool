@@ -317,7 +317,7 @@ describe('db', () => {
         id: 'tech-rating-1',
         capabilityAssessmentId: 'assessment-1',
         dimensionId: 'technology',
-        subDimensionId: 'infrastructure',
+        subDimensionId: 'technologyInfrastructureManagement',
         aspectId: 'cloud-adoption',
         currentLevel: 4,
         questionResponses: [],
@@ -332,7 +332,12 @@ describe('db', () => {
 
       const result = await db.orbitRatings
         .where('[capabilityAssessmentId+dimensionId+subDimensionId+aspectId]')
-        .equals(['assessment-1', 'technology', 'infrastructure', 'cloud-adoption'])
+        .equals([
+          'assessment-1',
+          'technology',
+          'technologyInfrastructureManagement',
+          'cloud-adoption',
+        ])
         .first();
 
       expect(result).toBeDefined();

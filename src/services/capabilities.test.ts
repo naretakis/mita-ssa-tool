@@ -106,7 +106,7 @@ describe('capabilities service', () => {
     it('should return all capability areas including from categorized domains', () => {
       const areas = getAllAreas();
       expect(areas).toBeInstanceOf(Array);
-      expect(areas.length).toBe(76); // 74 original + 2 organizational areas
+      expect(areas.length).toBe(65); // 63 standard + 2 organizational areas
     });
 
     it('should have required properties on each area', () => {
@@ -149,7 +149,7 @@ describe('capabilities service', () => {
 
     it('should return categories for technical domain', () => {
       const categories = getCategoriesByDomainId('technical');
-      expect(categories.length).toBe(7);
+      expect(categories.length).toBe(2);
     });
 
     it('should return empty array for standard domain', () => {
@@ -222,7 +222,7 @@ describe('capabilities service', () => {
   describe('getTotalAreaCount', () => {
     it('should return total count of all areas', () => {
       const count = getTotalAreaCount();
-      expect(count).toBe(76); // 74 original + 2 organizational areas
+      expect(count).toBe(65); // 63 standard + 2 organizational areas
     });
   });
 

@@ -56,6 +56,7 @@ export const COLORS = {
  */
 export const DIMENSION_NAMES: Record<OrbitDimensionId, string> = {
   businessArchitecture: 'Business Architecture',
+  enterpriseArchitecture: 'Enterprise Architecture',
   information: 'Information',
   technology: 'Technology',
 } as const;

@@ -168,7 +168,7 @@ describe('useOrbitRatings', () => {
       await act(async () => {
         await result.current.saveRating({
           dimensionId: 'technology',
-          subDimensionId: 'infrastructure',
+          subDimensionId: 'technologyInfrastructureManagement',
           aspectId: 'cloud-adoption',
           currentLevel: 4,
         });
@@ -177,7 +177,7 @@ describe('useOrbitRatings', () => {
       const ratings = await db.orbitRatings.toArray();
       expect(ratings).toHaveLength(1);
       expect(ratings[0]!.dimensionId).toBe('technology');
-      expect(ratings[0]!.subDimensionId).toBe('infrastructure');
+      expect(ratings[0]!.subDimensionId).toBe('technologyInfrastructureManagement');
     });
 
     it('should update assessment timestamp', async () => {
@@ -470,7 +470,7 @@ describe('useOrbitRatings', () => {
         id: 'r1',
         capabilityAssessmentId: assessmentId,
         dimensionId: 'technology',
-        subDimensionId: 'infrastructure',
+        subDimensionId: 'technologyInfrastructureManagement',
         aspectId: 'cloud-adoption',
         currentLevel: 4,
         questionResponses: [],
@@ -489,7 +489,11 @@ describe('useOrbitRatings', () => {
         expect(result.current.ratings).toHaveLength(1);
       });
 
-      const rating = result.current.getRating('technology', 'cloud-adoption', 'infrastructure');
+      const rating = result.current.getRating(
+        'technology',
+        'cloud-adoption',
+        'technologyInfrastructureManagement'
+      );
       expect(rating?.currentLevel).toBe(4);
     });
   });
@@ -562,7 +566,7 @@ describe('useOrbitRatings', () => {
           id: 'r1',
           capabilityAssessmentId: assessmentId,
           dimensionId: 'technology',
-          subDimensionId: 'infrastructure',
+          subDimensionId: 'technologyInfrastructureManagement',
           aspectId: 'a1',
           currentLevel: 3,
           questionResponses: [],
@@ -578,7 +582,7 @@ describe('useOrbitRatings', () => {
           id: 'r2',
           capabilityAssessmentId: assessmentId,
           dimensionId: 'technology',
-          subDimensionId: 'infrastructure',
+          subDimensionId: 'technologyInfrastructureManagement',
           aspectId: 'a2',
           currentLevel: 4,
           questionResponses: [],
@@ -594,7 +598,7 @@ describe('useOrbitRatings', () => {
           id: 'r3',
           capabilityAssessmentId: assessmentId,
           dimensionId: 'technology',
-          subDimensionId: 'integration',
+          subDimensionId: 'applicationManagement',
           aspectId: 'a3',
           currentLevel: 2,
           questionResponses: [],
@@ -614,7 +618,9 @@ describe('useOrbitRatings', () => {
         expect(result.current.ratings).toHaveLength(3);
       });
 
-      const infraRatings = result.current.getRatingsForSubDimension('infrastructure');
+      const infraRatings = result.current.getRatingsForSubDimension(
+        'technologyInfrastructureManagement'
+      );
       expect(infraRatings).toHaveLength(2);
     });
   });

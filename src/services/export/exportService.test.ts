@@ -364,7 +364,7 @@ describe('exportService', () => {
         id: uuidv4(),
         capabilityAssessmentId: assessment.id,
         dimensionId: 'information',
-        aspectId: 'data-governance',
+        aspectId: 'information-governance',
         currentLevel: 4,
         targetLevel: 5,
         questionResponses: [],

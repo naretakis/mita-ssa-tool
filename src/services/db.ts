@@ -26,31 +26,40 @@ const db = new Dexie('Mita4Database') as Dexie & {
 };
 
 /**
- * Database schema v1
- *
- * Index definitions:
- * - Primary key is always first
- * - Compound indexes use [field1+field2] syntax
- * - Multi-entry indexes use *field syntax
+ * Database schema v1 (original)
  */
 db.version(1).stores({
-  // Capability assessments - one per capability area
   capabilityAssessments: 'id, capabilityAreaId, capabilityDomainId, status, updatedAt, *tags',
-
-  // ORBIT ratings - one per aspect per assessment
-  // Compound index prevents duplicate ratings for same aspect
   orbitRatings:
     'id, capabilityAssessmentId, [capabilityAssessmentId+dimensionId+aspectId], [capabilityAssessmentId+dimensionId+subDimensionId+aspectId]',
-
-  // File attachments - stored as Blobs
   attachments: 'id, capabilityAssessmentId, orbitRatingId, uploadedAt',
-
-  // Assessment history - snapshots of finalized assessments
   assessmentHistory: 'id, capabilityAssessmentId, capabilityAreaId, snapshotDate',
-
-  // Tags for autocomplete
   tags: 'id, name, usageCount, lastUsed',
 });
+
+/**
+ * Database schema v2 — Clean break for maturity model v3.0.0
+ *
+ * Schema is unchanged but all data is cleared because the maturity model
+ * was restructured (new dimensions, consolidated aspects, new IDs).
+ * Existing assessment data is incompatible with the new model.
+ */
+db.version(2)
+  .stores({
+    capabilityAssessments: 'id, capabilityAreaId, capabilityDomainId, status, updatedAt, *tags',
+    orbitRatings:
+      'id, capabilityAssessmentId, [capabilityAssessmentId+dimensionId+aspectId], [capabilityAssessmentId+dimensionId+subDimensionId+aspectId]',
+    attachments: 'id, capabilityAssessmentId, orbitRatingId, uploadedAt',
+    assessmentHistory: 'id, capabilityAssessmentId, capabilityAreaId, snapshotDate',
+    tags: 'id, name, usageCount, lastUsed',
+  })
+  .upgrade(async (tx) => {
+    await tx.table('capabilityAssessments').clear();
+    await tx.table('orbitRatings').clear();
+    await tx.table('attachments').clear();
+    await tx.table('assessmentHistory').clear();
+    await tx.table('tags').clear();
+  });
 
 export { db };
 
