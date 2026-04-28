@@ -42,11 +42,11 @@ export function getOrbitModelVersion(): string {
 }
 
 /**
- * Get all dimension IDs (B-EA-I-T)
- * @returns Array of the four ORBIT dimension IDs for standard assessments
+ * Get all dimension IDs (B-I-T)
+ * @returns Array of the three ORBIT dimension IDs for standard assessments
  */
 export function getAllDimensionIds(): OrbitDimensionId[] {
-  return ['businessArchitecture', 'enterpriseArchitecture', 'information', 'technology'];
+  return ['businessArchitecture', 'information', 'technology'];
 }
 
 /**
@@ -54,7 +54,7 @@ export function getAllDimensionIds(): OrbitDimensionId[] {
  * @returns Array of dimension IDs that are required for assessment
  */
 export function getRequiredDimensionIds(): OrbitDimensionId[] {
-  return ['businessArchitecture', 'enterpriseArchitecture', 'information', 'technology'];
+  return ['businessArchitecture', 'information', 'technology'];
 }
 
 /**
@@ -79,14 +79,10 @@ export function getDimension(
 
 /**
  * Get all standard (non-Technology) dimensions
- * @returns Array of the three standard dimensions (Business Architecture, Enterprise Architecture, Information)
+ * @returns Array of the two standard dimensions (Business Architecture, Information)
  */
 export function getStandardDimensions(): OrbitDimension[] {
-  return [
-    orbitModel.dimensions.businessArchitecture,
-    orbitModel.dimensions.enterpriseArchitecture,
-    orbitModel.dimensions.information,
-  ];
+  return [orbitModel.dimensions.businessArchitecture, orbitModel.dimensions.information];
 }
 
 /**
@@ -199,8 +195,8 @@ export function getAllMaturityLevels(): Record<LevelKey | 'notApplicable', Matur
 export function getTotalAspectCount(): number {
   let count = 0;
 
-  // Standard dimensions (B, EA, I)
-  for (const dimId of ['businessArchitecture', 'enterpriseArchitecture', 'information'] as const) {
+  // Standard dimensions (B, I)
+  for (const dimId of ['businessArchitecture', 'information'] as const) {
     count += orbitModel.dimensions[dimId].aspects.length;
   }
 
@@ -286,8 +282,8 @@ export function getAspectLocation(aspectId: string):
       subDimensionId?: TechnologySubDimensionId;
     }
   | undefined {
-  // Check standard dimensions (B, EA, I)
-  for (const dimId of ['businessArchitecture', 'enterpriseArchitecture', 'information'] as const) {
+  // Check standard dimensions (B, I)
+  for (const dimId of ['businessArchitecture', 'information'] as const) {
     const dimension = orbitModel.dimensions[dimId];
     if (dimension.aspects.some((a) => a.id === aspectId)) {
       return { dimensionId: dimId };
@@ -392,7 +388,7 @@ export function getOrganizationalAspect(
  * @returns Array of organizational assessment type IDs
  */
 export function getOrganizationalAssessmentTypes(): OrganizationalAssessmentId[] {
-  return ['outcomes', 'roles'];
+  return ['outcomes', 'roles', 'enterprise-architecture'];
 }
 
 /**
@@ -401,5 +397,8 @@ export function getOrganizationalAssessmentTypes(): OrganizationalAssessmentId[]
  * @returns Total number of aspects across all organizational assessments
  */
 export function getTotalOrganizationalAspectCount(): number {
-  return getOrganizationalAspectCount('outcomes') + getOrganizationalAspectCount('roles');
+  return getOrganizationalAssessmentTypes().reduce(
+    (sum, type) => sum + getOrganizationalAspectCount(type),
+    0
+  );
 }

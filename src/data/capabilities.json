@@ -834,6 +834,25 @@
       ]
     },
     {
+      "id": "enterprise-architecture-domain",
+      "name": "Enterprise Architecture",
+      "layer": "support",
+      "description": "The Enterprise Architecture domain assesses organizational maturity in enterprise-level planning, governance, and architectural frameworks across the Medicaid enterprise. These capabilities apply at the organizational level rather than to specific business functions.",
+      "areas": [
+        {
+          "id": "organizational-enterprise-architecture",
+          "name": "Organizational Enterprise Architecture",
+          "description": "Assesses the organization's maturity in defining business capabilities, integrating enterprise architecture, managing policies, and aligning strategic planning across the Medicaid enterprise.",
+          "topics": [
+            "Business Capability Management",
+            "Enterprise Architecture Frameworks",
+            "Policy Management & Compliance",
+            "Strategic Planning & Governance"
+          ]
+        }
+      ]
+    },
+    {
       "id": "enterprise-governance",
       "name": "Enterprise Governance",
       "layer": "support",

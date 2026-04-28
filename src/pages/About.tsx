@@ -69,7 +69,7 @@ export default function About(): JSX.Element {
             </ListItemIcon>
             <ListItemText
               primary="Complete the ORBIT Assessment"
-              secondary="Each capability is assessed across four ORBIT dimensions: Business Architecture, Enterprise Architecture, Information, and Technology. For each dimension, you'll rate your current maturity level (1-5) and can optionally set a target level. The tool provides guiding questions to help you determine the appropriate level."
+              secondary="Each capability is assessed across three ORBIT dimensions: Business Architecture, Information, and Technology. For each dimension, you'll rate your current maturity level (1-5) and can optionally set a target level. The tool provides guiding questions to help you determine the appropriate level."
             />
           </ListItem>
 
@@ -181,7 +181,7 @@ export default function About(): JSX.Element {
           ORBIT Dimensions
         </Typography>
         <Typography variant="body1" paragraph>
-          Each capability area is assessed across four dimensions:
+          Each capability area is assessed across three dimensions:
         </Typography>
         <List dense>
           <ListItem>
@@ -192,16 +192,6 @@ export default function About(): JSX.Element {
                 </>
               }
               secondary="Business process performance, documentation, governance, automation, and reporting"
-            />
-          </ListItem>
-          <ListItem>
-            <ListItemText
-              primary={
-                <>
-                  <strong>Enterprise Architecture</strong> (Required)
-                </>
-              }
-              secondary="Business capability, enterprise architecture, policy management, and strategic planning"
             />
           </ListItem>
           <ListItem>
@@ -230,7 +220,7 @@ export default function About(): JSX.Element {
           Organizational Assessments
         </Typography>
         <Typography variant="body1" paragraph>
-          Two additional assessments evaluate organizational maturity at the enterprise level:
+          Additional assessments evaluate organizational maturity at the enterprise level:
         </Typography>
         <List dense>
           <ListItem>
@@ -243,6 +233,12 @@ export default function About(): JSX.Element {
             <ListItemText
               primary={<strong>Organizational Roles</strong>}
               secondary="Enterprise-wide role management maturity (6 aspects)"
+            />
+          </ListItem>
+          <ListItem>
+            <ListItemText
+              primary={<strong>Enterprise Architecture</strong>}
+              secondary="Business capability, enterprise architecture, policy management, and strategic planning (4 assessments)"
             />
           </ListItem>
         </List>

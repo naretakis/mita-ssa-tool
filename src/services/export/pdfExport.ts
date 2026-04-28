@@ -228,7 +228,7 @@ function generateExecutiveSummary(doc: JsPDFWithAutoTable, data: ExportData): nu
   const introText =
     'This report presents the results of the MITA 4.0 maturity self-assessment. ' +
     'Each capability area has been evaluated across the ORBIT dimensions: ' +
-    'Business Architecture, Enterprise Architecture, Information, and Technology.';
+    'Business Architecture, Information, and Technology.';
 
   const splitIntro = doc.splitTextToSize(introText, CONTENT_WIDTH);
   doc.text(splitIntro, MARGIN_LEFT, yPos);
@@ -302,7 +302,6 @@ function generateExecutiveSummary(doc: JsPDFWithAutoTable, data: ExportData): nu
     // Calculate average scores per dimension
     const dimensionScores: Record<OrbitDimensionId, number[]> = {
       businessArchitecture: [],
-      enterpriseArchitecture: [],
       information: [],
       technology: [],
     };
@@ -468,8 +467,12 @@ function generateCapabilityAreaSection(
   // Group ratings by dimension - only include B-I-T dimensions for standard assessments
   const ratingsByDimension = new Map<OrbitDimensionId, OrbitRating[]>();
   for (const rating of ratings) {
-    // Skip organizational assessment ratings (outcomes, roles)
-    if (rating.dimensionId === 'outcomes' || rating.dimensionId === 'roles') {
+    // Skip organizational assessment ratings (outcomes, roles, enterprise-architecture)
+    if (
+      rating.dimensionId === 'outcomes' ||
+      rating.dimensionId === 'roles' ||
+      rating.dimensionId === 'enterprise-architecture'
+    ) {
       continue;
     }
     const dimId = rating.dimensionId as OrbitDimensionId;

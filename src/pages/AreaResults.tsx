@@ -76,7 +76,6 @@ ChartJS.register(
  */
 const SHORT_DIMENSION_LABELS: Record<string, string> = {
   'Business Architecture': 'Bus. Arch.',
-  'Enterprise Architecture': 'Ent. Arch.',
   Information: 'Info',
   Technology: 'Tech',
 };

@@ -52,6 +52,7 @@ export const DOMAIN_AGGREGATE_DIMENSIONS: Partial<Record<string, OrbitDimensionI
 export const ORGANIZATIONAL_ASSESSMENT_AREAS: Record<string, OrganizationalAssessmentId> = {
   'organizational-outcomes': 'outcomes',
   'organizational-roles': 'roles',
+  'organizational-enterprise-architecture': 'enterprise-architecture',
 };
 
 /**

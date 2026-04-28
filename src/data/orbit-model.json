@@ -334,195 +334,6 @@
         }
       ]
     },
-    "enterpriseArchitecture": {
-      "id": "enterpriseArchitecture",
-      "name": "Enterprise Architecture",
-      "description": "The enterprise-level planning, governance, and architectural frameworks that guide capability development.",
-      "required": true,
-      "aspects": [
-        {
-          "id": "business-capability",
-          "name": "Business Capability",
-          "description": "To what extent are business capabilities  defined, documented, governed, measured, and improved to support the enterprise?",
-          "levels": {
-            "level1": {
-              "description": "The capability has been identified and the use of the capability has been documented.",
-              "questions": [
-                "To what extent are business capabilities  defined, documented, governed, measured, and improved to support the enterprise?"
-              ],
-              "evidence": ["Capability Catalog"]
-            },
-            "level2": {
-              "description": "The SMA has begun the documentation of the capability roles, supporting processes, technology, and information. The capability complies with state and federal requirements.",
-              "questions": [
-                "To what extent are business capabilities  defined, documented, governed, measured, and improved to support the enterprise?"
-              ],
-              "evidence": [
-                "Role Catalog, Process Catalog, Technology Component Catalog, Information Asset Catalog"
-              ]
-            },
-            "level3": {
-              "description": "The SMA has fully documented and defined the capability roles, supporting processes, technology and information. The capability complies with state and federal requirements and the conforms to MES industry - recognized architectural frameworks. The capability is standardized and aligned at the enterprise level.",
-              "questions": [
-                "To what extent are business capabilities  defined, documented, governed, measured, and improved to support the enterprise?"
-              ],
-              "evidence": ["Performance Metricss, MITA SS-A, Central EA repository"]
-            },
-            "level4": {
-              "description": "The SMA manages the capability for performance and compliance. The SMA monitors the metrics and measures of the capability.",
-              "questions": [
-                "To what extent are business capabilities  defined, documented, governed, measured, and improved to support the enterprise?"
-              ],
-              "evidence": ["ConOPS"]
-            },
-            "level5": {
-              "description": "The SMA uses performance monitoring to make improvements to the capability. The SMA is a thought leader for the capability and shares capability information with other SMAs.",
-              "questions": [
-                "To what extent are business capabilities  defined, documented, governed, measured, and improved to support the enterprise?"
-              ],
-              "evidence": [
-                "APD - Showing improvement or investment in the advancement or improvement of the capability.",
-                "Performance Metrics - SS-A, ConOPS"
-              ]
-            }
-          }
-        },
-        {
-          "id": "enterprise-architecture",
-          "name": "Enterprise Architecture",
-          "description": "To what extent is enterprise architecture  integrated into MITA enterprise planning, governance,  and execution to guide and optimize business, information, and technology outcomes?",
-          "levels": {
-            "level1": {
-              "description": "SMA recognizes the need for enterprise-wide planning and architectural frameworks but current EA practices are unstructured, reactive, and inconsistent.",
-              "questions": [
-                "To what extent is enterprise architecture  integrated into MITA enterprise planning, governance,  and execution to guide and optimize business, information, and technology outcomes?"
-              ],
-              "evidence": []
-            },
-            "level2": {
-              "description": "SMA complies with federal guidance and has begun adopting MES-recognized EA frameworks. EA processes exist but are not standardized or fully documented.",
-              "questions": [
-                "To what extent is enterprise architecture  integrated into MITA enterprise planning, governance,  and execution to guide and optimize business, information, and technology outcomes?"
-              ],
-              "evidence": [
-                "Draft EA framework, initial architecture repository, compliance reports."
-              ]
-            },
-            "level3": {
-              "description": "SMA has fully implemented MES-recognized EA frameworks. EA processes are standardized, documented, and aligned across business, information and technology.",
-              "questions": [
-                "To what extent is enterprise architecture  integrated into MITA enterprise planning, governance,  and execution to guide and optimize business, information, and technology outcomes?"
-              ],
-              "evidence": ["EA governance charter, architecture standards, EA Repository"]
-            },
-            "level4": {
-              "description": "SMA uses EA to monitor and manage MES performance. EA is integrated into strategic planning and execution. SMA collaborates with other SMAs to share EA practices.",
-              "questions": [
-                "To what extent is enterprise architecture  integrated into MITA enterprise planning, governance,  and execution to guide and optimize business, information, and technology outcomes?"
-              ],
-              "evidence": [
-                "EA dashboards, strategic plans with EA inputs, collaboration artifacts. Outcomes Catalog, Business case diagram, EA Matrix"
-              ]
-            },
-            "level5": {
-              "description": "SMA uses advanced, data-driven EA strategies for proactive decision-making. EA drives enterprise optimization and continuous improvement. SMA is nationally recognized for EA leadership.",
-              "questions": [
-                "To what extent is enterprise architecture  integrated into MITA enterprise planning, governance,  and execution to guide and optimize business, information, and technology outcomes?"
-              ],
-              "evidence": ["Predictive models, innovation roadmaps"]
-            }
-          }
-        },
-        {
-          "id": "policy-management",
-          "name": "Policy Management",
-          "description": "To what extent are policies systematically integrated into enterprise architecture, capability planning, and governance processes to guide compliance, decision‑making, and execution within MITA?",
-          "levels": {
-            "level1": {
-              "description": "Policies relevant to business capabilities are informally identified or inconsistently documented. There is little to no mapping of policies to business processes or systems.",
-              "questions": [
-                "To what extent are policies systematically integrated into enterprise architecture, capability planning, and governance processes to guide compliance, decision‑making, and execution within MITA?"
-              ],
-              "evidence": []
-            },
-            "level2": {
-              "description": "Some policies are documented and beginning to be mapped to business processes and systems. Compliance is mostly reactive, and regular reviews are not established.",
-              "questions": [
-                "To what extent are policies systematically integrated into enterprise architecture, capability planning, and governance processes to guide compliance, decision‑making, and execution within MITA?"
-              ],
-              "evidence": ["Policy Catalog, Policy/Process Matrix"]
-            },
-            "level3": {
-              "description": "All business policies relevant to the capability (e.g., \"Pharmacy Management\") are identified, documented, and mapped to business processes and supporting systems. Policies are harmonized with state and federal requirements, and their alignment is regularly reviewed to ensure compliance and support for enterprise objectives.",
-              "questions": [
-                "To what extent are policies systematically integrated into enterprise architecture, capability planning, and governance processes to guide compliance, decision‑making, and execution within MITA?"
-              ],
-              "evidence": [
-                "Policy/Process/Technology Component Matrix, Policy and Strategy Catalogs"
-              ]
-            },
-            "level4": {
-              "description": "Policy alignment is institutionalized and integrated into enterprise governance. Policies are systematically reviewed, updated, and optimized based on performance data, regulatory changes, and strategic objectives.",
-              "questions": [
-                "To what extent are policies systematically integrated into enterprise architecture, capability planning, and governance processes to guide compliance, decision‑making, and execution within MITA?"
-              ],
-              "evidence": ["Performance Metricss, MITA SS-A, Central policy repository"]
-            },
-            "level5": {
-              "description": "Policy alignment is a proactive, continuous process that drives organizational agility, compliance, and innovation. The organization demonstrates thought leadership and collaborates externally to share best practices.",
-              "questions": [
-                "To what extent are policies systematically integrated into enterprise architecture, capability planning, and governance processes to guide compliance, decision‑making, and execution within MITA?"
-              ],
-              "evidence": ["Outcomes based Planning Tool, Goal, Driver, Objective Catalog"]
-            }
-          }
-        },
-        {
-          "id": "strategic-planning",
-          "name": "Strategic Planning",
-          "description": "To what extent is the SMA’s strategic planning formally integrated into enterprise architecture, capability planning, and governance processes to guide the execution  of MITA?",
-          "levels": {
-            "level1": {
-              "description": "The SMA’s strategic plan is informally considered during architecture and capability planning efforts. Alignment between strategy and capabilities occurs opportunistically and is largely dependent on individual initiative rather than a defined planning approach.",
-              "questions": [
-                "To what extent is the SMA’s strategic planning formally integrated into enterprise architecture, capability planning, and governance processes to guide the execution  of MITA?"
-              ],
-              "evidence": []
-            },
-            "level2": {
-              "description": "The SMA’s strategic plan and capability planning are intentionally aligned through defined outcomes. Strategic objectives inform capability discussions, but dependencies between strategy, capabilities, and processes are not yet consistently analyzed or governed.",
-              "questions": [
-                "To what extent is the SMA’s strategic planning formally integrated into enterprise architecture, capability planning, and governance processes to guide the execution  of MITA?"
-              ],
-              "evidence": ["Outcomes Catalog, Outcomes Based Planning Tool"]
-            },
-            "level3": {
-              "description": "The SMA’s strategic plan explicitly identifies capabilities as required dependencies to achieve strategic outcomes. Capabilities and supporting processes are identified and analyzed as part of Enterprise Portfolio and Project Management to inform prioritization and planning decisions.",
-              "questions": [
-                "To what extent is the SMA’s strategic planning formally integrated into enterprise architecture, capability planning, and governance processes to guide the execution  of MITA?"
-              ],
-              "evidence": [
-                "Process Catalog, Capability Catalog, Enterprise Portfolio, Metrics Catalog"
-              ]
-            },
-            "level4": {
-              "description": "The SMAs Enterprise Roadmap(Projects/Initiatives) have capabilities and processes identified that support the roadmap items. Capabilities and Process are identified and analyzed for intake of new business to support funding requests for an APD, or state funding for project approval",
-              "questions": [
-                "To what extent is the SMA’s strategic planning formally integrated into enterprise architecture, capability planning, and governance processes to guide the execution  of MITA?"
-              ],
-              "evidence": ["Enteprise Roadmap, APDs, Intake Templates"]
-            },
-            "level5": {
-              "description": "Capabilities and processes are core inputs to enterprise governance and decision‑making. Strategic planning, investment decisions, and roadmap prioritization are consistently driven by capability and process analysis to ensure alignment, maximize value, and support execution of SMA strategic objectives.",
-              "questions": [
-                "To what extent is the SMA’s strategic planning formally integrated into enterprise architecture, capability planning, and governance processes to guide the execution  of MITA?"
-              ],
-              "evidence": ["Decision Logs, APDs"]
-            }
-          }
-        }
-      ]
-    },
     "information": {
       "id": "information",
       "name": "Information",
@@ -795,69 +606,6 @@
           }
         },
         {
-          "id": "information-reporting",
-          "name": "Information Reporting",
-          "description": "Are the reports that are created to support this capability documented and traceable to the specific data used to create each report?",
-          "levels": {
-            "level1": {
-              "description": "Reports and measures that are produced to support this capability have not been identified and documented.",
-              "questions": [],
-              "evidence": []
-            },
-            "level2": {
-              "description": "Reports and measures that are produced to support this capability have been identified and documented.",
-              "questions": [
-                "Reports that are used or produced to support this capability have been identified and documented",
-                "Measures/Metrics that are used or produced to support this capability have been identified and documented",
-                "Details about the data elements used to generate the reports have been identified and documented",
-                "Details about how the measure is calculated including the data elements used have been identified and documented."
-              ],
-              "evidence": ["Report Catalog", "Measure Catalog", "Measure Specification"]
-            },
-            "level3": {
-              "description": "Reports and measure standards have been established and implemented and are delivered to key stakeholders to support this capability.",
-              "questions": [
-                "Measure standards have been identified and documented",
-                "Reports are generated and provided to stakeholders to support the capability",
-                "Measures align to measure standards and are calculated and provided to stakeholders to support this capability"
-              ],
-              "evidence": ["Measure Standard", "Example Report", "Example Measure Calculation"]
-            },
-            "level4": {
-              "description": "Detailed measure specifications and report definitions have been documented and are tracked to the impacted information used to produce the measure and report in a central metadata repository.",
-              "questions": [
-                "All reports that support this capability are tracked to the data elements used to create the report in the central metadata repository",
-                "All measures that support this capability are tracked to the data elements used to calculate the report in the central metadata repository"
-              ],
-              "evidence": [
-                "Metadata Repository Screenshots",
-                "Metamodel",
-                "Metadata Repository Operating Model",
-                "Report/Measure Metadata Repository Change Workflow"
-              ]
-            },
-            "level5": {
-              "description": "Reports and measures that are used to support this capability adhere to enterprise business intelligence processes, procedures, standards, metadata and technology and are regularly assessed to improve the quality of the reports and measures.",
-              "questions": [
-                "SMA has established and applied to the impacted assets Enterprise Business Intelligence:",
-                "Outcomes & Metrics",
-                "Processes & procedures",
-                "Policies & Standards",
-                "Metadata requirements",
-                "Technology",
-                "SMA performs regular SS-A assessments for Business Intelligence"
-              ],
-              "evidence": [
-                "-Business Intelligence Process Diagram",
-                "-Business Intelligence Standard Operating Procedure",
-                "-Business Intelligence Standard Documentation",
-                "-Business Intelligence Metadata Requirements",
-                "-Business Intelligence MITA Scorecard"
-              ]
-            }
-          }
-        },
-        {
           "id": "information-content",
           "name": "Information Content",
           "description": "Is the unstructured data (e.g. paper documents) that supports this capability organized, controlled and categorized so that it can be stored, published and discovered by stakeholders that need it?",
@@ -918,38 +666,6 @@
                 "-Document and Content Management Metadata Requirements",
                 "-Document and Content Management MITA Scorecard"
               ]
-            }
-          }
-        },
-        {
-          "id": "information-metadata",
-          "name": "Information Metadata",
-          "description": "Is the metadata about the information used to support this capability captured, adhere to standards and stored in a central location so that stakeholders can search and discover information that is available for them to use?",
-          "levels": {
-            "level1": {
-              "description": "Metadata for the information assets that support this capability have not been identified and documented.",
-              "questions": [],
-              "evidence": []
-            },
-            "level2": {
-              "description": "Some metadata for the information assets are defined and stored locally.",
-              "questions": [],
-              "evidence": []
-            },
-            "level3": {
-              "description": "All required metadata needed to support the information asset have been identified and is stored in a metadata repository, but it is managed in a silo.",
-              "questions": [],
-              "evidence": []
-            },
-            "level4": {
-              "description": "Metadata for the information asset adhere to enterprise standards for metadata, Ingestion of Metadata is automatic to the fullest extent possible, stored in a central repository, and is perceived and used as a strategic enterprise asset.",
-              "questions": [],
-              "evidence": []
-            },
-            "level5": {
-              "description": "Metadata for the information asset adhere to Enterprise Metadata processes, procedures, and technology and are assessed regularly to identify metadata improvement opportunities.",
-              "questions": [],
-              "evidence": []
             }
           }
         },
@@ -2341,6 +2057,195 @@
               "description": "SMA uses comprehensive planning and advanced analytics to align roles and skills with program objectives, enabling rapid response to required changes while maintaining high service delivery standards.",
               "questions": [],
               "evidence": []
+            }
+          }
+        }
+      ]
+    },
+    "enterprise-architecture": {
+      "id": "enterprise-architecture",
+      "name": "Organizational Enterprise Architecture",
+      "description": "Assesses the organization's maturity in enterprise-level planning, governance, and architectural frameworks across the Medicaid enterprise.",
+      "capabilityAreaId": "organizational-enterprise-architecture",
+      "aspects": [
+        {
+          "id": "business-capability",
+          "name": "Business Capability",
+          "description": "To what extent are business capabilities  defined, documented, governed, measured, and improved to support the enterprise?",
+          "levels": {
+            "level1": {
+              "description": "The capability has been identified and the use of the capability has been documented.",
+              "questions": [
+                "To what extent are business capabilities  defined, documented, governed, measured, and improved to support the enterprise?"
+              ],
+              "evidence": ["Capability Catalog"]
+            },
+            "level2": {
+              "description": "The SMA has begun the documentation of the capability roles, supporting processes, technology, and information. The capability complies with state and federal requirements.",
+              "questions": [
+                "To what extent are business capabilities  defined, documented, governed, measured, and improved to support the enterprise?"
+              ],
+              "evidence": [
+                "Role Catalog, Process Catalog, Technology Component Catalog, Information Asset Catalog"
+              ]
+            },
+            "level3": {
+              "description": "The SMA has fully documented and defined the capability roles, supporting processes, technology and information. The capability complies with state and federal requirements and the conforms to MES industry - recognized architectural frameworks. The capability is standardized and aligned at the enterprise level.",
+              "questions": [
+                "To what extent are business capabilities  defined, documented, governed, measured, and improved to support the enterprise?"
+              ],
+              "evidence": ["Performance Metricss, MITA SS-A, Central EA repository"]
+            },
+            "level4": {
+              "description": "The SMA manages the capability for performance and compliance. The SMA monitors the metrics and measures of the capability.",
+              "questions": [
+                "To what extent are business capabilities  defined, documented, governed, measured, and improved to support the enterprise?"
+              ],
+              "evidence": ["ConOPS"]
+            },
+            "level5": {
+              "description": "The SMA uses performance monitoring to make improvements to the capability. The SMA is a thought leader for the capability and shares capability information with other SMAs.",
+              "questions": [
+                "To what extent are business capabilities  defined, documented, governed, measured, and improved to support the enterprise?"
+              ],
+              "evidence": [
+                "APD - Showing improvement or investment in the advancement or improvement of the capability.",
+                "Performance Metrics - SS-A, ConOPS"
+              ]
+            }
+          }
+        },
+        {
+          "id": "enterprise-architecture",
+          "name": "Enterprise Architecture",
+          "description": "To what extent is enterprise architecture  integrated into MITA enterprise planning, governance,  and execution to guide and optimize business, information, and technology outcomes?",
+          "levels": {
+            "level1": {
+              "description": "SMA recognizes the need for enterprise-wide planning and architectural frameworks but current EA practices are unstructured, reactive, and inconsistent.",
+              "questions": [
+                "To what extent is enterprise architecture  integrated into MITA enterprise planning, governance,  and execution to guide and optimize business, information, and technology outcomes?"
+              ],
+              "evidence": []
+            },
+            "level2": {
+              "description": "SMA complies with federal guidance and has begun adopting MES-recognized EA frameworks. EA processes exist but are not standardized or fully documented.",
+              "questions": [
+                "To what extent is enterprise architecture  integrated into MITA enterprise planning, governance,  and execution to guide and optimize business, information, and technology outcomes?"
+              ],
+              "evidence": [
+                "Draft EA framework, initial architecture repository, compliance reports."
+              ]
+            },
+            "level3": {
+              "description": "SMA has fully implemented MES-recognized EA frameworks. EA processes are standardized, documented, and aligned across business, information and technology.",
+              "questions": [
+                "To what extent is enterprise architecture  integrated into MITA enterprise planning, governance,  and execution to guide and optimize business, information, and technology outcomes?"
+              ],
+              "evidence": ["EA governance charter, architecture standards, EA Repository"]
+            },
+            "level4": {
+              "description": "SMA uses EA to monitor and manage MES performance. EA is integrated into strategic planning and execution. SMA collaborates with other SMAs to share EA practices.",
+              "questions": [
+                "To what extent is enterprise architecture  integrated into MITA enterprise planning, governance,  and execution to guide and optimize business, information, and technology outcomes?"
+              ],
+              "evidence": [
+                "EA dashboards, strategic plans with EA inputs, collaboration artifacts. Outcomes Catalog, Business case diagram, EA Matrix"
+              ]
+            },
+            "level5": {
+              "description": "SMA uses advanced, data-driven EA strategies for proactive decision-making. EA drives enterprise optimization and continuous improvement. SMA is nationally recognized for EA leadership.",
+              "questions": [
+                "To what extent is enterprise architecture  integrated into MITA enterprise planning, governance,  and execution to guide and optimize business, information, and technology outcomes?"
+              ],
+              "evidence": ["Predictive models, innovation roadmaps"]
+            }
+          }
+        },
+        {
+          "id": "policy-management",
+          "name": "Policy Management",
+          "description": "To what extent are policies systematically integrated into enterprise architecture, capability planning, and governance processes to guide compliance, decision‑making, and execution within MITA?",
+          "levels": {
+            "level1": {
+              "description": "Policies relevant to business capabilities are informally identified or inconsistently documented. There is little to no mapping of policies to business processes or systems.",
+              "questions": [
+                "To what extent are policies systematically integrated into enterprise architecture, capability planning, and governance processes to guide compliance, decision‑making, and execution within MITA?"
+              ],
+              "evidence": []
+            },
+            "level2": {
+              "description": "Some policies are documented and beginning to be mapped to business processes and systems. Compliance is mostly reactive, and regular reviews are not established.",
+              "questions": [
+                "To what extent are policies systematically integrated into enterprise architecture, capability planning, and governance processes to guide compliance, decision‑making, and execution within MITA?"
+              ],
+              "evidence": ["Policy Catalog, Policy/Process Matrix"]
+            },
+            "level3": {
+              "description": "All business policies relevant to the capability (e.g., \"Pharmacy Management\") are identified, documented, and mapped to business processes and supporting systems. Policies are harmonized with state and federal requirements, and their alignment is regularly reviewed to ensure compliance and support for enterprise objectives.",
+              "questions": [
+                "To what extent are policies systematically integrated into enterprise architecture, capability planning, and governance processes to guide compliance, decision‑making, and execution within MITA?"
+              ],
+              "evidence": [
+                "Policy/Process/Technology Component Matrix, Policy and Strategy Catalogs"
+              ]
+            },
+            "level4": {
+              "description": "Policy alignment is institutionalized and integrated into enterprise governance. Policies are systematically reviewed, updated, and optimized based on performance data, regulatory changes, and strategic objectives.",
+              "questions": [
+                "To what extent are policies systematically integrated into enterprise architecture, capability planning, and governance processes to guide compliance, decision‑making, and execution within MITA?"
+              ],
+              "evidence": ["Performance Metricss, MITA SS-A, Central policy repository"]
+            },
+            "level5": {
+              "description": "Policy alignment is a proactive, continuous process that drives organizational agility, compliance, and innovation. The organization demonstrates thought leadership and collaborates externally to share best practices.",
+              "questions": [
+                "To what extent are policies systematically integrated into enterprise architecture, capability planning, and governance processes to guide compliance, decision‑making, and execution within MITA?"
+              ],
+              "evidence": ["Outcomes based Planning Tool, Goal, Driver, Objective Catalog"]
+            }
+          }
+        },
+        {
+          "id": "strategic-planning",
+          "name": "Strategic Planning",
+          "description": "To what extent is the SMA’s strategic planning formally integrated into enterprise architecture, capability planning, and governance processes to guide the execution  of MITA?",
+          "levels": {
+            "level1": {
+              "description": "The SMA’s strategic plan is informally considered during architecture and capability planning efforts. Alignment between strategy and capabilities occurs opportunistically and is largely dependent on individual initiative rather than a defined planning approach.",
+              "questions": [
+                "To what extent is the SMA’s strategic planning formally integrated into enterprise architecture, capability planning, and governance processes to guide the execution  of MITA?"
+              ],
+              "evidence": []
+            },
+            "level2": {
+              "description": "The SMA’s strategic plan and capability planning are intentionally aligned through defined outcomes. Strategic objectives inform capability discussions, but dependencies between strategy, capabilities, and processes are not yet consistently analyzed or governed.",
+              "questions": [
+                "To what extent is the SMA’s strategic planning formally integrated into enterprise architecture, capability planning, and governance processes to guide the execution  of MITA?"
+              ],
+              "evidence": ["Outcomes Catalog, Outcomes Based Planning Tool"]
+            },
+            "level3": {
+              "description": "The SMA’s strategic plan explicitly identifies capabilities as required dependencies to achieve strategic outcomes. Capabilities and supporting processes are identified and analyzed as part of Enterprise Portfolio and Project Management to inform prioritization and planning decisions.",
+              "questions": [
+                "To what extent is the SMA’s strategic planning formally integrated into enterprise architecture, capability planning, and governance processes to guide the execution  of MITA?"
+              ],
+              "evidence": [
+                "Process Catalog, Capability Catalog, Enterprise Portfolio, Metrics Catalog"
+              ]
+            },
+            "level4": {
+              "description": "The SMAs Enterprise Roadmap(Projects/Initiatives) have capabilities and processes identified that support the roadmap items. Capabilities and Process are identified and analyzed for intake of new business to support funding requests for an APD, or state funding for project approval",
+              "questions": [
+                "To what extent is the SMA’s strategic planning formally integrated into enterprise architecture, capability planning, and governance processes to guide the execution  of MITA?"
+              ],
+              "evidence": ["Enteprise Roadmap, APDs, Intake Templates"]
+            },
+            "level5": {
+              "description": "Capabilities and processes are core inputs to enterprise governance and decision‑making. Strategic planning, investment decisions, and roadmap prioritization are consistently driven by capability and process analysis to ensure alignment, maximize value, and support execution of SMA strategic objectives.",
+              "questions": [
+                "To what extent is the SMA’s strategic planning formally integrated into enterprise architecture, capability planning, and governance processes to guide the execution  of MITA?"
+              ],
+              "evidence": ["Decision Logs, APDs"]
             }
           }
         }

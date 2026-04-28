@@ -29,12 +29,11 @@ import type {
 const SUPPORTED_VERSIONS = ['1.0', '2.0'];
 
 /**
- * Valid dimension IDs for standard capability assessments (B-EA-I-T).
- * Outcomes and Roles are only valid for organizational assessments.
+ * Valid dimension IDs for standard capability assessments (B-I-T).
+ * Organizational assessments (Outcomes, Roles, Enterprise Architecture) use their own IDs.
  */
 const STANDARD_DIMENSION_IDS: OrbitDimensionId[] = [
   'businessArchitecture',
-  'enterpriseArchitecture',
   'information',
   'technology',
 ];
@@ -42,12 +41,16 @@ const STANDARD_DIMENSION_IDS: OrbitDimensionId[] = [
 /**
  * Organizational assessment dimension IDs.
  */
-const ORGANIZATIONAL_DIMENSION_IDS: RatingDimensionId[] = ['outcomes', 'roles'];
+const ORGANIZATIONAL_DIMENSION_IDS: RatingDimensionId[] = [
+  'outcomes',
+  'roles',
+  'enterprise-architecture',
+];
 
 /**
  * Checks if a rating should be imported for a given assessment.
  * - For organizational assessments: only import 'outcomes' or 'roles' ratings
- * - For standard assessments: only import B-EA-I-T ratings, skip orphaned O&R
+ * - For standard assessments: only import B-I-T ratings, skip organizational
  *
  * @param rating - The rating to check
  * @param isOrganizational - Whether the assessment is organizational
@@ -57,10 +60,10 @@ function shouldImportRating(rating: { dimensionId: string }, isOrganizational: b
   const dimId = rating.dimensionId as RatingDimensionId;
 
   if (isOrganizational) {
-    // Organizational assessments only accept outcomes/roles ratings
+    // Organizational assessments only accept outcomes/roles/enterprise-architecture ratings
     return ORGANIZATIONAL_DIMENSION_IDS.includes(dimId);
   } else {
-    // Standard assessments only accept B-EA-I-T ratings
+    // Standard assessments only accept B-I-T ratings
     return STANDARD_DIMENSION_IDS.includes(dimId as OrbitDimensionId);
   }
 }

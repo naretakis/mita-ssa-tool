@@ -527,7 +527,7 @@ describe('useScores', () => {
       const counts = result.current.getStatusCounts();
       expect(counts.inProgress).toBe(1);
       expect(counts.finalized).toBe(2);
-      expect(counts.total).toBe(65); // Total capability areas (63 standard + 2 organizational)
+      expect(counts.total).toBe(66); // Total capability areas
     });
   });
 
@@ -658,7 +658,7 @@ describe('useScores', () => {
 
       const dimensionScores = result.current.getDimensionScoresForAssessment('a1');
       expect(dimensionScores).toBeDefined();
-      expect(dimensionScores).toHaveLength(4); // B-EA-I-T dimensions only
+      expect(dimensionScores).toHaveLength(3); // B-I-T dimensions only
 
       const businessScore = dimensionScores?.find((d) => d.dimensionId === 'businessArchitecture');
       expect(businessScore?.averageLevel).toBe(3.5); // (3 + 4) / 2

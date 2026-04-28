@@ -38,14 +38,6 @@ describe('csvExport', () => {
               plans: 'BA plans',
             },
             {
-              dimension: 'Enterprise Architecture',
-              asIs: '3.0',
-              toBe: '4.0',
-              notes: 'EA notes',
-              barriers: '',
-              plans: '',
-            },
-            {
               dimension: 'Information',
               asIs: '2.0',
               toBe: '3.0',
@@ -156,9 +148,8 @@ describe('csvExport', () => {
 
       const dataLines = lines.slice(headerIndex + 1, headerIndex + 5);
       expect(dataLines[0]).toContain('Business Architecture');
-      expect(dataLines[1]).toContain('Enterprise Architecture');
-      expect(dataLines[2]).toContain('Information');
-      expect(dataLines[3]).toContain('Technology');
+      expect(dataLines[1]).toContain('Information');
+      expect(dataLines[2]).toContain('Technology');
     });
 
     it('should NOT include Outcomes or Roles dimensions', () => {
@@ -173,9 +164,9 @@ describe('csvExport', () => {
       const headerIndex = lines.findIndex((l) => l.startsWith('ORBIT,'));
       const dataLines = lines.slice(headerIndex + 1, headerIndex + 6);
 
-      // Should only have 4 dimension rows (B-EA-I-T)
+      // Should only have 3 dimension rows (B-I-T)
       const dimensionRows = dataLines.filter((l) => l && !l.startsWith(',,,,,') && l.trim() !== '');
-      expect(dimensionRows.length).toBe(4);
+      expect(dimensionRows.length).toBe(3);
 
       // Should not contain Outcomes or Roles
       expect(csv).not.toMatch(/^Outcomes,/m);
@@ -190,7 +181,6 @@ describe('csvExport', () => {
       const csv = generateMaturityProfileCsv(profile);
 
       expect(csv).toContain('Business Architecture,3.5,4.5');
-      expect(csv).toContain('Enterprise Architecture,3.0,4.0');
       expect(csv).toContain('Information,2.0,3.0');
       expect(csv).toContain('Technology,3.0,4.0');
     });
@@ -409,7 +399,7 @@ describe('csvExport', () => {
       const csv = generateMaturityProfileCsv(originalProfile);
       const parsed = parseMaturityProfileCsv(csv);
 
-      expect(parsed?.areas[0]?.rows.length).toBe(4);
+      expect(parsed?.areas[0]?.rows.length).toBe(3);
       const baRow = parsed?.areas[0]?.rows.find((r) => r.dimension === 'Business Architecture');
       expect(baRow?.asIs).toBe('3.5');
       expect(baRow?.toBe).toBe('4.5');
@@ -527,14 +517,6 @@ Aspect 2,2.5,3.5,,,Plans here`;
             plans: '',
           },
           {
-            dimension: 'Enterprise Architecture',
-            asIs: '3.0',
-            toBe: '4.0',
-            notes: 'EA specific',
-            barriers: '',
-            plans: '',
-          },
-          {
             dimension: 'Information',
             asIs: '2.0',
             toBe: '3.0',
@@ -561,7 +543,7 @@ Aspect 2,2.5,3.5,,,Plans here`;
       expect(parsed?.areas[0]?.areaName).toBe('Test Area');
 
       const rows = parsed?.areas[0]?.rows ?? [];
-      expect(rows.length).toBe(4);
+      expect(rows.length).toBe(3);
 
       const ba = rows.find((r) => r.dimension === 'Business Architecture');
       expect(ba?.asIs).toBe('4.0');

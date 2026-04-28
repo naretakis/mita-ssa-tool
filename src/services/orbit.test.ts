@@ -55,24 +55,14 @@ describe('orbit service', () => {
   describe('getAllDimensionIds', () => {
     it('should return the three B-I-T dimension IDs', () => {
       const ids = getAllDimensionIds();
-      expect(ids).toEqual([
-        'businessArchitecture',
-        'enterpriseArchitecture',
-        'information',
-        'technology',
-      ]);
+      expect(ids).toEqual(['businessArchitecture', 'information', 'technology']);
     });
   });
 
   describe('getRequiredDimensionIds', () => {
     it('should return required dimension IDs (all B-I-T)', () => {
       const ids = getRequiredDimensionIds();
-      expect(ids).toEqual([
-        'businessArchitecture',
-        'enterpriseArchitecture',
-        'information',
-        'technology',
-      ]);
+      expect(ids).toEqual(['businessArchitecture', 'information', 'technology']);
     });
   });
 
@@ -98,13 +88,6 @@ describe('orbit service', () => {
       expect(dimension?.required).toBe(true);
     });
 
-    it('should return the enterpriseArchitecture dimension', () => {
-      const dimension = getDimension('enterpriseArchitecture');
-      expect(dimension).toBeDefined();
-      expect(dimension?.name).toBe('Enterprise Architecture');
-      expect(dimension?.required).toBe(true);
-    });
-
     it('should return the technology dimension', () => {
       const dimension = getDimension('technology');
       expect(dimension).toBeDefined();
@@ -116,12 +99,8 @@ describe('orbit service', () => {
   describe('getStandardDimensions', () => {
     it('should return two standard dimensions (B, I)', () => {
       const dimensions = getStandardDimensions();
-      expect(dimensions.length).toBe(3);
-      expect(dimensions.map((d) => d.id)).toEqual([
-        'businessArchitecture',
-        'enterpriseArchitecture',
-        'information',
-      ]);
+      expect(dimensions.length).toBe(2);
+      expect(dimensions.map((d) => d.id)).toEqual(['businessArchitecture', 'information']);
     });
   });
 
@@ -239,7 +218,7 @@ describe('orbit service', () => {
   describe('getTotalAspectCount', () => {
     it('should return total count of B-EA-I-T aspects', () => {
       const count = getTotalAspectCount();
-      expect(count).toBe(32);
+      expect(count).toBe(26);
     });
   });
 
@@ -264,10 +243,9 @@ describe('orbit service', () => {
     it('should return count of aspects in required dimensions only', () => {
       const count = getRequiredAspectCount();
       const businessCount = getAspectCountForDimension('businessArchitecture');
-      const eaCount = getAspectCountForDimension('enterpriseArchitecture');
       const infoCount = getAspectCountForDimension('information');
       const techCount = getAspectCountForDimension('technology');
-      expect(count).toBe(businessCount + eaCount + infoCount + techCount);
+      expect(count).toBe(businessCount + infoCount + techCount);
     });
   });
 
@@ -388,16 +366,16 @@ describe('orbit service', () => {
   });
 
   describe('getOrganizationalAssessmentTypes', () => {
-    it('should return outcomes and roles', () => {
+    it('should return all organizational assessment types', () => {
       const types = getOrganizationalAssessmentTypes();
-      expect(types).toEqual(['outcomes', 'roles']);
+      expect(types).toEqual(['outcomes', 'roles', 'enterprise-architecture']);
     });
   });
 
   describe('getTotalOrganizationalAspectCount', () => {
-    it('should return 12 (6 outcomes + 6 roles)', () => {
+    it('should return 16 (6 outcomes + 6 roles + 4 enterprise architecture)', () => {
       const count = getTotalOrganizationalAspectCount();
-      expect(count).toBe(12);
+      expect(count).toBe(16);
     });
   });
 });

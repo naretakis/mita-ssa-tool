@@ -74,8 +74,11 @@ const LAYER_NAMES: Record<string, string> = {
 const SHORT_DIMENSION_LABELS: Record<string, string> = {
   'Organizational Outcomes': 'Outcomes',
   'Organizational Roles': 'Roles',
+  'Organizational Business Capability': 'Bus. Cap.',
+  'Organizational Enterprise Architecture': 'Ent. Arch.',
+  'Organizational Policy Management': 'Policy',
+  'Organizational Strategic Planning': 'Strategy',
   'Business Architecture': 'Bus. Arch.',
-  'Enterprise Architecture': 'Ent. Arch.',
   Information: 'Info',
   Technology: 'Tech',
 };
