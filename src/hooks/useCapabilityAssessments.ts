@@ -13,6 +13,7 @@ import { createHistorySnapshot as createSnapshot } from '../services/history';
 import { incrementTagUsage } from '../services/tags';
 import { calculateDimensionScore } from '../services/scoring';
 import { isEnterpriseDomain, getAggregatedDimensionForDomain } from '../services/orbit';
+import { getOrganizationalAssessmentType } from '../constants';
 import type {
   CapabilityAssessment,
   AssessmentStatus,
@@ -170,31 +171,49 @@ export function useCapabilityAssessments(): UseCapabilityAssessmentsReturn {
       .equals(assessmentId)
       .toArray();
 
-    // Check if this is an enterprise domain with an aggregate dimension
-    const aggregatedDimension = getAggregatedDimensionForDomain(assessment.capabilityDomainId);
-    let aggregateScore: number | null = null;
+    // Check if this is an organizational assessment (Outcomes, Roles, Enterprise Architecture)
+    const orgType = getOrganizationalAssessmentType(assessment.capabilityAreaId);
 
-    if (aggregatedDimension) {
-      // Calculate aggregate score for enterprise domains
-      const aggregateResult =
-        await calculateAggregateDimensionScoreForFinalization(aggregatedDimension);
-      aggregateScore = aggregateResult.score;
+    let overallScore: number | undefined;
+
+    if (orgType) {
+      // Organizational assessments: simple average of all assessed aspect ratings
+      const assessedRatings = ratings.filter(
+        (r) => r.dimensionId === orgType && r.currentLevel > 0
+      );
+      if (assessedRatings.length > 0) {
+        const avg =
+          assessedRatings.reduce((sum, r) => sum + r.currentLevel, 0) / assessedRatings.length;
+        overallScore = Math.round(avg * 10) / 10;
+      }
+    } else {
+      // Standard assessments: average of dimension scores (B-I-T)
+
+      // Check if this is an enterprise domain with an aggregate dimension
+      const aggregatedDimension = getAggregatedDimensionForDomain(assessment.capabilityDomainId);
+      let aggregateScore: number | null = null;
+
+      if (aggregatedDimension) {
+        const aggregateResult =
+          await calculateAggregateDimensionScoreForFinalization(aggregatedDimension);
+        aggregateScore = aggregateResult.score;
+      }
+
+      // Calculate dimension scores from manual ratings
+      const dimensionScores = calculateDimensionScoresFromRatings(ratings);
+
+      // For enterprise domains, add the aggregate score to dimension scores
+      if (aggregatedDimension && aggregateScore !== null) {
+        dimensionScores.set(aggregatedDimension, aggregateScore);
+      }
+
+      // Calculate overall score as average of all dimension scores
+      const allDimensionScores = Array.from(dimensionScores.values());
+      if (allDimensionScores.length > 0) {
+        const avg = allDimensionScores.reduce((sum, s) => sum + s, 0) / allDimensionScores.length;
+        overallScore = Math.round(avg * 10) / 10;
+      }
     }
-
-    // Calculate dimension scores from manual ratings
-    const dimensionScores = calculateDimensionScoresFromRatings(ratings);
-
-    // For enterprise domains, add the aggregate score to dimension scores
-    if (aggregatedDimension && aggregateScore !== null) {
-      dimensionScores.set(aggregatedDimension, aggregateScore);
-    }
-
-    // Calculate overall score as average of all dimension scores
-    const allDimensionScores = Array.from(dimensionScores.values());
-    const overallScore =
-      allDimensionScores.length > 0
-        ? allDimensionScores.reduce((sum, s) => sum + s, 0) / allDimensionScores.length
-        : undefined;
 
     const now = new Date();
 
