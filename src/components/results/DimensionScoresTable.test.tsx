@@ -141,7 +141,7 @@ describe('DimensionScoresTable', () => {
       subDimensionScores: [
         {
           subDimensionId: 'technologyInfrastructureManagement',
-          subDimensionName: 'Technology Infrastructure Management',
+          subDimensionName: 'Technical Infrastructure Management',
           averageLevel: 3.0,
           aspectScores: [createAspectScore('infra-1', 'Infra Aspect', 3)],
         },
@@ -171,7 +171,7 @@ describe('DimensionScoresTable', () => {
       subDimensionScores: [
         {
           subDimensionId: 'technologyInfrastructureManagement',
-          subDimensionName: 'Technology Infrastructure Management',
+          subDimensionName: 'Technical Infrastructure Management',
           averageLevel: 3.0,
           aspectScores: [],
         },
@@ -184,7 +184,7 @@ describe('DimensionScoresTable', () => {
     await user.click(screen.getByText('Technology'));
 
     // Sub-dimension should be visible (prefixed with arrow indicator)
-    expect(screen.getByText(/Technology Infrastructure Management/)).toBeInTheDocument();
+    expect(screen.getByText(/Technical Infrastructure Management/)).toBeInTheDocument();
   });
 
   it('should render with ratings data', () => {

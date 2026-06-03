@@ -1,5 +1,7 @@
 # MITA 4.0 Capability Reference Model
 
+> **Note:** This is a historical snapshot of an earlier capability reference model (Jan 2026 / v1.1). The current authoritative source of truth for the application's data model is the May 3, 2026 PRA Submission, archived at [`docs/source-documents/2026-05-03/`](../source-documents/2026-05-03/). For the current model structure see [`PROJECT_FOUNDATION_v2.md`](../../PROJECT_FOUNDATION_v2.md).
+
 ## Version History
 
 | Version | Date              | Author        | Notes                              |

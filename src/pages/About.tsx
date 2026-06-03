@@ -59,7 +59,7 @@ export default function About(): JSX.Element {
             </ListItemIcon>
             <ListItemText
               primary="Start from the Dashboard"
-              secondary="The Dashboard shows all 75 capability areas organized by domain. When you first arrive, everything will be marked as 'Not Started.' Click on any capability area to begin its assessment."
+              secondary="The Dashboard shows all 66 capability areas organized by domain. When you first arrive, everything will be marked as 'Not Started.' Click on any capability area to begin its assessment."
             />
           </ListItem>
 
@@ -232,7 +232,7 @@ export default function About(): JSX.Element {
           <ListItem>
             <ListItemText
               primary={<strong>Organizational Roles</strong>}
-              secondary="Enterprise-wide role management maturity (6 aspects)"
+              secondary="Enterprise-wide role management maturity (5 aspects)"
             />
           </ListItem>
           <ListItem>

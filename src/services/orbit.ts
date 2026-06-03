@@ -95,7 +95,7 @@ export function getTechnologyDimension(): TechnologyDimension {
 
 /**
  * Get all Technology sub-dimensions
- * @returns Array of all seven Technology sub-dimensions
+ * @returns Array of all Technology sub-dimensions
  */
 export function getTechnologySubDimensions(): TechnologySubDimension[] {
   return orbitModel.dimensions.technology.subDimensions;

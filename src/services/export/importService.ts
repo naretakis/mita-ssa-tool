@@ -17,12 +17,16 @@ import { db } from '../db';
 import { createHistorySnapshot, calculateDimensionScores, toHistoricalRatings } from '../history';
 import { extractAttachmentIdFromFileName } from './exportService';
 import { isOrganizationalAssessmentArea, TIMESTAMP_TOLERANCE_MS } from '../../constants';
+import { getAspect, getOrganizationalAspect, getOrganizationalAssessmentTypes } from '../orbit';
 import type { ExportData, ImportResult, ImportItemResult, ImportProgressCallback } from './types';
 import type {
   CapabilityAssessment,
   Attachment,
+  HistoricalRating,
   OrbitDimensionId,
+  OrganizationalAssessmentId,
   RatingDimensionId,
+  TechnologySubDimensionId,
 } from '../../types';
 
 /** Current supported export version */
@@ -47,25 +51,60 @@ const ORGANIZATIONAL_DIMENSION_IDS: RatingDimensionId[] = [
   'enterprise-architecture',
 ];
 
+const ORGANIZATIONAL_TYPES = new Set<string>(getOrganizationalAssessmentTypes());
+
+/**
+ * Returns true if the (dimensionId, aspectId, subDimensionId) tuple corresponds
+ * to an aspect that exists in the current ORBIT model. Used to filter out
+ * orphaned ratings from pre-3.0.0 exports whose aspect IDs have been renamed
+ * or removed.
+ */
+function aspectExistsInCurrentModel(rating: {
+  dimensionId: string;
+  aspectId: string;
+  subDimensionId?: string;
+}): boolean {
+  if (ORGANIZATIONAL_TYPES.has(rating.dimensionId)) {
+    return Boolean(
+      getOrganizationalAspect(rating.dimensionId as OrganizationalAssessmentId, rating.aspectId)
+    );
+  }
+  if (STANDARD_DIMENSION_IDS.includes(rating.dimensionId as OrbitDimensionId)) {
+    return Boolean(
+      getAspect(
+        rating.dimensionId as OrbitDimensionId,
+        rating.aspectId,
+        rating.subDimensionId as TechnologySubDimensionId | undefined
+      )
+    );
+  }
+  return false;
+}
+
 /**
  * Checks if a rating should be imported for a given assessment.
- * - For organizational assessments: only import 'outcomes' or 'roles' ratings
+ * - For organizational assessments: only import organizational ratings
  * - For standard assessments: only import B-I-T ratings, skip organizational
+ * - In both cases, skip ratings whose aspectId no longer exists in the current
+ *   ORBIT model (orphaned by a model update such as the v3.0.0 release)
  *
  * @param rating - The rating to check
  * @param isOrganizational - Whether the assessment is organizational
  * @returns True if the rating should be imported
  */
-function shouldImportRating(rating: { dimensionId: string }, isOrganizational: boolean): boolean {
+function shouldImportRating(
+  rating: { dimensionId: string; aspectId: string; subDimensionId?: string },
+  isOrganizational: boolean
+): boolean {
   const dimId = rating.dimensionId as RatingDimensionId;
 
   if (isOrganizational) {
-    // Organizational assessments only accept outcomes/roles/enterprise-architecture ratings
-    return ORGANIZATIONAL_DIMENSION_IDS.includes(dimId);
+    if (!ORGANIZATIONAL_DIMENSION_IDS.includes(dimId)) return false;
   } else {
-    // Standard assessments only accept B-I-T ratings
-    return STANDARD_DIMENSION_IDS.includes(dimId as OrbitDimensionId);
+    if (!STANDARD_DIMENSION_IDS.includes(dimId as OrbitDimensionId)) return false;
   }
+
+  return aspectExistsInCurrentModel(rating);
 }
 
 /**
@@ -375,8 +414,20 @@ async function processImport(
   for (const historyEntry of data.data.history) {
     const existing = await db.assessmentHistory.get(historyEntry.id);
     if (!existing) {
+      // Filter out historical ratings whose aspect IDs no longer exist in the
+      // current ORBIT model. This prevents pre-v3.0.0 history snapshots from
+      // showing orphaned aspects (e.g., dropped Roles "Technology Resources",
+      // renamed "Business Rules and Workflow") in the history view.
+      const filteredRatings: HistoricalRating[] = historyEntry.ratings.filter((r) =>
+        aspectExistsInCurrentModel({
+          dimensionId: r.dimensionId,
+          aspectId: r.aspectId,
+          subDimensionId: r.subDimensionId,
+        })
+      );
       await db.assessmentHistory.add({
         ...historyEntry,
+        ratings: filteredRatings,
         snapshotDate: new Date(historyEntry.snapshotDate),
       });
     }

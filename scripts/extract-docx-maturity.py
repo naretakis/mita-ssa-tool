@@ -10,8 +10,8 @@ Structure: 4 tables (2 criteria tables + 2 Q&E tables) for 2 sections:
 import os
 from docx import Document
 
-INPUT_FILE = 'docs/updated-documents/MITA 4 Maturity Model Guide_Pilot-TA Subgroup Update-0426.docx'
-OUTPUT_DIR = 'docs/updated-documents/extracted'
+INPUT_FILE = 'docs/source-documents/2026-04-26/MITA 4 Maturity Model Guide_Pilot-TA Subgroup Update-0426.docx'
+OUTPUT_DIR = 'docs/source-documents/2026-04-26/extracted'
 
 
 def clean_text(text):

@@ -1,7 +1,9 @@
 # ORBIT Dimension & Domain Changes - Implementation Specification
 
+> **Historical record (v2.0.5):** This document captures the spec for the v2.0.5 release. It is preserved for traceability and is no longer the current state of the model — see [`CHANGELOG.md`](../../CHANGELOG.md) for the current release.
+
 **Created:** January 28, 2026  
-**Status:** Approved for Implementation
+**Status:** Implemented in v2.0.5
 
 ---
 

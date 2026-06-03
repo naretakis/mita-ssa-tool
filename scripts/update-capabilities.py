@@ -8,7 +8,7 @@ import json
 from docx import Document
 
 CAPABILITIES_FILE = 'src/data/capabilities.json'
-DOCX_FILE = 'docs/updated-documents/MITA 4.0 Capability Reference Model Document for MGB-TA Subgroup Update-0426.docx'
+DOCX_FILE = 'docs/source-documents/2026-04-26/MITA 4.0 Capability Reference Model Document for MGB-TA Subgroup Update-0426.docx'
 
 
 def name_to_id(name):

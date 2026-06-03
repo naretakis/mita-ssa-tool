@@ -61,6 +61,39 @@ db.version(2)
     await tx.table('tags').clear();
   });
 
+/**
+ * Database schema v3 — Maturity model May 3 2026 PRA submission update
+ *
+ * Schema is unchanged but all data is cleared because the maturity model
+ * was updated:
+ *   - Roles dropped "Technology Resources" aspect (6 -> 5)
+ *   - A few aspect names/IDs changed to match the official source verbatim
+ *     (e.g., "Business Rules and Workflows", "User Interfaces and Session
+ *     Management", "Identity, Access and Consent")
+ *   - Information aspect ordering changed
+ *   - Schema simplification: per-level question checklists removed in favor
+ *     of single aspect-level questions plus "Suggested Documentation" as
+ *     evidence
+ *
+ * Existing assessment data is incompatible with the new model.
+ */
+db.version(3)
+  .stores({
+    capabilityAssessments: 'id, capabilityAreaId, capabilityDomainId, status, updatedAt, *tags',
+    orbitRatings:
+      'id, capabilityAssessmentId, [capabilityAssessmentId+dimensionId+aspectId], [capabilityAssessmentId+dimensionId+subDimensionId+aspectId]',
+    attachments: 'id, capabilityAssessmentId, orbitRatingId, uploadedAt',
+    assessmentHistory: 'id, capabilityAssessmentId, capabilityAreaId, snapshotDate',
+    tags: 'id, name, usageCount, lastUsed',
+  })
+  .upgrade(async (tx) => {
+    await tx.table('capabilityAssessments').clear();
+    await tx.table('orbitRatings').clear();
+    await tx.table('attachments').clear();
+    await tx.table('assessmentHistory').clear();
+    await tx.table('tags').clear();
+  });
+
 export { db };
 
 /**

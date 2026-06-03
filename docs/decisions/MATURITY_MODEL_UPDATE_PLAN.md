@@ -1,7 +1,9 @@
 # MITA 4.0 Maturity Model Update — Implementation Plan
 
+> **Historical record (April 26 working draft, superseded by v3.0.0):** This document describes the April 26 PRA pilot working draft that was prepared but never released. It was superseded by the May 3, 2026 PRA Submission which is now reflected in v3.0.0. See [`CHANGELOG.md`](../../CHANGELOG.md) for the current release notes.
+
 **Created:** April 27, 2026
-**Status:** Implemented
+**Status:** Superseded by v3.0.0 (May 3, 2026 PRA Submission)
 **Previous App Version:** 2.1.0
 **Target App Version:** 3.0.0
 **Branch:** `feature/maturity-model-v3`

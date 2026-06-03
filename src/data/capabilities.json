@@ -1,6 +1,6 @@
 {
   "version": "4.0",
-  "lastUpdated": "2026-04-27",
+  "lastUpdated": "2026-05-03",
   "description": "The MITA 4.0 Capability Reference Model defines the capabilities that State Medicaid Agencies (SMAs) possess or seek to develop. Capabilities are organized into three layers: Strategic (enterprise strategy), Core (mission and outcomes), and Support (critical enablers). Each capability is assessed using the standardized ORBIT maturity criteria.",
   "domains": [
     {
@@ -734,7 +734,7 @@
       "categories": [
         {
           "id": "technology-infrastructure-management",
-          "name": "Technology Infrastructure Management",
+          "name": "Technical Infrastructure Management",
           "description": "",
           "areas": [
             {
@@ -751,7 +751,7 @@
             },
             {
               "id": "identity-access-and-consent",
-              "name": "Identity, Access, and Consent",
+              "name": "Identity, Access and Consent",
               "description": "Provides the SMA with the ability to manage how someone logs in, what role and permissions they have, and how identity is verified within the MES, and gather members’ consent and sharing preferences.",
               "topics": [
                 "Roles Based Access Control",
@@ -778,7 +778,7 @@
             },
             {
               "id": "development-testing-release-and-security-compliance",
-              "name": "Development, Testing, Release, and Security Compliance",
+              "name": "Development, Testing, Release and Security Compliance",
               "description": "Provides the SMA with the ability to create, update, and version source code and scripts, test changes, resolve defects, and promote through pre-production and production MES environments with security checks incorporated.",
               "topics": [
                 "Source Code and Script",
@@ -812,8 +812,8 @@
               "topics": ["Hosting Environments", "Shared Resources"]
             },
             {
-              "id": "business-rules-and-workflow",
-              "name": "Business Rules and Workflow",
+              "id": "business-rules-and-workflows",
+              "name": "Business Rules and Workflows",
               "description": "Provides the ability for the SMA to automate Medicaid business processes and document and share business rules human readable and system formats to support transactions.",
               "topics": ["Workflows", "Business Rules"]
             },
@@ -824,8 +824,8 @@
               "topics": ["Modularity", "Scalability", "Ease of Replacement"]
             },
             {
-              "id": "user-interface-and-session-management",
-              "name": "User Interface and Session Management",
+              "id": "user-interfaces-and-session-management",
+              "name": "User Interfaces and Session Management",
               "description": "Provides the ability for the SMA to design Medicaid applications that are easy for internal and external users to interact with and perform activities, and work across different devices and browsers, and accessibility tools, including maintaining user activity within the Medicaid application so users can continue or complete their activities.",
               "topics": ["User-Friendly Design", "Accessibility", "Continuity of User Activities"]
             }
@@ -874,9 +874,8 @@
         {
           "id": "organizational-roles",
           "name": "Organizational Roles",
-          "description": "Assesses the organization's maturity in managing roles, resources, governance, and capacity across the Medicaid enterprise. Covers technology resources, goal alignment, governance, communication, leadership, and staffing.",
+          "description": "Assesses the organization's maturity in managing roles, resources, governance, and capacity across the Medicaid enterprise. Covers goal alignment, governance, communication, leadership, and staffing.",
           "topics": [
-            "Technology Resources",
             "Organizational Goals Alignment",
             "Governance & Standardization",
             "Communication",

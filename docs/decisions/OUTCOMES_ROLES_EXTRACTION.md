@@ -1,7 +1,9 @@
 # Outcomes & Roles Extraction - Implementation Specification
 
+> **Historical record (v2.1.0):** This document captures the spec for the v2.1.0 release. It is preserved for traceability and is no longer the current state of the model — see [`CHANGELOG.md`](../../CHANGELOG.md) for the current release.
+
 **Created:** January 30, 2026  
-**Status:** Draft - Pending Approval
+**Status:** Implemented in v2.1.0
 
 ---
 

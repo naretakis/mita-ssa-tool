@@ -8,8 +8,8 @@ import openpyxl
 import sys
 import os
 
-INPUT_FILE = 'docs/updated-documents/Business and Enterprise Architecture Maturity Criteria.xlsx'
-OUTPUT_DIR = 'docs/updated-documents/extracted'
+INPUT_FILE = 'docs/source-documents/2026-04-26/Business and Enterprise Architecture Maturity Criteria.xlsx'
+OUTPUT_DIR = 'docs/source-documents/2026-04-26/extracted'
 
 def extract_criteria_sheet(ws, sheet_name, output_path):
     """Extract a criteria sheet (BA Criteria or EA Criteria) to markdown."""

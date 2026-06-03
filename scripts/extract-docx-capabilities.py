@@ -7,8 +7,8 @@ This file contains the Technical Capability Domain areas with definitions and to
 import os
 from docx import Document
 
-INPUT_FILE = 'docs/updated-documents/MITA 4.0 Capability Reference Model Document for MGB-TA Subgroup Update-0426.docx'
-OUTPUT_DIR = 'docs/updated-documents/extracted'
+INPUT_FILE = 'docs/source-documents/2026-04-26/MITA 4.0 Capability Reference Model Document for MGB-TA Subgroup Update-0426.docx'
+OUTPUT_DIR = 'docs/source-documents/2026-04-26/extracted'
 
 
 def clean_text(text):

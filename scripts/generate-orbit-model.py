@@ -3,8 +3,8 @@
 Generate the updated orbit-model.json from extracted source documents.
 
 Sources:
-- BA Criteria: docs/updated-documents/extracted/BA_Criteria.md (XLSX)
-- EA Criteria: docs/updated-documents/extracted/EA_Criteria.md (XLSX)
+- BA Criteria: docs/source-documents/2026-04-26/extracted/BA_Criteria.md (XLSX)
+- EA Criteria: docs/source-documents/2026-04-26/extracted/EA_Criteria.md (XLSX)
 - Technology: DOCX tables (direct extraction for accuracy)
 - Information + Organizational: current orbit-model.json (unchanged)
 """
@@ -16,8 +16,8 @@ import openpyxl
 
 OUTPUT_FILE = 'src/data/orbit-model.json'
 CURRENT_FILE = 'src/data/orbit-model.json'
-XLSX_FILE = 'docs/updated-documents/Business and Enterprise Architecture Maturity Criteria.xlsx'
-DOCX_FILE = 'docs/updated-documents/MITA 4 Maturity Model Guide_Pilot-TA Subgroup Update-0426.docx'
+XLSX_FILE = 'docs/source-documents/2026-04-26/Business and Enterprise Architecture Maturity Criteria.xlsx'
+DOCX_FILE = 'docs/source-documents/2026-04-26/MITA 4 Maturity Model Guide_Pilot-TA Subgroup Update-0426.docx'
 
 
 def load_current_model():

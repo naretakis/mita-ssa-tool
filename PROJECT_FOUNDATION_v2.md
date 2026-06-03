@@ -4,11 +4,11 @@
 
 A Progressive Web App (PWA) enabling State Medicaid Agencies (SMAs) to self-assess their Medicaid Enterprise maturity using the **MITA 4.0 ORBIT Maturity Model**. The application is fully client-side, offline-first, and stores all data locally in the browser.
 
-**Version:** 2.0  
-**Last Updated:** January 25, 2026  
+**Version:** 3.0  
+**Last Updated:** June 3, 2026  
 **Target Deployment:** GitHub Pages
 
-> **Note:** This document (v2) reflects the current implementation.
+> **Note:** This document (v2) reflects the current implementation, which now ingests the May 3, 2026 PRA submission as the official maturity model source.
 
 ---
 
@@ -77,7 +77,10 @@ mita-4.0/
 │   ├── ISSUE_TEMPLATE/       # Bug, feature, docs templates
 │   ├── workflows/            # CI and deploy workflows
 │   └── PULL_REQUEST_TEMPLATE.md
-├── docs/                     # MITA 4.0 reference documents
+├── docs/
+│   ├── source-documents/     # Source MITA documents archived by date
+│   ├── reference/            # Reference snapshots of capability and maturity models
+│   └── decisions/            # Historic spec/decision records
 ├── CHANGELOG.md
 ├── CONTRIBUTING.md
 ├── README.md
@@ -92,7 +95,7 @@ mita-4.0/
 
 #### 1. `src/data/capabilities.json` — Capability Reference Model
 
-Defines **what** can be assessed. Contains 75 capability areas across 14 domains organized into three layers.
+Defines **what** can be assessed. Contains 66 capability areas across 16 domains organized into three layers.
 
 **Domain Structure:**
 
@@ -106,7 +109,7 @@ interface StandardCapabilityDomain {
   areas: CapabilityArea[];
 }
 
-// Categorized domain (Data Management, Technical)
+// Categorized domain (Enterprise Data Management, Enterprise Technology)
 interface CategorizedCapabilityDomain {
   id: string;
   name: string;
@@ -128,34 +131,38 @@ interface CapabilityArea {
 | Layer     | Domains | Capability Areas |
 | --------- | ------- | ---------------- |
 | Strategic | 2       | 5                |
-| Core      | 8       | 31               |
-| Support   | 4       | 39               |
-| **Total** | **14**  | **75**           |
+| Core      | 8       | 30               |
+| Support   | 6       | 31               |
+| **Total** | **16**  | **66**           |
 
 #### 2. `src/data/orbit-model.json` — ORBIT Maturity Criteria
 
-Defines **how** assessments are conducted. Contains standardized maturity criteria applied to ALL capability areas.
+Defines **how** assessments are conducted. Each business capability area is assessed against the three required dimensions; three additional organizational assessments evaluate enterprise-level maturity.
 
-**ORBIT Model Structure:**
+**Standard Dimensions (assessed per capability area):**
 
 | Dimension             | Required | Aspects                      |
 | --------------------- | -------- | ---------------------------- |
-| Outcomes              | No       | 6                            |
-| Roles                 | No       | 6                            |
-| Business Architecture | Yes      | 7                            |
-| Information           | Yes      | 11                           |
-| Technology            | Yes      | 22 (across 7 sub-dimensions) |
-| **Total**             |          | **52**                       |
+| Business Architecture | Yes      | 5                            |
+| Information           | Yes      | 10                           |
+| Technology            | Yes      | 11 (across 2 sub-dimensions) |
+| **Total**             |          | **26**                       |
 
 **Technology Sub-Dimensions:**
 
-1. Infrastructure (4 aspects)
-2. Integration (3 aspects)
-3. Platform Services (3 aspects)
-4. Application Architecture (3 aspects)
-5. Security and Identity (4 aspects)
-6. Operations and Maintenance (2 aspects)
-7. Development and Release (3 aspects)
+1. Technical Infrastructure Management (6 aspects)
+2. Application Management (5 aspects)
+
+**Organizational Assessments (assessed once per organization):**
+
+| Assessment                             | Aspects |
+| -------------------------------------- | ------- |
+| Organizational Outcomes (Optional)     | 6       |
+| Organizational Roles (Optional)        | 5       |
+| Organizational Enterprise Architecture | 4       |
+| **Total**                              | **15**  |
+
+**Grand total aspects: 41 (26 standard + 15 organizational)**
 
 **Enterprise Domains with Aggregate Dimensions:**
 
@@ -163,8 +170,8 @@ Two domains have special aggregate dimension handling:
 
 | Domain                     | Assessment Model | Aggregate Dimension |
 | -------------------------- | ---------------- | ------------------- |
-| Enterprise Data Management | O-R-B-T          | Information         |
-| Enterprise Technology      | O-R-B-I          | Technology          |
+| Enterprise Data Management | B-T              | Information         |
+| Enterprise Technology      | B-I              | Technology          |
 
 For these enterprise domains:
 
@@ -220,9 +227,9 @@ One record per aspect per capability assessment.
 interface OrbitRating {
   id: string; // UUID
   capabilityAssessmentId: string; // FK to CapabilityAssessment
-  dimensionId: OrbitDimensionId; // 'outcomes' | 'roles' | 'businessArchitecture' | 'information' | 'technology'
+  dimensionId: RatingDimensionId; // see types below
   subDimensionId?: TechnologySubDimensionId; // Only for technology dimension
-  aspectId: string; // e.g., "data-governance"
+  aspectId: string; // e.g., "information-quality"
   currentLevel: MaturityLevelWithNA; // -1 (N/A), 0 (not assessed), 1-5
   targetLevel?: MaturityLevelWithNA; // "To Be" target level
   previousLevel?: MaturityLevelWithNA; // Carry-forward hint
@@ -236,21 +243,16 @@ interface OrbitRating {
   updatedAt: Date;
 }
 
-type OrbitDimensionId =
-  | 'outcomes'
-  | 'roles'
-  | 'businessArchitecture'
-  | 'information'
-  | 'technology';
+// Standard ORBIT dimensions (assessed per capability area)
+type OrbitDimensionId = 'businessArchitecture' | 'information' | 'technology';
 
-type TechnologySubDimensionId =
-  | 'infrastructure'
-  | 'integration'
-  | 'platformServices'
-  | 'applicationArchitecture'
-  | 'securityIdentity'
-  | 'operationsMaintenance'
-  | 'developmentRelease';
+// Organizational assessments (assessed once per organization)
+type OrganizationalAssessmentId = 'outcomes' | 'roles' | 'enterprise-architecture';
+
+// dimensionId in OrbitRating accepts both
+type RatingDimensionId = OrbitDimensionId | OrganizationalAssessmentId;
+
+type TechnologySubDimensionId = 'technologyInfrastructureManagement' | 'applicationManagement';
 
 type MaturityLevelWithNA = -1 | 0 | 1 | 2 | 3 | 4 | 5;
 ```
@@ -294,7 +296,7 @@ interface AssessmentHistory {
 }
 
 interface HistoricalRating {
-  dimensionId: OrbitDimensionId;
+  dimensionId: RatingDimensionId;
   subDimensionId?: TechnologySubDimensionId;
   aspectId: string;
   currentLevel: MaturityLevelWithNA;
@@ -409,19 +411,19 @@ interface SubDimensionScore {
 | JSON   | Data backup          | Full assessment data (no blobs)      |
 | ZIP    | Complete backup      | JSON + PDF + all attachments         |
 
-**CSV Maturity Profile Format:**
+**CSV Maturity Profile Format (standard capability area):**
 
 ```csv
 MITA 4.0 Maturity Profile: <state name>,,,
 ,,,
 Capability Domain: <Domain Name>,,,
 ORBIT,As Is,To Be,Notes:
-Outcomes,<level>,<target>,<notes>
-Roles,<level>,<target>,<notes>
 Business Architecture,<level>,<target>,<notes>
 Information,<level>,<target>,<notes>
 Technology,<level>,<target>,<notes>
 ```
+
+For organizational assessments (Outcomes, Roles, Enterprise Architecture), each aspect appears as its own row under an `Aspect` header instead of a dimension row.
 
 ---
 
@@ -463,19 +465,20 @@ export-2026-01-24.zip
 
 ## Key Terminology
 
-| Term                  | Definition                                                                                  |
-| --------------------- | ------------------------------------------------------------------------------------------- |
-| **Capability Domain** | High-level capability grouping (e.g., "Provider Management")                                |
-| **Capability Area**   | Specific capability being assessed (e.g., "Provider Enrollment")                            |
-| **Dimension**         | ORBIT assessment category (Outcomes, Roles, Business Architecture, Information, Technology) |
-| **Sub-Dimension**     | Only applies to Technology (e.g., "Infrastructure", "Integration")                          |
-| **Aspect**            | Individual assessment criteria within a dimension (e.g., "Data Governance")                 |
-| **Maturity Level**    | Rating from 1 (Initial) to 5 (Optimized), or N/A                                            |
+| Term                  | Definition                                                                                                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Capability Domain** | High-level capability grouping (e.g., "Provider Management")                                                                                                                                            |
+| **Capability Area**   | Specific capability being assessed (e.g., "Provider Enrollment")                                                                                                                                        |
+| **Dimension**         | Standard ORBIT assessment category (Business Architecture, Information, Technology). Outcomes, Roles, and Enterprise Architecture are organizational assessments rather than per-capability dimensions. |
+| **Sub-Dimension**     | Only applies to Technology (e.g., "Infrastructure", "Integration")                                                                                                                                      |
+| **Aspect**            | Individual assessment criteria within a dimension (e.g., "Data Governance")                                                                                                                             |
+| **Maturity Level**    | Rating from 1 (Initial) to 5 (Optimized), or N/A                                                                                                                                                        |
 
 ---
 
 ## References
 
-- [MITA 4.0 Maturity Model List Format](docs/MITA_4.0_Maturity_Model_List_Format.md)
-- [MITA 4.0 Capability Reference Model](docs/MITA_4.0_Capability_Reference_Model.md)
-- [ORBIT Dimension & Domain Changes](docs/ORBIT_DIMENSION_CHANGES.md)
+- [Source documents archived by date](docs/source-documents/)
+- [Capability Reference Model snapshot](docs/reference/MITA_4.0_Capability_Reference_Model.md)
+- [Maturity Model List Format snapshot](docs/reference/MITA_4.0_Maturity_Model_List_Format.md)
+- [Historic spec records](docs/decisions/)

@@ -138,7 +138,7 @@ describe('scoring', () => {
     describe('Technology dimension', () => {
       it('should average sub-dimension scores, then average those', () => {
         const ratings = [
-          // Technology Infrastructure Management: avg = 3.5
+          // Technical Infrastructure Management: avg = 3.5
           { currentLevel: 3, subDimensionId: 'technologyInfrastructureManagement' },
           { currentLevel: 4, subDimensionId: 'technologyInfrastructureManagement' },
           // Application Management: avg = 5
@@ -162,7 +162,7 @@ describe('scoring', () => {
           { currentLevel: 0, subDimensionId: 'technologyInfrastructureManagement' }, // Not assessed
           { currentLevel: 5, subDimensionId: 'applicationManagement' },
         ];
-        // Technology Infrastructure Management: only 3 counts -> 3
+        // Technical Infrastructure Management: only 3 counts -> 3
         // Application Management: 5
         // Average: (3 + 5) / 2 = 4
         expect(calculateDimensionScore('technology', ratings)).toBe(4);

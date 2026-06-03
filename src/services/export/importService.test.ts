@@ -46,7 +46,7 @@ describe('importService', () => {
         id: r.id ?? uuidv4(),
         capabilityAssessmentId: r.capabilityAssessmentId ?? '',
         dimensionId: r.dimensionId ?? 'businessArchitecture',
-        aspectId: r.aspectId ?? 'process-standardization',
+        aspectId: r.aspectId ?? 'business-process-performance',
         currentLevel: r.currentLevel ?? 3,
         targetLevel: r.targetLevel,
         questionResponses: r.questionResponses ?? [],
@@ -427,7 +427,7 @@ describe('importService', () => {
         id: ratingId,
         capabilityAssessmentId: assessmentId,
         dimensionId: 'businessArchitecture',
-        aspectId: 'process-standardization',
+        aspectId: 'business-process-performance',
         currentLevel: 3,
         questionResponses: [],
         evidenceResponses: [],
@@ -570,7 +570,7 @@ describe('importService', () => {
           {
             capabilityAssessmentId: assessmentId,
             dimensionId: 'businessArchitecture',
-            aspectId: 'process-standardization',
+            aspectId: 'business-process-performance',
             currentLevel: 3,
           },
           {
@@ -625,7 +625,7 @@ describe('importService', () => {
           {
             capabilityAssessmentId: assessmentId,
             dimensionId: 'businessArchitecture',
-            aspectId: 'process-standardization',
+            aspectId: 'business-process-performance',
             currentLevel: 3,
           },
           {
@@ -677,14 +677,14 @@ describe('importService', () => {
           {
             capabilityAssessmentId: assessmentId,
             dimensionId: 'outcomes' as OrbitRating['dimensionId'],
-            aspectId: 'member-health-outcomes',
+            aspectId: 'culture-mindset',
             currentLevel: 3,
           },
           // Invalid B-I-T rating for organizational assessment (should be skipped)
           {
             capabilityAssessmentId: assessmentId,
             dimensionId: 'businessArchitecture',
-            aspectId: 'process-standardization',
+            aspectId: 'business-process-performance',
             currentLevel: 4,
           },
         ]
@@ -720,7 +720,7 @@ describe('importService', () => {
           {
             capabilityAssessmentId: assessmentId,
             dimensionId: 'roles' as OrbitRating['dimensionId'],
-            aspectId: 'stakeholder-engagement',
+            aspectId: 'organizational-goals-alignment',
             currentLevel: 3,
           },
           // Invalid B-I-T rating for organizational assessment (should be skipped)
@@ -759,7 +759,7 @@ describe('importService', () => {
           {
             capabilityAssessmentId: assessmentId,
             dimensionId: 'businessArchitecture',
-            aspectId: 'process-standardization',
+            aspectId: 'business-process-performance',
             currentLevel: 4,
           },
         ]
@@ -774,7 +774,7 @@ describe('importService', () => {
       expect(ratings.find((r) => r.aspectId === 'information-quality')?.dimensionId).toBe(
         'information'
       );
-      expect(ratings.find((r) => r.aspectId === 'process-standardization')?.dimensionId).toBe(
+      expect(ratings.find((r) => r.aspectId === 'business-process-performance')?.dimensionId).toBe(
         'businessArchitecture'
       );
     });

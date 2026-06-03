@@ -1,0 +1,756 @@
+[
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Optional Outcomes Maturity Criteria",
+    "name": "Culture & Mindset",
+    "question": "To what extent are organizational norms, expectations, and behaviors related to outcome development?",
+    "criteria": {
+      "1": "No culture or expectation of outcomes for projects (at any phase of the project).",
+      "2": "Recognition begins to take hold of the importance of outcomes during planning.",
+      "3": "Leadership sets expectations: outcome development during planning becomes a norm.",
+      "4": "Outcome development is formalized and institutionally expected.",
+      "5": "Outcome thinking is fully embedded at all levels of organization—without direction by or requirement from leadership."
+    },
+    "documentation": {}
+  },
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Optional Outcomes Maturity Criteria",
+    "name": "Capability",
+    "question": "To what extent is there internal capacity to develop, oversee, and apply outcomes without reliance on vendors?",
+    "criteria": {
+      "1": "No internal capabilities to identify or draft outcomes.",
+      "2": "Organization understands at a high-level what elements are needed to identify and draft outcomes, but vendor leads development of outcomes.",
+      "3": "Sufficient experience in identifying and drafting outcomes internally; organization may lead or closely oversee vendors to draft outcomes.",
+      "4": "Full in-house capability to independently produce outcomes.",
+      "5": "Deep in-house expertise with fully self-sufficient teams across the organization.\nOrganization may also support sister organizations and agencies in developing outcomes."
+    },
+    "documentation": {}
+  },
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Optional Outcomes Maturity Criteria",
+    "name": "Quality & Consistency",
+    "question": "To what extent is there clarity, structure, and strategic alignment of outcome statements?",
+    "criteria": {
+      "1": "Outcomes are ambiguous, inconsistent, and disconnected from goals.",
+      "2": "No consistent approach or methodology to developing outcomes.\nOutcomes may be aligned with priorities but are not “smart” or actionable.",
+      "3": "Defined approach or methodology to developing outcomes.\nOutcomes capture the capability sought and benefit derived from a given project, but the quality of the outcome statements vary.",
+      "4": "Well-established and consistently applied approach to developing outcomes.\nOutcomes are clear, actionable, reusable, and strategically aligned.",
+      "5": "Well-established and consistently applied approach to developing outcomes.\nOutcome statements are of consistently high quality, recognizable, and standardized."
+    },
+    "documentation": {}
+  },
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Optional Outcomes Maturity Criteria",
+    "name": "Alignment to Goals & Priorities",
+    "question": "To what extent are outcomes traceable to broader goals, priorities, and mission?",
+    "criteria": {
+      "1": "Outcomes are not aligned to goals or priorities.",
+      "2": "Emerging awareness of need to align outcomes with goals and priorities but gaps remain.",
+      "3": "Outcomes are intentionally aligned to strategic goals and priorities.",
+      "4": "Systematic alignment of outcomes to goals and priorities.\nOutcomes inform broader strategies.",
+      "5": "Outcomes reflect and reinforce strategic direction seamlessly."
+    },
+    "documentation": {}
+  },
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Optional Outcomes Maturity Criteria",
+    "name": "Use of Metrics",
+    "question": "To what extent are outcomes tracked, and metrics used to measure progress and guide improvement?",
+    "criteria": {
+      "1": "No recognition of the need to measure progress toward achieving outcomes or commitment to continuous improvement.",
+      "2": "Interest in measuring progress toward achieving outcomes.\nMetrics are not well-aligned with outcomes.",
+      "3": "Metrics are generally appropriate and regularly referenced to determine progress in achieving outcomes.\nSome engagement in continuous improvement cycles.",
+      "4": "Metrics are well-developed.\nStaff regularly use metrics to evaluate performance and engage in well-established continuous improvement cycles.",
+      "5": "Performance monitoring is deeply embedded in organization’s culture.\nMetrics and outcomes support continuous improvement, learning, and decision-making."
+    },
+    "documentation": {}
+  },
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Optional Outcomes Maturity Criteria",
+    "name": "Reusability & Integration",
+    "question": "To what extent are outcomes reused across project documents, Advance Planning Documents (APD), systems, and reporting?",
+    "criteria": {
+      "1": "No reuse.\nOutcomes are informal or nonexistent.",
+      "2": "Reuse is isolated to APDs; no reuse across other projects, planning, or leadership documents.",
+      "3": "Reuse is focused on APDs and some project-related documents.\nInconsistent reuse across leadership documents, and external communications.",
+      "4": "Reuse is consistent and intentional across APDs, project documents, and leadership and external communications.",
+      "5": "Seamless reuse across systems and communications, which improves coherence and efficiency."
+    },
+    "documentation": {}
+  },
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Optional Roles Maturity Criteria",
+    "name": "Organizational Goals Alignment",
+    "question": "To what extent do organizational goals align around shared, enterprise-wide Medicaid goals?",
+    "criteria": {
+      "1": "Business units operate in silos without clear understanding of enterprise-wide Medicaid goals.",
+      "2": "Organizational goals are defined but not fully communicated across all levels.",
+      "3": "Business units align their roles and processes to support broader Medicaid goals.",
+      "4": "All roles (internal and external) collaborate to drive enterprise-wide Medicaid program goals, with regular reassessments for alignment.",
+      "5": "SMA leadership collaborates at the national level to set adaptable, data-driven goals and performance outcomes for the Medicaid program; focus is on improving healthcare and social services delivery and beneficiary well-being nationwide."
+    },
+    "documentation": {}
+  },
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Optional Roles Maturity Criteria",
+    "name": "Governance & Standardization",
+    "question": "To what extent does governance support data-driven solutions and standardization of processes which are shared more broadly?",
+    "criteria": {
+      "1": "Limited or no formal governance to guide roles or standardize processes.",
+      "2": "Some governance exists, but role clarity and process standardization are inconsistent.",
+      "3": "Formal governance structures support role clarity, with standard operating procedures (SOPs).",
+      "4": "Enterprise governance bodies actively coordinate roles, processes, and data for continuous improvement and standardization.",
+      "5": "SMA leads data-driven solutions at a national level and collaborates with other SMAs to develop shared business and technical standards that are disseminated nationally to strengthen overall Medicaid service delivery."
+    },
+    "documentation": {}
+  },
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Optional Roles Maturity Criteria",
+    "name": "Communication (Internal / External)",
+    "question": "To what extent is communication integrated across business areas to support Medicaid goals and outcomes?",
+    "criteria": {
+      "1": "Minimal communication between leadership, business, and technical units.",
+      "2": "Defined communication channels exist but are not used consistently.",
+      "3": "Regular cross-unit communication occurs, including with external partners like Managed Care Organizations (MCO) and vendors.",
+      "4": "Transparent, enterprise-wide communication ensures all roles understand priorities, responsibilities, and impacts.",
+      "5": "Integrates communication across all business areas to align long-term Medicaid goals and performance outcomes.\nFosters cooperation with other SMAs, CMS, and external partners nationally.\nThe Agency is recognized for its leadership in sharing solutions, provider enrollment process needs, and best practices."
+    },
+    "documentation": {}
+  },
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Optional Roles Maturity Criteria",
+    "name": "Culture & Leadership",
+    "question": "To what extent does leadership support a culture of continuous learning and collaboration?",
+    "criteria": {
+      "1": "Leadership lacks visibility into workloads and resource capacity; roles are reactive.",
+      "2": "Leadership begins assessing role capacity but lacks full enterprise insight.",
+      "3": "Leadership proactively manages workloads and roles based on enterprise needs and priorities.",
+      "4": "Leadership fosters a culture of collaboration and continuous learning across internal and external roles.",
+      "5": "Leadership supports internal change agents to align culture, strategy, and resources with long-term Medicaid goals."
+    },
+    "documentation": {}
+  },
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Optional Roles Maturity Criteria",
+    "name": "Resourcing Capacity (Staffing, Training, Recruitment)",
+    "question": "How are staffing, training, and recruitment processes identified and aligned with program objectives?",
+    "criteria": {
+      "1": "SMA struggles to identify gaps in role capacity; staffing is reactive.",
+      "2": "Some processes exist for role capacity management (staffing, training, recruitment).",
+      "3": "SMA systematically identifies, recruits, and trains staff.",
+      "4": "SMA maintains a dynamic capacity model to forecast and meet enterprise role needs, including succession planning and continuous role development.",
+      "5": "SMA uses comprehensive planning and advanced analytics to align roles and skills with program objectives, enabling rapid response to required changes while maintaining high service delivery standards."
+    },
+    "documentation": {}
+  },
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Organizational Enterprise Architecture",
+    "name": "Business Capability",
+    "question": "How clearly are business capabilities described and documented, managed, measured, and regularly improved so they effectively support the enterprise?",
+    "criteria": {
+      "1": "The capability has been identified, and the use of the capability has been documented. \nThe capability is not yet fully described across roles, processes, technology, information, or performance measures. Compliance alignment may not yet be fully documented.",
+      "2": "Documentation of the capability roles, supporting processes, technology, and information has begun. The capability complies with state and federal requirements. \nCapability documentation is in progress but is not yet complete or standardized. Performance measures may still be under development, and enterprise alignment may not yet be established.",
+      "3": "Capability roles, supporting processes, technology and information are fully defined and documented. The capability complies with state and federal requirements and the conforms to MES industry - recognized architectural frameworks. The capability is standardized and aligned at the enterprise level. \nThe capability is defined and standardized, but performance is not yet actively managed or routinely monitored through metrics.",
+      "4": "The SMA manages the capability for performance and compliance. Metrics and measures of the capability are monitored.\nThe capability is monitored and managed, but performance data may not yet be consistently used to drive improvements, investment decisions, or cross-SMA thought leadership.",
+      "5": "The SMA uses performance monitoring to make improvements to the capability. The SMA is a thought leader for the capability and shares capability information with other SMAs."
+    },
+    "documentation": {
+      "1": "Capability Catalog",
+      "2": "Role Catalog\nOrganization and Actor Catalog\nProcess Catalog \nInterface Catalog\nData Asset Catalog",
+      "3": "Performance metrics\nCentral Enterprise Architecture repository",
+      "4": "Performance metrics are monitored",
+      "5": "Advance Planning Document (APD) showing improvement or investment in the advancement or improvement of the capability\nPerformance Metrics direct improvements"
+    }
+  },
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Organizational Enterprise Architecture",
+    "name": "Enterprise Architecture",
+    "question": "To what extent is enterprise architecture (EA) integrated into MITA enterprise planning, governance, and execution to guide and optimize business, information, and technology outcomes?",
+    "criteria": {
+      "1": "Recognition of the need for enterprise-wide planning and architectural frameworks but current EA practices are not structured, standardized, or consistently applied.\nPlanning is reactive, and architectural guidance is inconsistent across the enterprise.",
+      "2": "Compliance with federal guidance and adoption of MES-recognized EA frameworks. EA processes exist but are not standardized or fully documented.\nEA may still be compliance-driven rather than integrated into planning and execution.",
+      "3": "Fully implemented MES-recognized EA frameworks. EA processes are standardized, documented, and aligned across business, information and technology.\nEA is not yet consistently used to actively monitor MES performance, manage outcomes, or guide strategic execution.",
+      "4": "EA is used to monitor and manage MES performance. EA is integrated into strategic planning and execution. SMA collaborates with other SMAs to share EA practices.\nEA may not yet be fully data-driven, predictive, or continuously optimized. National-level leadership and proactive enterprise optimization are not yet demonstrated.",
+      "5": "Advanced, data-driven EA is used as strategies for proactive decision-making. EA drives enterprise optimization and continuous improvement. SMA is nationally recognized for enterprise architecture leadership."
+    },
+    "documentation": {
+      "1": "N/A – none exists",
+      "2": "Draft EA framework\nInitial architecture repository\nCompliance reports",
+      "3": "EA governance charter\nArchitecture standards\nEA Repository",
+      "4": "EA dashboards\nStrategic plans with EA inputs\nCollaboration artifacts\nOutcomes Catalog\nBusiness case diagram\nEA Matrix",
+      "5": "Predictive model\nInnovation roadmaps"
+    }
+  },
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Organizational Enterprise Architecture",
+    "name": "Policy Management",
+    "question": "To what extent are policies systematically integrated into enterprise architecture, capability planning, and governance processes to guide compliance, decision-making, and execution within MITA?",
+    "criteria": {
+      "1": "Policies relevant to business capabilities are informally identified or inconsistently documented.\nThere is little to no mapping of policies to business processes or systems.",
+      "2": "Some policies are documented and work has begun to map to business processes and systems. Compliance is mostly reactive, and regular reviews are not established.\nPolicies are not yet fully integrated into governance, planning, or execution.",
+      "3": "All business policies relevant to the capability (e.g., \"Pharmacy Management\") are identified, documented, and mapped to business processes and supporting systems. Policies are harmonized with state and federal requirements, and their alignment is regularly reviewed to ensure compliance and support for enterprise objectives.\nPolicy alignment is not yet fully institutionalized across enterprise governance. Policy updates may not yet be consistently driven by performance data, regulatory change, or strategic objectives.",
+      "4": "Policy alignment is institutionalized and integrated into enterprise governance. Policies are systematically reviewed, updated, and optimized based on performance data, regulatory changes, and strategic objectives.\nPolicy alignment may not yet function as a fully proactive, continuous driver of agility, innovation, and external thought leadership.",
+      "5": "Policy alignment is a proactive, continuous process that drives organizational agility, compliance, and innovation. The organization demonstrates thought leadership and collaborates externally to share best practices."
+    },
+    "documentation": {
+      "1": "N/A – none exists",
+      "2": "Policy Catalog\nPolicy/Process Matrix",
+      "3": "Policy/Process/Technology Component Matrix\nPolicy and Strategy Catalogs",
+      "4": "Performance metrics\nCentral policy repository",
+      "5": "Goal, Driver, Objective Catalog"
+    }
+  },
+  {
+    "section": "Enterprise Architecture (EA)",
+    "subsection": "Organizational Enterprise Architecture",
+    "name": "Strategic Planning",
+    "question": "To what extent is strategic planning formally integrated into enterprise architecture, capability planning, and governance processes to guide the execution of MITA?",
+    "criteria": {
+      "1": "Strategic plan is informally considered during architecture and capability planning efforts. \nAlignment between strategy and capabilities occurs opportunistically and is largely dependent on individual initiative rather than a defined planning approach.",
+      "2": "Strategic plan and capability planning are intentionally aligned through defined outcomes. Strategic objectives inform capability discussions, but dependencies between strategy, capabilities, and processes are not yet consistently analyzed or governed.\nStrategic alignment exists but may not yet drive portfolio or project prioritization.",
+      "3": "Strategic plan explicitly identifies capabilities as required dependencies to achieve strategic outcomes. Capabilities and supporting processes are identified and analyzed as part of Enterprise Portfolio and Project Management to inform prioritization and planning decisions.\nCapabilities and supporting processes are not yet consistently tied to roadmap execution, intake decisions, APD funding requests, or project approval processes.",
+      "4": "Enterprise Roadmap (Projects/Initiatives) have capabilities and processes identified that support the roadmap items. Capabilities and processes are identified and analyzed for intake of new business to support funding requests for an APD, or state funding for project approval.\nCapabilities and processes may not yet be fully institutionalized as core inputs to all enterprise governance, investment, and prioritization decisions.",
+      "5": "Capabilities and processes are core inputs to enterprise governance and decision-making. Strategic planning, investment decisions, and roadmap prioritization are consistently driven by capability and process analysis to ensure alignment, maximize value, and support execution of SMA strategic objectives."
+    },
+    "documentation": {
+      "1": "N/A – none exists",
+      "2": "Outcomes Catalog\nOutcomes are mapped to capabilities",
+      "3": "Viewpoints:\nProcess Catalog\n Capability decomposition diagram\nEnterprise Portfolio\nMetrics Catalog",
+      "4": "Enterprise Roadmap\nIntake Templates",
+      "5": "Decision Logs"
+    }
+  },
+  {
+    "section": "Business Architecture (BA)",
+    "subsection": null,
+    "name": "Business Process Performance",
+    "question": "To what extent is the performance of business processes supporting this capability consistently measured, monitored, and managed using meaningful metrics?",
+    "criteria": {
+      "1": "Business processes that support the capability are identified and defined, but performance expectations are implicit and not formally measured. \nProcess outcomes vary and are not consistently reviewed.",
+      "2": "Business processes are documented in SOPs, including steps and accountable roles. \nPerformance expectations are understood informally but are not yet measured or tracked.",
+      "3": "Business processes are standardized and executed consistently across the organization. All staff follow the same documented process steps, and processes are centrally accessible through a Business Process Catalog.\nProcess performance is not yet routinely measured, monitored, or reported using defined metrics.",
+      "4": "Business processes have defined performance metrics (e.g., timeliness, quality, efficiency) that are regularly tracked, monitored, and reported. Process performance insights are used to identify bottlenecks and manage outcomes. Select steps may be automated to improve performance predictability.\nContinuous optimization, trend analysis, feedback loops, and broader innovation are not yet fully institutionalized.",
+      "5": "Business process performance is continuously assessed and optimized using metrics, trends, and feedback. Data-driven insights are used to proactively improve effectiveness, efficiency, and capability outcomes through refinement, automation, and innovation."
+    },
+    "documentation": {
+      "1": "Process lists\nCapability maps\nInformal process descriptions",
+      "2": "Approved SOPs\nRole descriptions\nTraining materials",
+      "3": "Approved SOPs\nBusiness Process Catalog\nRole Catalog\nTraining materials",
+      "4": "Performance metrics developed for defined outcomes\n Metrics dashboards\nPerformance reports\nAutomation logs\nLeadership reviews",
+      "5": "Process improvement roadmaps\nTrend analyses\nRoot cause analyses\nOptimization initiatives\nImprovement plans\nProcess assessments"
+    }
+  },
+  {
+    "section": "Business Architecture (BA)",
+    "subsection": null,
+    "name": "Business Process Documentation",
+    "question": "To what extent are the business processes that support this capability identified, documented using defined standards, centrally managed, and regularly maintained?",
+    "criteria": {
+      "1": "Business processes that support the capability are partially or inconsistently identified. Process documentation is incomplete, informal, or outdated.\nBusiness process models (BPMs) are not fully developed or consistently used to guide execution.",
+      "2": "All business processes supporting the capability are fully identified and documented. BPMs are developed for each process and are available for staff reference, but modeling quality and consistency may vary.\nDocumentation standards may be limited or informal, and process models may not yet follow a common enterprise standard.",
+      "3": "Business processes supporting the capability are formally defined and documented using a common modeling standard (e.g., Business Process Model and Notation (BPMN) 2.0 or organization-defined conventions), ensuring clarity, consistency, and adherence to industry best practices.\nProcess documentation may not yet be centrally managed in a standardized modeling tool with version control, traceability, and formal relationships to capabilities and metrics.",
+      "4": "Business process documentation is managed in a standardized modeling tool that supports version control, change history, and traceability. Process models are maintained in an enterprise business process catalog with defined relationships to capabilities and metrics.\nProcess documentation updates may not yet be consistently driven by performance metrics, improvement insights, capability changes, or strategic priorities.",
+      "5": "BPMs follow a documented review schedule with clear ownership. Updates are driven by performance metrics, operational insights, and lessons learned, not ad-hoc changes. All changes are logged in Process improvement logs or formal change requests, ensuring traceability from issue identification through approval and implementation. \nBPM updates are explicitly tied to changes in business capabilities, strategic priorities, or regulatory requirements, keeping process design current and strategically aligned."
+    },
+    "documentation": {
+      "1": "Partial lists of processes supporting the capability\nHigh level or informal process diagrams\nDraft or outdated BPM with gaps\nReliance on institutional knowledge to understand processes",
+      "2": "Complete inventory of processes mapped to capabilities\nProcess catalog\nBPMs available for all supporting processes\nProcess documentation used for onboarding or training\nLimited or informal documentation standards",
+      "3": "BPMs compliant with BPMN 2.0 or internal standards\nCentralized Process Catalog\nModeling guidelines and documentation standards\nVerified consistency across process models\nPeriodic BPM quality or compliance assessments",
+      "4": "Centralized modeling repository/tool\nVersion history and change logs for BPMs\nEnterprise business process catalog\nDocumented relationships between processes, capabilities, and metrics",
+      "5": "Formal review cadence for BPMs\nEvidence of updates driven by metrics or insights\nProcess improvement logs or change requests\nAlignment of BPM updates with capability or strategy changes"
+    }
+  },
+  {
+    "section": "Business Architecture (BA)",
+    "subsection": null,
+    "name": "Business Process Governance",
+    "question": "Are specific individuals assigned to process governance roles, and do they actively participate in governing the business processes that support this capability?",
+    "criteria": {
+      "1": "Process governance roles and responsibilities have not been established or assigned to individuals for the business processes that support the capability.\nThere is no clear accountability for process ownership, decision-making, or process governance.",
+      "2": "Process governance roles and responsibilities for the business processes supporting the capability have been identified and assigned to individuals (e.g., capability/business owner, process owner), and key process terms, definitions, and acronyms used to support the capability have been identified and documented.\nAssigned individuals may not yet consistently participate in process governance decisions or manage process changes and standards.",
+      "3": "The SMA monitors the assignment of process governance roles to ensure minimal vacancy, and the assigned individuals actively participate in governing the business processes, including decision-making related to process changes, standards, and alignment to the capability.\nGovernance information may not yet be centrally stored, searchable, or accessible through an enterprise repository. Stakeholders may still have limited visibility into governed processes, role assignments, and process definitions.",
+      "4": "Process governance role assignments, process definitions, and key terms are stored in a central enterprise repository (e.g., business architecture or process catalog) and are accessible to stakeholders to search, discover, and understand the processes governed by the SMA.\nProcess governance may not yet be regularly assessed against enterprise outcomes, policies, standards, and methodologies. Continuous governance improvement may not yet be fully institutionalized.",
+      "5": "Business processes adhere to enterprise process governance outcomes, policies, standards, and methodologies and are regularly assessed to identify opportunities to improve process governance, effectiveness, and alignment with the supported capability."
+    },
+    "documentation": {
+      "1": "N/A – none exists",
+      "2": "Process catalog (with role assignments)\nProcess model view with roles identified\nDocumentation of key process terms, definitions, and acronyms used to support the capability",
+      "3": "Actor-to-Role RACI Matrix\n Decisions documented with key decision makers noted",
+      "4": "Central enterprise architecture repository",
+      "5": "Process governance diagram\nSOPs\nProcess governance policy"
+    }
+  },
+  {
+    "section": "Business Architecture (BA)",
+    "subsection": null,
+    "name": "Business Process Automation",
+    "question": "To what extent are business processes that support this capability deliberately designed, automated, governed, measured, and continuously improved?",
+    "criteria": {
+      "1": "Business Process automation is minimal or nonexistent.\nProcesses supporting the capability are largely manual, with heavy reliance on spreadsheets, email, and individual workarounds.",
+      "2": "Isolated or tactical automation exists for parts of the process, often using basic tools or scripts. Automation efforts are reactive and focused on local efficiency rather than end-to-end capability support.\nLimited standards, reuse, or governance are applied.",
+      "3": "Automation is formally designed and standardized for key processes supporting the capability. Common tools and platforms are adopted, processes are mapped prior to automation, and automation follows defined patterns. Documentation, roles, and controls are established.\nAutomation is not centrally governed, measured, monitored, or integrated across the full capability. Exception handling, lifecycle management, and performance reporting may not yet be mature.",
+      "4": "Automation is centrally governed, measured, and integrated across the capability. End-to-end processes are automated where appropriate, with performance metrics, monitoring, exception handling, and lifecycle management in place. Automation reliably supports business outcomes.\nAutomation is not yet continuously optimized through advanced technologies, predictive insights, feedback loops, or innovation-focused improvement practices.",
+      "5": "Automation is continuously optimized and intelligent. Advanced technologies (e.g., Robotic process automation, orchestration, low-code, Artificial Intelligence/Machine Learning) are leveraged to improve speed, quality, and adaptability. Data-driven insights and continuous feedback loops drive ongoing capability enhancement and innovation."
+    },
+    "documentation": {
+      "1": "Emails\nSpreadsheets\nUnstructured notes indicating manual execution",
+      "2": "Tool specific workflows\nUse of scripts, or  applications with limited documentation",
+      "3": "Approved process models\nAutomation design standards\nSolution architecture diagrams",
+      "4": "Key performance indicators dashboards\nGovernance charters\nOperational metrics\nException reports",
+      "5": "Process mining insights\nImprovement backlogs\nAutomation return on investment (ROI) analyses\nArtificial Intelligence-enabled decision models"
+    }
+  },
+  {
+    "section": "Business Architecture (BA)",
+    "subsection": null,
+    "name": "Business Process Reporting",
+    "question": "Are the reports that are created to support this process documented and traceable to the specific data used to create each report?",
+    "criteria": {
+      "1": "Reports and measures that are produced to support this process have not been identified and documented.\nThere is no reliable basis for report governance or quality assessment.",
+      "2": "Reports and measures that are produced to support this process have been identified and documented.\nConsistent implementation may not yet be established.",
+      "3": "Reports and measure standards have been established and implemented and are delivered to key stakeholders to support this process.\nDetailed measure specifications and report definitions are not yet documented and traced to underlying information assets.",
+      "4": "Detailed measure specifications and report definitions have been documented and are tracked to the impacted information used to produce the measure and report in a central metadata repository.\nReports and measures do not yet fully adhere to enterprise business intelligence standards, procedures, metadata requirements, and technology.\nRegular quality assessment and improvement is yet to be fully institutionalized.",
+      "5": "Reports and measures that are used to support this process adhere to enterprise business intelligence processes, procedures, standards, metadata and technology and are regularly assessed to improve the quality of the reports and measures."
+    },
+    "documentation": {
+      "1": "N/A- none exists",
+      "2": "Report catalog\nMeasure catalog\nMeasure \nspecification",
+      "3": "Measure standard\nExample report\nExample measure calculation",
+      "4": "Metadata repository screenshots\nMetamodel\nMetadata repository operating model \nReport/measure metadata repository change workflow",
+      "5": "Business Intelligence Process Diagram\nBusiness Intelligence SOP\nBusiness Intelligence Standard Documentation\nBusiness Intelligence Metadata Requirements\nBusiness Intelligence MITA maturity ratings"
+    }
+  },
+  {
+    "section": "Information Architecture (IA)",
+    "subsection": null,
+    "name": "Information Classification",
+    "question": "Is the information used to support this capability classified so that stakeholders can understand any security or privacy requirements associated with the access and use of the information?",
+    "criteria": {
+      "1": "Data security and privacy requirements have not been documented for the information asset.",
+      "2": "Data security, sensitivity and privacy requirements have been documented for the information assets, but the classifications have not been applied to the information assets that support this capability.",
+      "3": "Data security, sensitivity and privacy classifications have been defined and applied to the data elements and data sets within the information assets that support this capability. The detailed Data Classifications and related metadata are not being captured in a central repository.",
+      "4": "Data security, sensitivity and privacy classifications are tracked to the impacted policies, standards and information assets in a central metadata repository that is accessible to stakeholders to search, discover and identify impacts of data security, sensitivity and privacy classification modifications.\nThe SOPs have not been applied and regular assessments have not occurred.",
+      "5": "SMA has established and applied the impacted assets’ Enterprise Data security, sensitivity & privacy:\nOutcomes & Metrics\nProcesses & procedures\nPolicies & Standards\nMetadata requirements\nTechnology\nSMA performs regular SS-A assessments for Data security, sensitivity & privacy"
+    },
+    "documentation": {
+      "1": "N/A- none exists",
+      "2": "Data Security and Privacy Requirements",
+      "3": "Physical Data Dictionary\nData Handling Procedures",
+      "4": "Data Classification   Metadata Repository Screenshots\nData Classification  Metamodel\nData Classification   Metadata Repository Operating Model\nData Classification Metadata Repository Change Workflow",
+      "5": "Data Security and Privacy Policy\nData security, sensitivity & privacy Process Diagram\nData security, sensitivity & privacy SOP\nData security, sensitivity & privacy Standard Documentation\nData security, sensitivity & privacy Metadata Requirements\nPrevious Data security, sensitivity & privacy MITA Maturity Profile"
+    }
+  },
+  {
+    "section": "Information Architecture (IA)",
+    "subsection": null,
+    "name": "Information Quality",
+    "question": "Does the information used to support this capability have documented data quality rules and measures that are accessible to stakeholders and help ensure that the information is fit for use?",
+    "criteria": {
+      "1": "Data quality rules have not been developed for the information asset.",
+      "2": "Data quality rules have been developed and documented for the information asset and is accessible by stakeholders, but is not implemented or results tracked.",
+      "3": "Data quality rules have been implemented for the information assets, is applied as the information as it moves across the enterprise, and results tracked and made available to key stakeholders.\nData quality rules are not aligned to T-MSIS or tracked in a central repository. Data quality reports are ad-hoc if produced at all.",
+      "4": "Data quality rules have been aligned to related T-MSIS rules, data anomalies and issues documented and tracked to the related information assets in a central repository. Data quality measures, standards and thresholds have been defined and included on data quality reports that are produced regularly.\nThe SOP have not been applied and regular assessments have not occurred.",
+      "5": "The quality of the information asset adheres to Enterprise Data Quality\nOutcomes & Metrics\nProcesses & procedures\nPolicies & Standards\nMetadata requirements\nTechnology\nSMA performs regular assessments for opportunities to improve the quality of the information asset."
+    },
+    "documentation": {
+      "1": "N/A- none exists",
+      "2": "Data Rule Catalog\nMeasure Catalog",
+      "3": "Data Quality Report\nData Rule Catalog\nMeasure Catalog",
+      "4": "Data Rule Catalog connected to T-MSIS\nData Quality Report\nData Quality Metadata Repository Screenshots\nData Quality Metamodel\nData Quality Metadata Repository Operating Model\nData quality Metadata Repository Change Workflow",
+      "5": "Data Quality Process Diagram\nData Quality SOP\nData Quality Standard Documentation\nData Quality Metadata Requirements\nPrevious Data Quality MITA Maturity Profile"
+    }
+  },
+  {
+    "section": "Information Architecture (IA)",
+    "subsection": null,
+    "name": "Information Analysis",
+    "question": "Is there advanced statistical analysis that is performed and used by stakeholders for decision-making to support this capability?",
+    "criteria": {
+      "1": "Information is used sporadically and in response to specific, immediate queries to support decision-making to support this capability.",
+      "2": "The measures and information assets needed to produce the reports for this capability have been identified and documented. The type of data analytics performed to support the capability primarily focuses on descriptive analytics to understand what happened in the past to inform decision-making for the capability without full understanding of the root-cause of why it happened.",
+      "3": "Measure standards have been established and implemented. The SMA performs diagnostic analytics to uncover the root-cause of events through examination of historical data to understand why things happened to inform decision-making for the capability. The detailed measures, analysis logic, and related metadata are not being captured in a central repository.",
+      "4": "The measure specifications, statistical models and other information assets are traced to the reports that use them in the central metadata repository. The SMA performs predictive analytics to predict future outcomes through the evaluation of probability estimates to inform decision-making for the capability. \nThe SOPs have not been applied and regular assessments of the reports have not occurred.",
+      "5": "The measures and the analysis performed to support the capability adhere to enterprise business intelligence \nOutcomes & Metrics\nProcesses & procedures\nPolicies & Standards\nMetadata requirements\nTechnology \nSMA performs regular assessments to improve the quality of the measures and analysis. The SMA performs prescriptive analytics to define actions that will affect outcomes, rather than just predicting the outcomes from actions that have occurred to inform decision-making for the capability."
+    },
+    "documentation": {
+      "1": "N/A- none exists",
+      "2": "Report Catalog\n- Measure Catalog\n- Measure Specification\n- Descriptive Analytics Results",
+      "3": "Measure Standards\nExample Measure Calculation\nPrescriptive Analytics Results",
+      "4": "Report/Measure Metadata Repository Screenshots\nReport/Measure Metamodel\nMetadata Repository Operating Model\nReport/Measure Metadata Repository Change Workflow\nExample Predictive analytical model\nPredictive Analytics Results",
+      "5": "Business Intelligence & Data Science Process Diagram\nBusiness Intelligence & Data Science SOP\nBusiness Intelligence & Data Science Standard Documentation\nBusiness Intelligence & Data Science Metadata Requirements\nPrevious Business Intelligence & Data Science MITA Maturity Profile\nPrescribe Analytics Model\nPrescribe Analytics Results"
+    }
+  },
+  {
+    "section": "Information Architecture (IA)",
+    "subsection": null,
+    "name": "Information Exchange",
+    "question": "Is the information used to support this capability classified so that stakeholders can understand any security or privacy requirements associated with the access and use of the information?",
+    "criteria": {
+      "1": "Information assets for every exchange of information that supports this capability have not been identified and documented.",
+      "2": "Information assets for every exchange of information that supports this capability have been identified and documented, but those Information assets have not been aligned to data standards.",
+      "3": "Structure data standards that meet the business needs have been identified for every exchange of information that supports this capability and are traced to the applicable information asset. The detailed transformation logic and related metadata are not being captured in a central repository.",
+      "4": "Detailed documentation about how data moves across the enterprise, including detailed transformation logic, has been documented, is traced to the applicable information assets maintained in a central metadata repository that is accessible to stakeholders to search, discover and identify impacts of data exchange modifications. However, the SOPs have not been applied and regular assessments have not occurred.",
+      "5": "All information exchanges that support this capability align to enterprise data integration and interoperability \nOutcomes & Metrics\nProcesses & procedures\nPolicies & Standards\nMetadata requirements\nTechnology \nSMA performs regular assessments to improve the quality of the exchange of information."
+    },
+    "documentation": {
+      "1": "N/A- none exists",
+      "2": "Data Catalog\nData Flow Model",
+      "3": "Data Catalog with Standards\nData Standard Documentation",
+      "4": "Data Lineage Diagram\nData exchange Map Specification\nData exchange Metadata Repository Screenshots\nData exchange Metamodel\nData exchange Metadata Repository Operating Model\nData exchange Metadata Repository Change Workflow",
+      "5": "Data Integration and Interoperability Process Diagram\nData Integration and Interoperability SOP\nData Integration and Interoperability Standard Documentation\nData Integration and Interoperability Metadata Requirements\nPrevious Data Integration and Interoperability MITA Maturity Profile"
+    }
+  },
+  {
+    "section": "Information Architecture (IA)",
+    "subsection": null,
+    "name": "Information Content",
+    "question": "Is the unstructured data (e.g. paper documents) that support this capability organized, controlled and categorized so that it can be stored, published and discovered by stakeholders that need it?",
+    "criteria": {
+      "1": "The unstructured data, documents and content that is used to support this capability have not been identified and documented.",
+      "2": "The unstructured data, documents and content that is used to support this capability have been identified and documented. Some documents exist that have not been converted to machine-readable and searchable content.",
+      "3": "All documents that are produced and/or used to support this capability are converted to machine-readable content and the content adheres to enterprise unstructured data standards, but is not organized, controlled, and categorized for easy discovery.",
+      "4": "The unstructured data that supports this capability adheres to enterprise unstructured data standards and is organized, controlled and categorized so that it can be stored, published, discovered and easily accessed by stakeholders.\nThe SOPs have not been applied and regular assessments have not occurred.",
+      "5": "The unstructured data that supports this capability adheres to Enterprise document and content \nOutcomes & Metrics\nProcesses & procedures\nPolicies & Standards\nMetadata requirements\nTechnology \nSMA performs regular assessments to improve the quality of the unstructured data."
+    },
+    "documentation": {
+      "1": "N/A - none exists",
+      "2": "Document and Content Management Standard Documentation",
+      "3": "Document and Content Management Enterprise Standard Documentation\nDocument and Content Management Metadata Requirements",
+      "4": "Document and Content Management Process Diagram\nDocument and Content Management SOP\nDocument and Content Management Standard Documentation\nDocument and Content Management Metadata Requirements",
+      "5": "Document and Content Management Process Diagram\nDocument and Content Management SOP\nDocument and Content Management Standard Documentation\nDocument and Content Management Metadata Requirements\nDocument and Content Management MITA Scorecard"
+    }
+  },
+  {
+    "section": "Information Architecture (IA)",
+    "subsection": null,
+    "name": "Information Governance",
+    "question": "Are there individuals assigned to data governance roles that actively participate in the governance of the information used to support this capability? Are there business terms that describe the meaning of the information documented?",
+    "criteria": {
+      "1": "Data governance roles and responsibilities have not been established or assigned to individuals for the impacted information assets.",
+      "2": "Data governance roles and responsibilities for the information asset have been identified and assigned to individuals to fulfill them, and key business terms and acronyms used to support the capability have been identified and documented. The governance roles are not being actively monitored.",
+      "3": "The SMA monitors governance roles for the information assets to ensure minimal vacancy and active participation in the governance of the information assets. The detailed business terms, acronyms, and metadata are not being captured in a central repository.",
+      "4": "The business terms, acronyms and information asset data governance role assignments are stored in a central metadata repository and is accessible to stakeholders to search and discover the information assets that are governed by the SMA.\nThe SOP have not been applied and regular assessments have not occurred.",
+      "5": "Information assets adhere to the enterprise data governance:\nOutcomes & Metrics\nProcesses & procedures\nPolicies & Standards\nMetadata requirements\nTechnology\nSMA performs regular assessments to improve the quality of the governance of the information asset."
+    },
+    "documentation": {
+      "1": "N/A - none exists",
+      "2": "Data Catalog (with assignments)\nBusiness Glossary",
+      "3": "Governance Assignment Vacancy Rate\nGovernance Assignment Participation Rate\nAverage Information Asset Approval Time (Time it takes to approve information asset changes)",
+      "4": "Business Glossary Metadata Repository Screenshots\nBusiness Glossary Metamodel\nBusiness Glossary Metadata Repository Operating Model",
+      "5": "Data Governance Process Diagram\nData Governance SOP\nData Governance Standard Documentation\nData Governance Metadata Requirements\nData Governance MITA Scorecard"
+    }
+  },
+  {
+    "section": "Information Architecture (IA)",
+    "subsection": null,
+    "name": "Information Design",
+    "question": "Are the data dictionaries and other detailed definitions that describe the structure and relationships of the information used to support this capability defined and accessible to stakeholders?",
+    "criteria": {
+      "1": "No or few information assets that support this capability have detailed design documentation.",
+      "2": "Each information asset needed to support this capability includes detailed design documentation but has not been aligned to any Enterprise Information Reference Models.",
+      "3": "Enterprise Information Reference Models including target data definitions that are needed to support the capability have been identified and aligned to the detailed data definitions and/or models for each information asset. The detailed Enterprise data models, data dictionaries, and related metadata are not being captured in a central repository.",
+      "4": "Mappings of Enterprise Information Reference Models to physical data design documentation are maintained in a central enterprise metadata repository that is accessible to stakeholders to search, discover and identify impacts of data design modifications.\nThe SOP have not been applied and regular assessments have not occurred.",
+      "5": "The design of the information asset adheres to Enterprise Data Architecture & Modeling: \nOutcomes & Metrics\nProcesses & procedures\nPolicies & Standards\nMetadata requirements\nTechnology\nSMA performs regular assessments to improve the quality of the unstructured data."
+    },
+    "documentation": {
+      "1": "N/A- none exists",
+      "2": "Physical Data Model\nPhysical Data Dictionary\nProcess to Data Matrix\nApplication to Data Matrix",
+      "3": "Enterprise Conceptual Data Model\nEnterprise Logical Data Model\nPhysical Data Dictionary with Definitions",
+      "4": "Data Design Metadata Repository Screenshots\nData Design Metamodel\nData Design Metadata Repository Operating Model\nData Design Metadata Repository Change Workflow",
+      "5": "Data Architecture, Modeling & Design Process Diagram\nData Architecture, Modeling & Design SOP\nData Architecture, Modeling & Design Standard Documentation\nData Architecture, Modeling & Design Metadata Requirements\nData Architecture, Modeling & Design MITA Scorecard"
+    }
+  },
+  {
+    "section": "Information Architecture (IA)",
+    "subsection": null,
+    "name": "Reference Information",
+    "question": "Do the reference data that are included in the information used to support this capability adhere to standards and are documented, controlled and stored in a location that is accessible to stakeholders?",
+    "criteria": {
+      "1": "Little or no reference data that is used to support the information asset for this capability has-been identified and documented, including all code sets and code values.",
+      "2": "The reference data that is used to support this capability has been identified and documented, and aligned to the corresponding data elements, but is not aligned to target reference data standards.",
+      "3": "Target reference data standards that meet the business needs have been identified, adopted and implemented. \nThe detailed reference data and related metadata are not being captured in a central repository.",
+      "4": "Reference data adheres to reference data metadata standards and is traced to the applicable data elements in the data dictionary in a central metadata repository that is accessible to stakeholders to search, discover and identify the impact of reference data modifications.\nThe SOPs have not been applied and regular assessments have not occurred.",
+      "5": "The reference data used to support the information asset adheres to Enterprise Reference Data: \nOutcomes & Metrics\nProcesses & procedures\nPolicies & Standards\nMetadata requirements\nTechnology\nSMA performs regular assessments to improve the quality of the management of reference data for the information asset."
+    },
+    "documentation": {
+      "1": "N/A- none exists",
+      "2": "Reference Data Catalog",
+      "3": "Data Standard Document\nReference Data Catalog with Standards\nReference Data Crosswalk",
+      "4": "Reference Data Metadata Repository Screenshots\nReference Data Metamodel\nReference Data Metadata Repository Operating Model\nReference Data Metadata Repository Change Workflow",
+      "5": "Reference Data Management Process Diagram\nReference Data Management SOP\nReference Data Management Standard Documentation\nReference Data Management Metadata Requirements\nReference Data Management MITA Scorecard"
+    }
+  },
+  {
+    "section": "Information Architecture (IA)",
+    "subsection": null,
+    "name": "Master Information",
+    "question": "Is the information used to support this capability mastered so that all entities represented in the information are unique?",
+    "criteria": {
+      "1": "Information assets used to support this capability do not use or contribute to Master Data.",
+      "2": "Master data rules have been developed to ensure that the entities represented in the information assets are unique, but have not been harmonized across the enterprise.",
+      "3": "Master data rules have been harmonized across the enterprise for common data and implemented within the information assets that support this capability. Entities represented in the information asset are unique entities that do not have duplicate records within the SMA.\nThe Master Data Management (MDM) and related metadata are not being captured in a central repository.",
+      "4": "Master data rules are traced to the related information asset in a central metadata repository that is accessible to stakeholders to search, discover and identify the impact of master data rule modifications.\nThe SOPs have not been applied and regular assessments have not occurred.",
+      "5": "The master data used to support the information asset adheres to Enterprise Master Management: \nOutcomes & Metrics\nProcesses & procedures\nPolicies & Standards\nMetadata requirements\nTechnology\nSMA performs regular assessments to improve the quality of the management of master data for the information asset."
+    },
+    "documentation": {
+      "1": "N/A- none exists",
+      "2": "Data Rule Catalog",
+      "3": "MDM Match Report",
+      "4": "MDM Metadata Repository Screenshots\nMDM Metamodel\nMDM Metadata Repository Operating Model\nMDM Metadata Repository Change Workflow",
+      "5": "MDM Process Diagram\nMDM SOP\nMDM Standard Documentation\nMDM Metadata Requirements\nPrevious MDM MITA Maturity Profile"
+    }
+  },
+  {
+    "section": "Information Architecture (IA)",
+    "subsection": null,
+    "name": "Information Storage",
+    "question": "Is the information used for this capability stored in locations that reduces duplication with defined retention and access policies?",
+    "criteria": {
+      "1": "Data store repositories (e.g. databases) used for persistently storing and managing the information assets used for this capability have not been identified and documented.",
+      "2": "Data store repositories (e.g. databases) used for persistently storing and managing the information assets used for this capability have been identified and documented, but information assets might be stored in multiple databases.",
+      "3": "The Information assets that are used for this capability are stored in a single data store repository resulting in no or low data duplication.\nThe Data Storage related metadata is not being captured in a central repository.",
+      "4": "The information assets have defined policies for data retention and access that define how long the information must be retained and the roles that have access to the information. The metadata about data storage and policies are stored in a central metadata repository that is accessible to stakeholders to search, discover and identify impacts of data storage modifications.\nThe SOP have not been applied and regular assessments have not occurred.",
+      "5": "The information assets used to support this capability adhere to enterprise data storage & warehousing: \nOutcomes & Metrics\nProcesses & procedures\nPolicies & Standards\nMetadata requirements\nTechnology\nSMA performs regular assessments to improve the quality of the information asset."
+    },
+    "documentation": {
+      "1": "N/A- none exists",
+      "2": "Data Catalog",
+      "3": "Physical Data Dictionary\nData Asset Catalog",
+      "4": "Data Retention Policy\nData Access Policy\nData Storage Metadata Repository Screenshots\nData Storage Metamodel\nData Storage Metadata Repository Operating Model\nData Storage Metadata Repository Change Workflow",
+      "5": "Data Storage & Warehousing Process Diagram\nData Storage & Warehousing SOP\nData Storage & Warehousing Standard Documentation\nData Storage & Warehousing Metadata Requirements\nPrevious Data Storage & Warehousing MITA Maturity Profile"
+    }
+  },
+  {
+    "section": "Technical Architecture (TA)",
+    "subsection": "Technical Infrastructure Management",
+    "name": "Compute and Storage",
+    "question": "Does the Medicaid Enterprise System have servers on premise, hybrid, or cloud with routine, scheduled backup?",
+    "criteria": {
+      "1": "The MES runs on physical servers with no virtualization, no automation, and no defined backup schedule.\nStorage and backups are handled ad hoc and manually, with no consistent process for capacity planning or recovery.",
+      "2": "The MES uses some virtualization, and storage and backups are performed on a defined schedule.\nHowever, servers are still provisioned manually, configurations are not standardized, and there is no automation to manage growth or enforce consistency.",
+      "3": "The majority of the MES runs in cloud environments, with resources provisioned through standard configurations and scripting and backups automated.\nGovernance over those configurations is not yet formalized, and storage growth, retention, and cost are not actively managed against defined thresholds.",
+      "4": "The MES operates in cloud environments governed through standardized processes, with automation managing storage and backups for growth, volume, and retention.\nBackups are not yet immutable by default, and cost and capacity thresholds are not formally defined or reviewed on a regular cadence.",
+      "5": "The MES runs on cloud compute and hosting infrastructure across environments, with immutable backups retained per a defined schedule and compute and storage usage governed by cost and capacity thresholds that are regularly reviewed.\nThere are no manual provisioning dependencies, no ungoverned configurations, and no unmonitored consumption — capacity, cost, and recoverability are continuously managed."
+    },
+    "documentation": {
+      "1": "Server inventory\nOperations documentation\nBackup Logs\nBackup procedures",
+      "2": "Storage/Backup schedules\nOperations procedures / documentation",
+      "3": "Architecture Diagram\nBackup Retention Policy",
+      "4": "Automation documentation\nCost / Utilization metrics\nDocumentation of reviews and decisions made",
+      "5": "Architecture Diagrams\nSystem documentation \nStorage and backup documentation \nAutomation processes"
+    }
+  },
+  {
+    "section": "Technical Architecture (TA)",
+    "subsection": "Technical Infrastructure Management",
+    "name": "Networking and Technical Recovery",
+    "question": "Does the MES have network segmentation that is regularly tested for outages and recovery?",
+    "criteria": {
+      "1": "The MES operates on a flat network with no segmentation and minimal traffic visibility. There are no defined recovery objectives, no failover capability, and no proactive monitoring — outages are discovered only when users report them and resolved manually.",
+      "2": "The MES has basic segmentation separating major workloads, and traffic logs are collected and reviewed periodically. Failover and restoration procedures exist but are not scheduled, not formally tracked, and not tied to defined recovery objectives, leaving recovery times unpredictable.",
+      "3": "The MES network follows defined design patterns that segment workloads by sensitivity and function, and Recovery Time and Recovery Point Objectives are documented in Service Level Agreements (SLAs). However, monitoring is not continuous, anomaly detection is not in place, and testing is performed only initially rather than on an ongoing schedule.",
+      "4": "The MES continuously monitors network traffic against established baselines with anomaly detection, enforces standardized network patterns through governance, and tests failover and restoration on a scheduled basis with SLA performance reported and consistently met. Failover and remediation, however, are not yet automated and still require manual intervention, and the network is not designed around zero-trust principles.",
+      "5": "The MES network applies micro-segmentation and zero-trust principles, with continuous observability and proactive optimization sustaining performance during peak demand. There are no manual recovery dependencies, no untested failure paths, and no unmonitored segments — automated failover, self-healing, and redundant environments deliver recovery with little to no user impact, validated through regular resilience exercises."
+    },
+    "documentation": {
+      "1": "Network architecture diagram\nTechnical Recovery Documentation",
+      "2": "Network access documentation\nTechnical Recovery Testing Schedule and results",
+      "3": "Network architecture patterns/diagram\nRecovery Time Objective (RTO), Recovery Point Objective (RPO), SLAs",
+      "4": "Network monitoring and alerting patterns\nTechnical Recovery Testing Schedule and results",
+      "5": "Network analytics\nRouting documentation\nDowntime/outage mitigation documentation"
+    }
+  },
+  {
+    "section": "Technical Architecture (TA)",
+    "subsection": "Technical Infrastructure Management",
+    "name": "Identify, Access and Consent",
+    "question": "Does the MES have identity, access, and consent services for internal and external users?",
+    "criteria": {
+      "1": "The MES has limited ability to manage user identity and access, with no centralized system and no role-based controls. Consent for Medicaid applicants and members is captured manually, with no audit trail and no defined process for revocation.",
+      "2": "The MES has standardized identity and access management for new systems, and some applications capture consent from Medicaid applicants and members. However, legacy systems are not yet integrated, consent is not consistently captured across the MES, and revocation still requires manual intervention.",
+      "3": "The MES uses centralized identity and access management for most applications with Role-Based Access Control (RBAC), and Medicaid applicant and member consent, preferences, and revocation are collected and auditable within most applications. Coverage is not yet complete across all systems, and access activity is not consistently logged or centrally managed.",
+      "4": "The MES uses centralized identity and access management with RBAC across all applications, and access activities are logged and auditable. Medicaid applicant and member consent, preferences, and revocation are centrally managed, though they are not yet user-managed or shared across external systems and partner organizations.",
+      "5": "The MES integrates identity and access management across internal and external systems and organizations, with continuous improvement and automation governing access decisions. There are no siloed identity stores, no manually tracked consent records, and no barriers to revocation — Medicaid applicant and member consent, preferences, and revocation are user-managed and shared seamlessly across internal and external MES systems and Medicaid organizations."
+    },
+    "documentation": {
+      "1": "Identity Management documentation\nConsent Form documentation",
+      "2": "Identity management, verification, and access request process documentation\nRevocation Form documentation",
+      "3": "RBAC documentation, identity management architecture diagram\nConsent and Revocation workflow diagrams",
+      "4": "Identity management architecture diagram\nConsent service documentation",
+      "5": "Identity integration diagrams"
+    }
+  },
+  {
+    "section": "Technical Architecture (TA)",
+    "subsection": "Technical Infrastructure Management",
+    "name": "Security Protection and Monitoring",
+    "question": "Does the MES have security controls, with incident logging and monitoring?",
+    "criteria": {
+      "1": "The MES applies security controls inconsistently across systems, with no enforced standards. Monitoring is limited, alerting is minimal, and there is no centralized visibility into security events, leaving gaps where threats can go undetected.",
+      "2": "The MES has security controls defined and partially implemented across applications. Monitoring exists but alerts are reviewed manually, with no automation, no consistent coverage across all systems, and no formal process for measuring control effectiveness.",
+      "3": "The MES has security controls implemented across Medicaid applications, with data encrypted in transit and at rest, and monitoring and logs reviewed on a regular cadence. Reviews are not yet automated, auditing is not continuous, and incident detection still depends on manual analysis.",
+      "4": "The MES has consistently implemented security controls with regular auditing, automated control checks, and automated alerting on security events and incidents. Controls are not yet continuously optimized, validation against evolving threats is periodic rather than ongoing, and the program is not yet positioned to exceed baseline regulatory expectations.",
+      "5": "The MES has security controls that are continuously optimized, audited, and validated, with monitoring fully supporting compliance and audit readiness. There are no unmonitored systems, no unreviewed controls, and no reactive-only processes — the security posture is proactive, evidence-based, and consistently exceeds federal and state regulatory expectations."
+    },
+    "documentation": {
+      "1": "Security controls documentation\nSecurity Monitoring documentation",
+      "2": "Security process documentation\nMonitoring, Logging, and Alerting guidelines",
+      "3": "Security diagrams\nSecurity control inventory\nAudit process\nLogging/Alerting Rules",
+      "4": "Security control monitoring logs\nTest Planning and Results",
+      "5": "Security control inventory and monitoring logs\nMetrics and Reporting"
+    }
+  },
+  {
+    "section": "Technical Architecture (TA)",
+    "subsection": "Technical Infrastructure Management",
+    "name": "System Operations and Monitoring",
+    "question": "Does the MES have SOPs and performance monitoring?",
+    "criteria": {
+      "1": "The MES is operated manually with limited documentation, and system logs are reviewed reactively for performance issues. There are no defined procedures, no monitoring standards, and no proactive alerting, leaving operations dependent on individual knowledge.",
+      "2": "The MES is operated manually with partial documentation of processes and procedures, and basic guidelines exist for monitoring performance. Procedures are not yet consistently followed, service levels are not formally defined, and monitoring is not tied to automated alerting.",
+      "3": "The MES operates according to documented internal procedures with defined SLAs, and monitoring and alerting cover application performance and health. Procedures are internally defined rather than aligned to industry standards, automation is limited, and alerting is not yet integrated with broader systems operations.",
+      "4": "The MES operates following industry-standard processes, with automation applied where feasible and monitoring and alerting integrated with systems operations. Performance is not yet benchmarked against external standards, continuous improvement is not formalized, and analytics across operational data are not centralized.",
+      "5": "The MES operations are benchmarked against industry standards and continuously improved, with centralized monitoring and alerting analytics providing a unified view of application performance and health. There are no undocumented procedures, no manual operations where automation is feasible, and no siloed monitoring — operations are proactive, data-driven, and continuously refined."
+    },
+    "documentation": {
+      "1": "Monitoring guidance",
+      "2": "System operations documentation, SLAs with metrics\nMonitoring and alerting rules, documentation, and diagrams",
+      "3": "Documentation showing operations align with industry-standard processes \n Automation and operational procedure documentation \nDocumentation of monitoring and alerting integrated with systems operations \n Incident and event response procedures \n SLA performance reports",
+      "4": "Benchmarking documentation against industry standards \nContinuous improvement records \nCentralized operational analytics for performance and health \nPerformance and capacity trend reporting\nSystem operations documentation with SLA and metrics\nMonitoring and alerting rules, documentation, and diagrams",
+      "5": ""
+    }
+  },
+  {
+    "section": "Technical Architecture (TA)",
+    "subsection": "Technical Infrastructure Management",
+    "name": "Development, Testing, Release and Security Compliance",
+    "question": "Does the MES have centralized source and script management with testing and security reviews?",
+    "criteria": {
+      "1": "The MES has no version control of source code or scripts, testing is performed manually, and security compliance checks are limited or absent. Changes are released infrequently as large, all-at-once updates, with no traceability, no iterative delivery, and no feedback loop between development and the people who use the system.",
+      "2": "The MES has basic version control of source code and scripts, releases and testing follow checklists, and security compliance reviews are performed manually. Changes are still integrated and released in large, infrequent batches, testing is not automated, and slow feedback cycles limit the team's ability to deliver and adjust incrementally.",
+      "3": "The MES has standardized version control with pre-production environments and documented release, testing, and security review procedures. Developers integrate changes into a shared codebase on a regular cadence and deliver work in smaller increments, though integration and testing are not yet automated, batch sizes remain larger than ideal, and feedback to teams is not yet fast or continuous.",
+      "4": "The MES has centralized version control with automated build, testing, and release pipelines across pre-production environments, and security reviews are integrated into release planning. Small, incremental changes are delivered on a regular cadence with automated regression testing providing fast feedback to teams. Releases to production are not yet continuous, and post-release monitoring is not yet ongoing.",
+      "5": "The MES has fully automated source code and script management with continuous integration and continuous delivery across pre-production and production environments, monitored deployments, and continuous security and compliance validation. The pipeline supports rapid, iterative response to changing requirements with little to no manual intervention. There are no large-batch releases, and no untested changes reaching production— development operates as a continuous, feedback-driven, and secure pipeline."
+    },
+    "documentation": {
+      "1": "Development and configuration procedures\nTesting process documentation\nSecure coding standards\nSecurity review checklist",
+      "2": "Testing checklists\nRelease checklists\nRecords from prior application security testing",
+      "3": "Environment architecture and diagrams\nStandardized release and testing process documentation\nVersion control / branching and integration strategy documentation\nStandardized security review process",
+      "4": "Automated release workflow / pipeline configuration documentation\nAutomated test coverage and regression results\nRelease cadence and testing metrics\nEvidence of security reviews integrated into release planning",
+      "5": "Comprehensive development, configuration, and release process documentation\nEnvironment diagrams\nCI/CD pipeline and release workflow documentation\nSecure coding standards\nDeployment monitoring reports\nContinuous security validation results\nCompliance review metrics"
+    }
+  },
+  {
+    "section": "Technical Architecture (TA)",
+    "subsection": "Application Management",
+    "name": "API, Messaging, and Integration",
+    "question": "Does the Medicaid application connect and interface with other internal or external systems or organizations?",
+    "criteria": {
+      "1": "The MES application or module connects to other systems for a single, limited purpose using an API, interface, or manual batch file exchange, with limited documentation. There is no inventory of connections, no defined standards, and no governance over how external integrations are established or maintained.",
+      "2": "The MES application or module connects through an API, interface, or scheduled batch file exchange that is documented and tracked in an inventory. Connections do not yet follow industry standards, there is no consistent process for establishing new integrations, and event-driven patterns are not in use.",
+      "3": "The MES application or module uses APIs or interfaces that follow industry standards, and all external connections are established through a documented process. APIs are not yet centrally managed or versioned, integrations are not event-driven, and there is no automated way to publish or discover available services.",
+      "4": "The MES application or module uses APIs or interfaces that are event-driven where appropriate, published and versioned through an API management tool, and consistently apply industry standards. Conformance with standards is not yet fully validated, integrations are not continuously optimized, and external connection management is not yet fully automated.",
+      "5": "The MES application or module uses APIs or interfaces that fully conform with industry standards, are continuously optimized through automated adjustments, and have all external connections actively managed. There are no undocumented integrations, no manual file exchanges where APIs are feasible, and no unmonitored connections — interoperability is standards-based, fully governed, and continuously refined."
+    },
+    "documentation": {
+      "1": "Basic description of the connection or interface\nDescription of the data exchanged and with which system",
+      "2": "Integration / connection inventory\nInterface specifications and batch exchange schedules\nInterface control documentation",
+      "3": "API and interface design standards\nDocumented process for establishing external connections\nAPI specifications aligned to industry standards",
+      "4": "API catalog or registry from an API management tool\nAPI versioning documentation\nEvent-driven integration documentation\nAPI governance documentation",
+      "5": "API/Interface Inventory and documentation\nInterface performance metrics\nEnterprise patterns\nConformance validation against industry standards\nDocumentation of automated monitoring and optimization\nExternal connection management and oversight records\nIntegration performance reporting"
+    }
+  },
+  {
+    "section": "Technical Architecture (TA)",
+    "subsection": "Application Management",
+    "name": "Application Hosting and Platform Services",
+    "question": "Is the Medicaid application hosted in a dedicated MES environment with common platform services reused?",
+    "criteria": {
+      "1": "The MES application or module is hosted in an environment with limited documentation and inconsistent configurations. There are no defined hosting standards, no shared services, and no consistency across environments, making the hosting setup difficult to support or replicate.",
+      "2": "The MES application or module is hosted in a documented environment, with standardization of MES hosting practices being piloted. Standards are not yet broadly adopted, common services are not available across applications, and configurations still vary between environments.",
+      "3": "The MES application or module is hosted in an environment that adopts and follows standard hosting patterns, with some common services available across the MES. Standards are not yet enforced to reduce complexity, automation is limited, and resources are not shared across hosting environments.",
+      "4": "The MES application or module is hosted in an environment that applies standards to limit complexity, supports automation, and shares resources across MES hosting environments. Hosting is not yet proactively managed, automation is not used to optimize performance and reliability, and resource reuse is not yet widespread.",
+      "5": "The MES application or module is hosted in an environment that is proactively managed, uses automation to continuously improve application performance and reliability, and reuses resources widely across MES hosting environments. There are no undocumented configurations, no isolated or duplicated services, and no reactive-only management — hosting is standardized, automated, and continuously optimized."
+    },
+    "documentation": {
+      "1": "Basic hosting environment documentation \nServer and system configuration details",
+      "2": "Documented hosting environment \nPilot standard hosting practices documentation \nConfiguration documentation",
+      "3": "Standard hosting pattern documentation \nCatalog of common or shared services \nEnvironment architecture diagrams",
+      "4": "Hosting standards or reference architecture \nAutomation and infrastructure-as-code documentation \nShared resource documentation",
+      "5": "Proactive hosting management and monitoring documentation \nDocumentation of automated performance and reliability optimization \nShared resource reuse catalog and reporting"
+    }
+  },
+  {
+    "section": "Technical Architecture (TA)",
+    "subsection": "Application Management",
+    "name": "Business Rules and Workflows",
+    "question": "Does the Medicaid application enable and support SMA business processes?",
+    "criteria": {
+      "1": "The MES application or module has business rules and workflows that are hard coded into source code and require technical staff to change. There is no documentation, no separation between rules and code, and no ability for business users to understand or influence how rules operate.",
+      "2": "The MES application or module has business rules and workflows that remain hard-coded but are documented for internal use by technical staff. Documentation is not in a business-readable format, rules are not separated from code, and changes still depend entirely on technical resources.",
+      "3": "The MES application or module has business rules and workflows documented in a human-readable format and maintained separately from scripts or code. Rules are not yet externalized from the application itself, are not reused across modules, and still require code changes to update.",
+      "4": "The MES application or module has business rules and workflows externalized from scripts or source code and reused across multiple applications or modules. Rules are not yet versioned across the MES, governance over reuse is informal, and updates are not driven by automation.",
+      "5": "The MES application or module has business rules and workflows that are fully externalized, versioned, and reused across the MES, with adjustments made through policy-informed automation. There are no hard-coded rules, no duplicated logic across modules, and no purely manual rule changes — business rules are managed as a governed, reusable asset."
+    },
+    "documentation": {
+      "1": "Some form of application documentation",
+      "2": "Technical documentation of business rules and workflows for internal use \nDeveloper reference notes",
+      "3": "Business rules documented in a human-readable format \nWorkflow diagrams and process maps \nDocumentation showing rules maintained separately from code",
+      "4": "Externalized business rules repository documentation \nDocumentation of rules reused across applications or modules \nBusiness rules engine or configuration documentation",
+      "5": "Rule versioning and change history \nGovernance documentation for reuse across the MES \nPolicy-to-rule mapping and automation documentation"
+    }
+  },
+  {
+    "section": "Technical Architecture (TA)",
+    "subsection": "Application Management",
+    "name": "Modular Architecture",
+    "question": "Can the Medicaid application and its services be changed or updated without impacting the system?",
+    "criteria": {
+      "1": "The MES application or module is a large, complex system where changes require system-level updates. There are no independently deployable services, no separation of common functions, and no ability to modify one capability without affecting the broader system.",
+      "2": "The MES application or module has identified some services as candidates for modularity. Those services are not yet separated from the core application, cannot be deployed independently, and are not reused by other modules.",
+      "3": "The MES application or module has common services that can be deployed independently of the application or module. Those services are not yet reused across other MES applications, redundancy still exists between modules, and there is no broader composability strategy.",
+      "4": "The MES application or module has common services that are reused by other MES applications and modules to reduce redundancy. The system is not yet fully composable, services are not all discrete, and changes to individual capabilities can still require coordinated updates across modules.",
+      "5": "The MES application or module is fully composable, with discrete services that allow independent and adaptive changes. There are no monolithic dependencies, no duplicated services across modules, and no system-level updates required for capability changes — the architecture supports independent evolution of each service."
+    },
+    "documentation": {
+      "1": "Application Architecture Diagrams",
+      "2": "Modularity Planning",
+      "3": "Architecture Patterns or Standards",
+      "4": "Resource/Service Inventory\nArchitecture Patterns or Standards",
+      "5": "Architecture Diagrams"
+    }
+  },
+  {
+    "section": "Technical Architecture (TA)",
+    "subsection": "Application Management",
+    "name": "User Interfaces and Session Management",
+    "question": "Does the Medicaid application have standardized user interfaces, responsive design, accessibility testing, and maintain SMA user progress?",
+    "criteria": {
+      "1": "The MES application or module has user interfaces that are inconsistently designed with limited accessibility support, and user progress is not maintained between sessions. There are no usability standards, no accessibility testing, and no mechanism for users to save or resume their work.",
+      "2": "The MES application or module has some standardization of user interfaces and has conducted limited usability testing, with basic ability to maintain user progress. Standards are not yet applied consistently, accessibility testing is not formalized, and user feedback is not systematically collected.",
+      "3": "The MES application or module has standardized user interfaces, collects user feedback to inform planned improvements, and allows users to resume their progress. Designs are not yet fully responsive across devices and browsers, accessibility testing is not automated, and progress is not maintained across multiple devices.",
+      "4": "The MES application or module has responsive design across different devices and browsers, automated accessibility testing in place, and users can maintain progress across devices. Personalization is not supported, user feedback is not yet driving continuous improvement, and sessions are not context-aware across channels.",
+      "5": "The MES application or module supports user interface personalization, uses ongoing user feedback to continuously improve the front-end experience, and preserves user sessions in a context-aware way across devices and browsers. There are no inconsistent designs, no untested accessibility gaps, and no lost user context — the experience is personalized, accessible, and continuously refined."
+    },
+    "documentation": {
+      "1": "User interface documentation and standards\nAccessibility testing results\nApplication documentation\nPresence or lack of user persistence",
+      "2": "User interface documentation and standards\nAccessibility testing checklists and results\nApplication documentation, user timeout configuration",
+      "3": "Component inventory\nAccessibility testing checklists and results\nApplication documentation, user session management pattern documentation",
+      "4": "Application frontend documentation, User interface documentation and standards\nAutomated accessibility testing procedures and results\nApplication documentation, user session management pattern documentation",
+      "5": "Application frontend documentation\nApplication frontend design standards and reusable components\nAutomated accessibility testing procedures and results\nApplication documentation, user session management pattern documentation"
+    }
+  }
+]
