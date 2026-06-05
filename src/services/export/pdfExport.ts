@@ -9,8 +9,16 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { ExportData, ExportOptions } from './types';
 import type { OrbitDimensionId, OrbitRating, LevelKey } from '../../types';
-import { getDimension, getAspect, getMaturityLevelMeta, getTechnologySubDimension } from '../orbit';
+import {
+  getDimension,
+  getAspect,
+  getMaturityLevelMeta,
+  getTechnologySubDimension,
+  getOrganizationalAspect,
+  getOrganizationalAspects,
+} from '../orbit';
 import { getDomainById, getAreaById } from '../capabilities';
+import { getOrganizationalAssessmentType } from '../../constants';
 import {
   PAGE,
   MARGIN,
@@ -227,8 +235,8 @@ function generateExecutiveSummary(doc: JsPDFWithAutoTable, data: ExportData): nu
 
   const introText =
     'This report presents the results of the MITA 4.0 maturity self-assessment. ' +
-    'Each capability area has been evaluated across the five ORBIT dimensions: ' +
-    'Outcomes, Roles, Business Architecture, Information, and Technology.';
+    'Each capability area has been evaluated across the ORBIT dimensions: ' +
+    'Business Architecture, Information, and Technology.';
 
   const splitIntro = doc.splitTextToSize(introText, CONTENT_WIDTH);
   doc.text(splitIntro, MARGIN_LEFT, yPos);
@@ -464,26 +472,38 @@ function generateCapabilityAreaSection(
   // Get ratings for this assessment
   const ratings = data.data.ratings.filter((r) => r.capabilityAssessmentId === assessment.id);
 
-  // Group ratings by dimension - only include B-I-T dimensions for standard assessments
-  const ratingsByDimension = new Map<OrbitDimensionId, OrbitRating[]>();
-  for (const rating of ratings) {
-    // Skip organizational assessment ratings (outcomes, roles)
-    if (rating.dimensionId === 'outcomes' || rating.dimensionId === 'roles') {
-      continue;
-    }
-    const dimId = rating.dimensionId as OrbitDimensionId;
-    const existing = ratingsByDimension.get(dimId);
-    if (existing) {
-      existing.push(rating);
-    } else {
-      ratingsByDimension.set(dimId, [rating]);
-    }
-  }
+  // Check if this is an organizational assessment
+  const orgType = getOrganizationalAssessmentType(assessment.capabilityAreaId);
 
-  // Generate dimension details
-  for (const [dimensionId, dimRatings] of ratingsByDimension) {
-    yPos = checkPageBreak(doc, yPos, 40);
-    yPos = generateDimensionDetails(doc, dimensionId, dimRatings, yPos);
+  if (orgType) {
+    // Organizational assessment: render aspects directly
+    yPos = generateOrganizationalDetails(doc, orgType, ratings, yPos);
+  } else {
+    // Standard assessment: group ratings by B-I-T dimension
+    const ratingsByDimension = new Map<OrbitDimensionId, OrbitRating[]>();
+    for (const rating of ratings) {
+      // Skip organizational assessment ratings
+      if (
+        rating.dimensionId === 'outcomes' ||
+        rating.dimensionId === 'roles' ||
+        rating.dimensionId === 'enterprise-architecture'
+      ) {
+        continue;
+      }
+      const dimId = rating.dimensionId as OrbitDimensionId;
+      const existing = ratingsByDimension.get(dimId);
+      if (existing) {
+        existing.push(rating);
+      } else {
+        ratingsByDimension.set(dimId, [rating]);
+      }
+    }
+
+    // Generate dimension details
+    for (const [dimensionId, dimRatings] of ratingsByDimension) {
+      yPos = checkPageBreak(doc, yPos, 40);
+      yPos = generateDimensionDetails(doc, dimensionId, dimRatings, yPos);
+    }
   }
 
   // Attachments for this assessment
@@ -660,6 +680,140 @@ function generateDimensionDetails(
       }
 
       // Advancement Plans
+      if (rating.plans && rating.plans.trim()) {
+        yPos = checkPageBreak(doc, yPos, 12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${aspect.name} - Advancement Plans:`, MARGIN_LEFT + 3, yPos);
+        yPos += 4;
+        doc.setFont('helvetica', 'normal');
+        const planLines = doc.splitTextToSize(rating.plans, CONTENT_WIDTH - 10);
+        doc.text(planLines, MARGIN_LEFT + 5, yPos);
+        yPos += planLines.length * 3.5 + 2;
+      }
+    }
+  }
+
+  yPos += 4;
+  return yPos;
+}
+
+/**
+ * Generates details for an organizational assessment's aspect ratings.
+ * Shows aspects directly in a table (same pattern as dimension details but without dimension grouping).
+ */
+function generateOrganizationalDetails(
+  doc: JsPDFWithAutoTable,
+  orgType: string,
+  ratings: OrbitRating[],
+  startY: number
+): number {
+  let yPos = startY;
+
+  // Get all aspects for this organizational assessment
+  const aspects = getOrganizationalAspects(
+    orgType as Parameters<typeof getOrganizationalAspects>[0]
+  );
+  const orgRatings = ratings.filter((r) => r.dimensionId === orgType);
+
+  // Build table data
+  const tableData: string[][] = [];
+
+  for (const aspect of aspects) {
+    const rating = orgRatings.find((r) => r.aspectId === aspect.id);
+
+    let levelName = 'Not Rated';
+    let levelDesc = '';
+
+    if (rating && rating.currentLevel > 0) {
+      const levelKey = `level${rating.currentLevel}` as LevelKey;
+      const levelMeta = getMaturityLevelMeta(levelKey);
+      levelName = `${rating.currentLevel} - ${levelMeta.name}`;
+
+      const aspectLevel = aspect.levels[levelKey];
+      if (aspectLevel) {
+        levelDesc = aspectLevel.description;
+      }
+    } else if (rating && rating.currentLevel === -1) {
+      levelName = 'N/A';
+      levelDesc = 'Not applicable';
+    }
+
+    tableData.push([aspect.name, levelName, levelDesc]);
+  }
+
+  if (tableData.length > 0) {
+    autoTable(doc, {
+      startY: yPos,
+      head: [['Aspect', 'Level', 'Description']],
+      body: tableData,
+      theme: 'grid',
+      headStyles: {
+        fillColor: COLORS.lightGray,
+        textColor: COLORS.secondary,
+        fontSize: 8,
+        fontStyle: 'bold',
+      },
+      styles: {
+        fontSize: 8,
+        cellPadding: 2,
+        overflow: 'linebreak',
+        cellWidth: 'wrap',
+      },
+      columnStyles: {
+        0: { cellWidth: 40 },
+        1: { cellWidth: 28 },
+        2: { cellWidth: 'auto' },
+      },
+      margin: { left: MARGIN_LEFT, right: MARGIN_RIGHT },
+      tableWidth: CONTENT_WIDTH,
+    });
+
+    yPos = doc.lastAutoTable.finalY + 4;
+  }
+
+  // Add notes, barriers, and plans
+  const ratingsWithText = orgRatings.filter(
+    (r) =>
+      (r.notes && r.notes.trim()) ||
+      (r.barriers && r.barriers.trim()) ||
+      (r.plans && r.plans.trim())
+  );
+
+  if (ratingsWithText.length > 0) {
+    yPos = checkPageBreak(doc, yPos, 25);
+
+    doc.setFontSize(8);
+    doc.setTextColor(...COLORS.darkGray);
+
+    for (const rating of ratingsWithText) {
+      const aspect = getOrganizationalAspect(
+        orgType as Parameters<typeof getOrganizationalAspect>[0],
+        rating.aspectId
+      );
+      if (!aspect) continue;
+
+      if (rating.notes && rating.notes.trim()) {
+        yPos = checkPageBreak(doc, yPos, 12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${aspect.name} - Notes:`, MARGIN_LEFT + 3, yPos);
+        yPos += 4;
+        doc.setFont('helvetica', 'normal');
+        const noteLines = doc.splitTextToSize(rating.notes, CONTENT_WIDTH - 10);
+        doc.text(noteLines, MARGIN_LEFT + 5, yPos);
+        yPos += noteLines.length * 3.5 + 2;
+      }
+
+      if (rating.barriers && rating.barriers.trim()) {
+        yPos = checkPageBreak(doc, yPos, 12);
+        doc.setFont('helvetica', 'bold');
+        doc.text(`${aspect.name} - Barriers & Challenges:`, MARGIN_LEFT + 3, yPos);
+        yPos += 4;
+        doc.setFont('helvetica', 'normal');
+        const barrierLines = doc.splitTextToSize(rating.barriers, CONTENT_WIDTH - 10);
+        doc.text(barrierLines, MARGIN_LEFT + 5, yPos);
+        yPos += barrierLines.length * 3.5 + 2;
+      }
+
       if (rating.plans && rating.plans.trim()) {
         yPos = checkPageBreak(doc, yPos, 12);
         doc.setFont('helvetica', 'bold');

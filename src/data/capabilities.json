@@ -1,6 +1,6 @@
 {
   "version": "4.0",
-  "lastUpdated": "2026-01-21",
+  "lastUpdated": "2026-05-03",
   "description": "The MITA 4.0 Capability Reference Model defines the capabilities that State Medicaid Agencies (SMAs) possess or seek to develop. Capabilities are organized into three layers: Strategic (enterprise strategy), Core (mission and outcomes), and Support (critical enablers). Each capability is assessed using the standardized ORBIT maturity criteria.",
   "domains": [
     {
@@ -733,223 +733,121 @@
       "description": "The Enterprise Technology Capability Domain represents the SMA's technology capabilities that enable and support core and strategic capabilities. Organized into seven categories: Infrastructure, Integration, Platform Services, Application Architecture, Security and Identity, Operations and Maintenance, and Development and Release.",
       "categories": [
         {
-          "id": "infrastructure",
-          "name": "Infrastructure",
-          "description": "Capabilities related to compute, storage, networking, and system resilience.",
+          "id": "technology-infrastructure-management",
+          "name": "Technical Infrastructure Management",
+          "description": "",
           "areas": [
             {
-              "id": "compute-hosting",
-              "name": "Compute and Hosting",
-              "description": "Provides the ability for SMAs to provision servers and cloud platforms for Medicaid systems and applications.",
-              "topics": ["Provision of Servers", "Cloud Infrastructure"]
+              "id": "compute-and-storage",
+              "name": "Compute and Storage",
+              "description": "Provides the State Medicaid Agency (SMA) with the ability to provision computing resources for the Medicaid Enterprise System (MES) and manage the storage of data and files, with backups and retention in accordance with regulatory compliance requirements.",
+              "topics": ["Servers", "Storage", "Backups", "Retention"]
             },
             {
-              "id": "storage",
-              "name": "Storage",
-              "description": "Provides the ability for SMAs to manage Medicaid data storage, including files and backups for retention.",
-              "topics": ["Management of Medicaid Data Storage", "Security and Retention Compliance"]
+              "id": "networking-and-technical-recovery",
+              "name": "Networking and Technical Recovery",
+              "description": "Provides the SMA with the ability to establish secure connections between MES environments, and external systems and partners, monitor network traffic, and adjust the network through failover and recovery during peak usage or outages.",
+              "topics": ["Networking", "Communications", "Disaster Recovery", "Failover"]
             },
             {
-              "id": "networking-connectivity",
-              "name": "Networking and Connectivity",
-              "description": "Provides the ability for SMAs to enable secure connections between internal systems, external partners, and cloud environments.",
+              "id": "identity-access-and-consent",
+              "name": "Identity, Access and Consent",
+              "description": "Provides the SMA with the ability to manage how someone logs in, what role and permissions they have, and how identity is verified within the MES, and gather members’ consent and sharing preferences.",
               "topics": [
-                "Secure Connections between Internal Systems and External Partners",
-                "Reliable Communication in Computing and Hosting Environments"
+                "Roles Based Access Control",
+                "Identity Proofing",
+                "Consent and Sharing Preferences"
               ]
             },
             {
-              "id": "resilience-scaling",
-              "name": "Resilience and Scaling",
-              "description": "Provides the ability for SMAs to maintain system operation during outages through failover and disaster recovery or to make adjustments during peak usage.",
+              "id": "security-protection-and-monitoring",
+              "name": "Security Protection and Monitoring",
+              "description": "Provides the SMA with the ability to secure and protect sensitive and confidential Medicaid and healthcare information in the MES, prevent unauthorized access, detect unusual activity, log and remediate events, and support audits to comply with regulatory compliance requirements.",
               "topics": [
-                "System Operation during Outages",
-                "Failover and Disaster Recovery",
-                "Adjustments during Peak Usage Times"
+                "Encryption",
+                "Monitoring of Activities",
+                "Event Logging",
+                "Audit and Compliance"
+              ]
+            },
+            {
+              "id": "system-operations-and-monitoring",
+              "name": "System Operations and Monitoring",
+              "description": "Provides the SMA with the ability to analyze the MES health, performance, and availability, and perform steady-state operational processes to maintain and support the MES and its environments.",
+              "topics": ["Monitoring of Performance", "Availability", "MES maintenance"]
+            },
+            {
+              "id": "development-testing-release-and-security-compliance",
+              "name": "Development, Testing, Release and Security Compliance",
+              "description": "Provides the SMA with the ability to create, update, and version source code and scripts, test changes, resolve defects, and promote through pre-production and production MES environments with security checks incorporated.",
+              "topics": [
+                "Source Code and Script",
+                "Version Control",
+                "Bugs and Defects",
+                "Deployment and Security Checks"
               ]
             }
           ]
         },
         {
-          "id": "integration",
-          "name": "Integration",
-          "description": "Capabilities related to APIs, system messaging, and external partner connectivity.",
+          "id": "application-management",
+          "name": "Application Management",
+          "description": "",
           "areas": [
             {
-              "id": "api-interface-management",
-              "name": "API and Interface Management",
-              "description": "Provides the ability for SMAs to facilitate data sharing between systems using standard formats like FHIR, X12, or Representational State Transfer (REST).",
+              "id": "api-messaging-and-integration",
+              "name": "API, Messaging, and Integration",
+              "description": "Provides the ability for the SMA to facilitate integration and connectivity between MES applications through scheduled or real-time events and establishes connections with the Centers for Medicare and Medicaid Services (CMS), Managed Care Organizations (MCOs), providers, and other Medicaid partners or external systems.",
               "topics": [
-                "Digital Connections and Data Sharing",
-                "Common Data Formats (FHIR, X12, REST)"
+                "APIs and Interfaces",
+                "Alerts and Events",
+                "Common Formats (FHIR, X12, REST)",
+                "Secure connections with CMS, MCOs, and Providers"
               ]
             },
             {
-              "id": "system-messaging",
-              "name": "System Messaging",
-              "description": "Provides the ability for SMAs to enable real-time or scheduled alerts or events between systems.",
-              "topics": [
-                "Real-Time or Scheduled Communication",
-                "Clear and Traceable Alerts or Events"
-              ]
+              "id": "application-hosting-and-platform-services",
+              "name": "Application Hosting and Platform Services",
+              "description": "Provides the ability for the SMA to host Medicaid applications in managed environments within the MES, and leverage and reuse common services to avoid duplication and redundancy.",
+              "topics": ["Hosting Environments", "Shared Resources"]
             },
             {
-              "id": "external-partner-integration",
-              "name": "External Partner Integration",
-              "description": "Provides the ability for SMAs to establish secure connections with CMS, MCOs, providers, and other federal or state partners.",
-              "topics": [
-                "Secure Connections with CMS, MCOs, Providers",
-                "Coordination of Medicaid Services"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "platform-services",
-          "name": "Platform Services",
-          "description": "Capabilities related to application hosting, business rules, and shared platform functions.",
-          "areas": [
-            {
-              "id": "application-hosting",
-              "name": "Application Hosting",
-              "description": "Provides the ability for SMAs to host managed environments that run Medicaid applications.",
-              "topics": ["Managed Environments", "Minimization of Manual Work"]
+              "id": "business-rules-and-workflows",
+              "name": "Business Rules and Workflows",
+              "description": "Provides the ability for the SMA to automate Medicaid business processes and document and share business rules human readable and system formats to support transactions.",
+              "topics": ["Workflows", "Business Rules"]
             },
-            {
-              "id": "business-rules-workflow",
-              "name": "Business Rules and Workflow",
-              "description": "Provides the ability for SMAs to create rules (such as eligibility criteria) and automate processes (like Provider Enrollment).",
-              "topics": ["Creation of Business Rules", "Automation of Processes"]
-            },
-            {
-              "id": "common-platform-functions",
-              "name": "Common Platform Functions",
-              "description": "Provides the ability for SMAs to use shared services, such as address verification or file upload services, that multiple systems can use to prevent redundancy and duplication.",
-              "topics": [
-                "Shared Tools",
-                "Prevention of Duplication across Systems",
-                "Leverage and Reuse"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "application-architecture",
-          "name": "Application Architecture",
-          "description": "Capabilities related to modular design, user interfaces, and session management.",
-          "areas": [
             {
               "id": "modular-architecture",
               "name": "Modular Architecture",
-              "description": "Provides the ability for SMAs to divide large Medicaid systems into smaller, manageable components for easier scaling and replacement.",
-              "topics": ["Scalability", "Ease of Replacement"]
+              "description": "Provides the ability for the SMA to decompose Medicaid applications into smaller, manageable components that are easier to modify, update, or replace, without impacting the entire Medicaid application or MES.",
+              "topics": ["Modularity", "Scalability", "Ease of Replacement"]
             },
             {
-              "id": "user-interfaces",
-              "name": "User Interfaces",
-              "description": "Provides the ability for SMAs to design application screens that are easy to access, interact with, and consistent for users, such as members and providers.",
-              "topics": ["User Accessibility", "Consistency"]
-            },
-            {
-              "id": "session-state-management",
-              "name": "Session and State Management",
-              "description": "Provides the ability for SMAs to monitor user activity during a session, enabling users to confidently and securely continue or finish their actions.",
-              "topics": ["User Activity Tracking", "Continuity of Actions"]
+              "id": "user-interfaces-and-session-management",
+              "name": "User Interfaces and Session Management",
+              "description": "Provides the ability for the SMA to design Medicaid applications that are easy for internal and external users to interact with and perform activities, and work across different devices and browsers, and accessibility tools, including maintaining user activity within the Medicaid application so users can continue or complete their activities.",
+              "topics": ["User-Friendly Design", "Accessibility", "Continuity of User Activities"]
             }
           ]
-        },
+        }
+      ]
+    },
+    {
+      "id": "enterprise-architecture-domain",
+      "name": "Enterprise Architecture",
+      "layer": "support",
+      "description": "The Enterprise Architecture domain assesses organizational maturity in enterprise-level planning, governance, and architectural frameworks across the Medicaid enterprise. These capabilities apply at the organizational level rather than to specific business functions.",
+      "areas": [
         {
-          "id": "security-identity",
-          "name": "Security and Identity",
-          "description": "Capabilities related to identity management, consent, data protection, and security monitoring.",
-          "areas": [
-            {
-              "id": "identity-access-services",
-              "name": "Identity and Access Services",
-              "description": "Provides the ability for SMAs to control who can log in, what they can do, and how their identity is verified.",
-              "topics": ["Authentication and Authorization", "Identity Verification"]
-            },
-            {
-              "id": "consent-management",
-              "name": "Consent Management",
-              "description": "Provides the ability for SMAs to gather and manage member consents and data-sharing preferences.",
-              "topics": ["Collection of Member Consents", "Data-Sharing Preferences"]
-            },
-            {
-              "id": "system-data-protection",
-              "name": "System and Data Protection",
-              "description": "Provides the ability for SMAs to use measures like encryption, firewalls, and secure configurations to prevent unauthorized access and protect sensitive Medicaid and healthcare data.",
-              "topics": [
-                "Use of Encryption",
-                "Secure Configurations",
-                "Protection of Medicaid and Healthcare Data"
-              ]
-            },
-            {
-              "id": "security-monitoring",
-              "name": "Security Monitoring",
-              "description": "Provides the ability for SMAs to detect unusual activity, log events, and support audits to better comply with CMS and NIST security standards, e.g., Acceptable Risk Controls for Affordable Care Act (ACA), Medicaid, and Partner Entities (ARC-AMPE).",
-              "topics": [
-                "Monitoring for Unusual Activity",
-                "Event Logging",
-                "Audit Support",
-                "Compliance with CMS and NIST Security Standards"
-              ]
-            }
-          ]
-        },
-        {
-          "id": "operations-maintenance",
-          "name": "Operations and Maintenance",
-          "description": "Capabilities related to system monitoring and operations.",
-          "areas": [
-            {
-              "id": "systems-monitoring",
-              "name": "Systems Monitoring",
-              "description": "Provides an SMA's visibility into Medicaid system health, including uptime, performance, and availability.",
-              "topics": ["System Health and Availability", "Performance Evaluation"]
-            },
-            {
-              "id": "systems-operations",
-              "name": "Systems Operations",
-              "description": "Provides the ability for SMAs to manage systems, perform tasks, and deploy updates across various environments.",
-              "topics": ["System Administration", "Environment Management"]
-            }
-          ]
-        },
-        {
-          "id": "development-release",
-          "name": "Development and Release",
-          "description": "Capabilities related to code management, testing, and security compliance in the development lifecycle.",
-          "areas": [
-            {
-              "id": "code-configuration-management",
-              "name": "Code and Configuration Management",
-              "description": "Provides the ability for SMAs to write, track, and securely manage software changes.",
-              "topics": [
-                "Creating Software Changes",
-                "Tracking Software Changes",
-                "Managing Software Changes"
-              ]
-            },
-            {
-              "id": "testing-release",
-              "name": "Testing and Release",
-              "description": "Provides the ability for SMAs to run tests to identify bugs or issues and deploy code across different environments such as Development, Test, and Production.",
-              "topics": [
-                "Testing for Bugs, Issues, or Defects",
-                "Deploying Code across Environments"
-              ]
-            },
-            {
-              "id": "security-compliance",
-              "name": "Security Compliance",
-              "description": "Provides the ability for SMAs to incorporate security checks throughout the development process to ensure code is secure.",
-              "topics": [
-                "Incorporating Security Checks before Deployment",
-                "Adhering to Compliance Standards"
-              ]
-            }
+          "id": "organizational-enterprise-architecture",
+          "name": "Organizational Enterprise Architecture",
+          "description": "Assesses the organization's maturity in defining business capabilities, integrating enterprise architecture, managing policies, and aligning strategic planning across the Medicaid enterprise.",
+          "topics": [
+            "Business Capability Management",
+            "Enterprise Architecture Frameworks",
+            "Policy Management & Compliance",
+            "Strategic Planning & Governance"
           ]
         }
       ]
@@ -976,9 +874,8 @@
         {
           "id": "organizational-roles",
           "name": "Organizational Roles",
-          "description": "Assesses the organization's maturity in managing roles, resources, governance, and capacity across the Medicaid enterprise. Covers technology resources, goal alignment, governance, communication, leadership, and staffing.",
+          "description": "Assesses the organization's maturity in managing roles, resources, governance, and capacity across the Medicaid enterprise. Covers goal alignment, governance, communication, leadership, and staffing.",
           "topics": [
-            "Technology Resources",
             "Organizational Goals Alignment",
             "Governance & Standardization",
             "Communication",

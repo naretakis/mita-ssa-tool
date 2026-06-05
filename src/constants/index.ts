@@ -13,10 +13,14 @@ import type { OrbitDimensionId, OrganizationalAssessmentId } from '../types';
 
 /**
  * GitHub repository URL.
- * Automatically set via VITE_GITHUB_REPO_URL in the deploy workflow.
- * Falls back to empty string for local development (link won't appear if not set).
+ *
+ * In deployed builds this is injected via `VITE_GITHUB_REPO_URL` in the deploy
+ * workflow, which points to the repository the app was deployed from. When the
+ * env var is not set (local development, or a build that omits it), it falls
+ * back to the canonical upstream repository so GitHub links always work.
  */
-export const GITHUB_REPO_URL = import.meta.env.VITE_GITHUB_REPO_URL || '';
+const DEFAULT_GITHUB_REPO_URL = 'https://github.com/Enterprise-CMCS/mita-ssa-tool';
+export const GITHUB_REPO_URL = import.meta.env.VITE_GITHUB_REPO_URL || DEFAULT_GITHUB_REPO_URL;
 
 // =============================================================================
 // Enterprise Domain Configuration
@@ -52,6 +56,7 @@ export const DOMAIN_AGGREGATE_DIMENSIONS: Partial<Record<string, OrbitDimensionI
 export const ORGANIZATIONAL_ASSESSMENT_AREAS: Record<string, OrganizationalAssessmentId> = {
   'organizational-outcomes': 'outcomes',
   'organizational-roles': 'roles',
+  'organizational-enterprise-architecture': 'enterprise-architecture',
 };
 
 /**

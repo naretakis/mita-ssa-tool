@@ -27,19 +27,19 @@ describe('history', () => {
       const ratings: OrbitRating[] = [
         createMockRating({
           dimensionId: 'technology',
-          subDimensionId: 'infrastructure',
+          subDimensionId: 'technologyInfrastructureManagement',
           aspectId: 'a1',
           currentLevel: 3,
         }),
         createMockRating({
           dimensionId: 'technology',
-          subDimensionId: 'infrastructure',
+          subDimensionId: 'technologyInfrastructureManagement',
           aspectId: 'a2',
           currentLevel: 5,
         }),
         createMockRating({
           dimensionId: 'technology',
-          subDimensionId: 'integration',
+          subDimensionId: 'applicationManagement',
           aspectId: 'a3',
           currentLevel: 4,
         }),
@@ -47,8 +47,8 @@ describe('history', () => {
 
       const scores = calculateDimensionScores(ratings);
 
-      expect(scores['technology:infrastructure']).toBe(4);
-      expect(scores['technology:integration']).toBe(4);
+      expect(scores['technology:technologyInfrastructureManagement']).toBe(4);
+      expect(scores['technology:applicationManagement']).toBe(4);
     });
 
     it('should exclude ratings with currentLevel <= 0', () => {
@@ -84,7 +84,7 @@ describe('history', () => {
         createMockRating({ dimensionId: 'businessArchitecture', aspectId: 'a2', currentLevel: 4 }),
         createMockRating({
           dimensionId: 'technology',
-          subDimensionId: 'infrastructure',
+          subDimensionId: 'technologyInfrastructureManagement',
           aspectId: 'a3',
           currentLevel: 5,
         }),
@@ -94,7 +94,7 @@ describe('history', () => {
 
       expect(scores['outcomes']).toBe(3);
       expect(scores['businessArchitecture']).toBe(4);
-      expect(scores['technology:infrastructure']).toBe(5);
+      expect(scores['technology:technologyInfrastructureManagement']).toBe(5);
     });
   });
 
@@ -155,7 +155,7 @@ describe('history', () => {
       const ratings: OrbitRating[] = [
         createMockRating({
           dimensionId: 'technology',
-          subDimensionId: 'infrastructure',
+          subDimensionId: 'technologyInfrastructureManagement',
           aspectId: 'cloud-adoption',
           currentLevel: 4,
         }),
@@ -163,7 +163,7 @@ describe('history', () => {
 
       const historical = toHistoricalRatings(ratings);
 
-      expect(historical[0]?.subDimensionId).toBe('infrastructure');
+      expect(historical[0]?.subDimensionId).toBe('technologyInfrastructureManagement');
     });
 
     it('should handle empty array', () => {

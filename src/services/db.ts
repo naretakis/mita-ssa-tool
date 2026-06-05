@@ -26,31 +26,73 @@ const db = new Dexie('Mita4Database') as Dexie & {
 };
 
 /**
- * Database schema v1
- *
- * Index definitions:
- * - Primary key is always first
- * - Compound indexes use [field1+field2] syntax
- * - Multi-entry indexes use *field syntax
+ * Database schema v1 (original)
  */
 db.version(1).stores({
-  // Capability assessments - one per capability area
   capabilityAssessments: 'id, capabilityAreaId, capabilityDomainId, status, updatedAt, *tags',
-
-  // ORBIT ratings - one per aspect per assessment
-  // Compound index prevents duplicate ratings for same aspect
   orbitRatings:
     'id, capabilityAssessmentId, [capabilityAssessmentId+dimensionId+aspectId], [capabilityAssessmentId+dimensionId+subDimensionId+aspectId]',
-
-  // File attachments - stored as Blobs
   attachments: 'id, capabilityAssessmentId, orbitRatingId, uploadedAt',
-
-  // Assessment history - snapshots of finalized assessments
   assessmentHistory: 'id, capabilityAssessmentId, capabilityAreaId, snapshotDate',
-
-  // Tags for autocomplete
   tags: 'id, name, usageCount, lastUsed',
 });
+
+/**
+ * Database schema v2 — Clean break for maturity model v3.0.0
+ *
+ * Schema is unchanged but all data is cleared because the maturity model
+ * was restructured (new dimensions, consolidated aspects, new IDs).
+ * Existing assessment data is incompatible with the new model.
+ */
+db.version(2)
+  .stores({
+    capabilityAssessments: 'id, capabilityAreaId, capabilityDomainId, status, updatedAt, *tags',
+    orbitRatings:
+      'id, capabilityAssessmentId, [capabilityAssessmentId+dimensionId+aspectId], [capabilityAssessmentId+dimensionId+subDimensionId+aspectId]',
+    attachments: 'id, capabilityAssessmentId, orbitRatingId, uploadedAt',
+    assessmentHistory: 'id, capabilityAssessmentId, capabilityAreaId, snapshotDate',
+    tags: 'id, name, usageCount, lastUsed',
+  })
+  .upgrade(async (tx) => {
+    await tx.table('capabilityAssessments').clear();
+    await tx.table('orbitRatings').clear();
+    await tx.table('attachments').clear();
+    await tx.table('assessmentHistory').clear();
+    await tx.table('tags').clear();
+  });
+
+/**
+ * Database schema v3 — Maturity model May 3 2026 PRA submission update
+ *
+ * Schema is unchanged but all data is cleared because the maturity model
+ * was updated:
+ *   - Roles dropped "Technology Resources" aspect (6 -> 5)
+ *   - A few aspect names/IDs changed to match the official source verbatim
+ *     (e.g., "Business Rules and Workflows", "User Interfaces and Session
+ *     Management", "Identity, Access and Consent")
+ *   - Information aspect ordering changed
+ *   - Schema simplification: per-level question checklists removed in favor
+ *     of single aspect-level questions plus "Suggested Documentation" as
+ *     evidence
+ *
+ * Existing assessment data is incompatible with the new model.
+ */
+db.version(3)
+  .stores({
+    capabilityAssessments: 'id, capabilityAreaId, capabilityDomainId, status, updatedAt, *tags',
+    orbitRatings:
+      'id, capabilityAssessmentId, [capabilityAssessmentId+dimensionId+aspectId], [capabilityAssessmentId+dimensionId+subDimensionId+aspectId]',
+    attachments: 'id, capabilityAssessmentId, orbitRatingId, uploadedAt',
+    assessmentHistory: 'id, capabilityAssessmentId, capabilityAreaId, snapshotDate',
+    tags: 'id, name, usageCount, lastUsed',
+  })
+  .upgrade(async (tx) => {
+    await tx.table('capabilityAssessments').clear();
+    await tx.table('orbitRatings').clear();
+    await tx.table('attachments').clear();
+    await tx.table('assessmentHistory').clear();
+    await tx.table('tags').clear();
+  });
 
 export { db };
 

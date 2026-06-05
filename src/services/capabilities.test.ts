@@ -37,7 +37,7 @@ describe('capabilities service', () => {
     it('should return all capability domains', () => {
       const domains = getAllDomains();
       expect(domains).toBeInstanceOf(Array);
-      expect(domains.length).toBe(15); // 14 original + 1 Enterprise Governance
+      expect(domains.length).toBe(16); // 14 original + Enterprise Governance + Enterprise Architecture
     });
 
     it('should have required properties on each domain', () => {
@@ -71,7 +71,7 @@ describe('capabilities service', () => {
 
     it('should return support domains', () => {
       const domains = getDomainsByLayer('support');
-      expect(domains.length).toBe(5); // 4 original + 1 Enterprise Governance
+      expect(domains.length).toBe(6); // 4 original + Enterprise Governance + Enterprise Architecture
       expect(domains.every((d) => d.layer === 'support')).toBe(true);
     });
   });
@@ -106,7 +106,7 @@ describe('capabilities service', () => {
     it('should return all capability areas including from categorized domains', () => {
       const areas = getAllAreas();
       expect(areas).toBeInstanceOf(Array);
-      expect(areas.length).toBe(76); // 74 original + 2 organizational areas
+      expect(areas.length).toBe(66); // standard + organizational areas
     });
 
     it('should have required properties on each area', () => {
@@ -149,7 +149,7 @@ describe('capabilities service', () => {
 
     it('should return categories for technical domain', () => {
       const categories = getCategoriesByDomainId('technical');
-      expect(categories.length).toBe(7);
+      expect(categories.length).toBe(2);
     });
 
     it('should return empty array for standard domain', () => {
@@ -222,14 +222,14 @@ describe('capabilities service', () => {
   describe('getTotalAreaCount', () => {
     it('should return total count of all areas', () => {
       const count = getTotalAreaCount();
-      expect(count).toBe(76); // 74 original + 2 organizational areas
+      expect(count).toBe(66); // standard + organizational areas
     });
   });
 
   describe('getTotalDomainCount', () => {
     it('should return total count of all domains', () => {
       const count = getTotalDomainCount();
-      expect(count).toBe(15); // 14 original + 1 Enterprise Governance
+      expect(count).toBe(16); // 14 original + Enterprise Governance + Enterprise Architecture
     });
   });
 

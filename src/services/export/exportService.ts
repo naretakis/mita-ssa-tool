@@ -598,7 +598,7 @@ function generateStandardAreaProfile(
   ratings: OrbitRating[],
   aggregateData?: { dimensionId: OrbitDimensionId; score: number | null; contributingCount: number }
 ): CapabilityAreaProfile {
-  // Map dimension IDs to display names (B-I-T only)
+  // Map dimension IDs to display names (B-I-T)
   const dimensionMap: Record<OrbitDimensionId, string> = {
     businessArchitecture: 'Business Architecture',
     information: 'Information',
@@ -630,8 +630,12 @@ function generateStandardAreaProfile(
 
   // Aggregate data from ratings (only B-I-T dimensions)
   for (const rating of ratings) {
-    // Skip organizational assessment ratings (outcomes/roles) in standard assessments
-    if (rating.dimensionId === 'outcomes' || rating.dimensionId === 'roles') {
+    // Skip organizational assessment ratings in standard assessments
+    if (
+      rating.dimensionId === 'outcomes' ||
+      rating.dimensionId === 'roles' ||
+      rating.dimensionId === 'enterprise-architecture'
+    ) {
       continue;
     }
 

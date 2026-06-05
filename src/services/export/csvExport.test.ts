@@ -2,7 +2,7 @@
  * CSV Export Service Tests
  *
  * Tests for CSV generation and parsing of maturity profiles.
- * Standard assessments use B-I-T dimensions only.
+ * Standard assessments use B-EA-I-T dimensions only.
  * Organizational assessments use direct aspects with "Aspect" header.
  */
 
@@ -16,7 +16,7 @@ import type { MaturityProfile, CapabilityAreaProfile } from './types';
 
 describe('csvExport', () => {
   /**
-   * Creates a standard capability area profile with B-I-T dimensions
+   * Creates a standard capability area profile with B-EA-I-T dimensions
    */
   const createStandardAreaProfile = (
     domainName: string,
@@ -134,7 +134,7 @@ describe('csvExport', () => {
       expect(csv).toContain('ORBIT,As Is,To Be,Notes,Barriers & Challenges,Advancement Plans');
     });
 
-    it('should include B-I-T dimensions in order', () => {
+    it('should include B-EA-I-T dimensions in order', () => {
       const profile = createProfile('Test State', 'Provider Management', [
         createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
       ]);
@@ -146,7 +146,7 @@ describe('csvExport', () => {
       const headerIndex = lines.findIndex((l) => l.startsWith('ORBIT,'));
       expect(headerIndex).toBeGreaterThan(-1);
 
-      const dataLines = lines.slice(headerIndex + 1, headerIndex + 4);
+      const dataLines = lines.slice(headerIndex + 1, headerIndex + 5);
       expect(dataLines[0]).toContain('Business Architecture');
       expect(dataLines[1]).toContain('Information');
       expect(dataLines[2]).toContain('Technology');
@@ -391,7 +391,7 @@ describe('csvExport', () => {
       expect(parsed?.areas[0]?.areaName).toBe('Provider Enrollment');
     });
 
-    it('should parse dimension rows correctly for B-I-T', () => {
+    it('should parse dimension rows correctly for B-EA-I-T', () => {
       const originalProfile = createProfile('Test State', 'Provider Management', [
         createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
       ]);

@@ -16,7 +16,7 @@ const CSV_HEADERS_STANDARD = 'ORBIT,As Is,To Be,Notes,Barriers & Challenges,Adva
 const CSV_HEADERS_ORGANIZATIONAL =
   'Aspect,As Is,To Be,Notes,Barriers & Challenges,Advancement Plans';
 
-/** Standard ORBIT dimension names for CSV output (B-I-T only) */
+/** Standard ORBIT dimension names for CSV output (B-I-T) */
 const ORBIT_DIMENSIONS = ['Business Architecture', 'Information', 'Technology'];
 
 /**

@@ -98,15 +98,15 @@ export interface CapabilityReferenceModel {
 
 /**
  * The three ORBIT dimension IDs (B-I-T)
- * Note: Outcomes and Roles are now organizational assessments, not per-capability dimensions
+ * Note: Outcomes, Roles, and Enterprise Architecture aspects are organizational assessments, not per-capability dimensions
  */
 export type OrbitDimensionId = 'businessArchitecture' | 'information' | 'technology';
 
 /**
- * Organizational assessment type IDs (formerly O&R dimensions)
+ * Organizational assessment type IDs
  * These are assessed at the organizational level, not per capability area
  */
-export type OrganizationalAssessmentId = 'outcomes' | 'roles';
+export type OrganizationalAssessmentId = 'outcomes' | 'roles' | 'enterprise-architecture';
 
 /**
  * Combined type for rating storage - allows both dimension and organizational assessment IDs
@@ -118,13 +118,8 @@ export type RatingDimensionId = OrbitDimensionId | OrganizationalAssessmentId;
  * Technology sub-dimension IDs
  */
 export type TechnologySubDimensionId =
-  | 'infrastructure'
-  | 'integration'
-  | 'platformServices'
-  | 'applicationArchitecture'
-  | 'securityIdentity'
-  | 'operationsMaintenance'
-  | 'developmentRelease';
+  | 'technologyInfrastructureManagement'
+  | 'applicationManagement';
 
 /**
  * Maturity levels 1-5, 0 for not assessed, -1 for N/A
@@ -255,6 +250,7 @@ export interface OrbitModel {
   organizationalAssessments: {
     outcomes: OrganizationalAssessmentDefinition;
     roles: OrganizationalAssessmentDefinition;
+    'enterprise-architecture': OrganizationalAssessmentDefinition;
   };
 }
 

@@ -33,7 +33,7 @@ const orbitModel = JSON.parse(readFileSync('src/data/orbit-model.json', 'utf-8')
 // ============================================================================
 
 const EXPORT_VERSION = '1.0';
-const APP_VERSION = '0.1.0';
+const APP_VERSION = '3.0.0';
 
 // Enterprise domain configuration
 const ENTERPRISE_DOMAIN_IDS = ['data-management', 'technical'];
@@ -44,9 +44,11 @@ const DOMAIN_AGGREGATE_DIMENSIONS = {
 
 // Organizational assessment configuration
 const ENTERPRISE_GOVERNANCE_DOMAIN_ID = 'enterprise-governance';
+const ENTERPRISE_ARCHITECTURE_DOMAIN_ID = 'enterprise-architecture-domain';
 const ORGANIZATIONAL_ASSESSMENT_AREAS = {
   'organizational-outcomes': 'outcomes',
   'organizational-roles': 'roles',
+  'organizational-enterprise-architecture': 'enterprise-architecture',
 };
 
 // ============================================================================
@@ -670,16 +672,23 @@ function generateMaturityProfileCsv(profile) {
   for (const area of profile.areas) {
     lines.push(`Capability Domain: ${area.domainName},,,,,`);
     lines.push(`Capability Area: ${area.areaName},,,,,`);
-    
+
     // Add organizational assessment indicator if applicable
     if (area.isOrganizationalAssessment) {
       lines.push(`Assessment Type: Organizational (${area.organizationalType}),,,,,`);
     }
-    
-    lines.push('ORBIT,As Is,To Be,Notes,Barriers & Challenges,Advancement Plans');
+
+    // Match the real export: organizational assessments use "Aspect" header,
+    // standard assessments use "ORBIT" header
+    const header = area.isOrganizationalAssessment
+      ? 'Aspect,As Is,To Be,Notes,Barriers & Challenges,Advancement Plans'
+      : 'ORBIT,As Is,To Be,Notes,Barriers & Challenges,Advancement Plans';
+    lines.push(header);
 
     for (const row of area.rows) {
-      lines.push(`${row.dimension},${row.asIs},${row.toBe},${escapeCSV(row.notes)},${escapeCSV(row.barriers)},${escapeCSV(row.plans)}`);
+      lines.push(
+        `${row.dimension},${row.asIs},${row.toBe},${escapeCSV(row.notes)},${escapeCSV(row.barriers)},${escapeCSV(row.plans)}`
+      );
     }
 
     lines.push(',,,,,');
@@ -700,40 +709,63 @@ function buildMaturityProfile(assessments, allRatings, stateName) {
     technology: 'Technology',
   };
 
-  // Dimension display names for organizational assessments
-  const organizationalDimensionMap = {
-    outcomes: 'Outcomes',
-    roles: 'Roles',
-  };
-
   const areas = [];
 
   for (const assessment of assessments) {
     const ratings = allRatings.filter((r) => r.capabilityAssessmentId === assessment.id);
     const areaId = assessment.capabilityAreaId;
     const domainId = assessment.capabilityDomainId;
-    
-    // Determine assessment type and appropriate dimension map
+
     const isOrganizational = isOrganizationalAssessmentArea(areaId);
     const orgType = getOrganizationalAssessmentType(areaId);
     const isEnterprise = isEnterpriseDomain(domainId);
     const aggregatedDimension = getAggregatedDimensionForDomain(domainId);
-    
-    let dimensionMap;
+
     if (isOrganizational) {
-      // Organizational assessment - only show the specific org dimension
-      dimensionMap = { [orgType]: organizationalDimensionMap[orgType] };
-    } else if (isEnterprise) {
-      // Enterprise domain - show B-I-T minus the aggregated dimension
+      // Organizational assessment: one row per aspect (matches the real export)
+      const orgAspects =
+        (orbitModel.organizationalAssessments[orgType] &&
+          orbitModel.organizationalAssessments[orgType].aspects) ||
+        [];
+
+      const rows = orgAspects.map((aspect) => {
+        const rating = ratings.find(
+          (r) => r.dimensionId === orgType && r.aspectId === aspect.id
+        );
+        return {
+          dimension: aspect.name, // CSV "dimension" field carries the aspect name for org assessments
+          asIs: rating && rating.currentLevel > 0 ? rating.currentLevel.toString() : '',
+          toBe:
+            rating && rating.targetLevel && rating.targetLevel > 0
+              ? rating.targetLevel.toString()
+              : '',
+          notes: rating?.notes ?? '',
+          barriers: rating?.barriers ?? '',
+          plans: rating?.plans ?? '',
+        };
+      });
+
+      areas.push({
+        domainName: assessment.capabilityDomainName,
+        areaName: assessment.capabilityAreaName,
+        rows,
+        isOrganizationalAssessment: true,
+        organizationalType: orgType,
+      });
+      continue;
+    }
+
+    // Standard or enterprise capability area: rows are dimension averages
+    let dimensionMap;
+    if (isEnterprise) {
+      // Enterprise domain: B-I-T minus the aggregated dimension (still emit B-I-T row order)
       dimensionMap = Object.fromEntries(
         Object.entries(standardDimensionMap).filter(([key]) => key !== aggregatedDimension)
       );
     } else {
-      // Standard assessment - show all B-I-T
       dimensionMap = standardDimensionMap;
     }
 
-    // Group by dimension
     const dimensionData = {};
     for (const dimName of Object.values(dimensionMap)) {
       dimensionData[dimName] = { asIs: [], toBe: [], notes: [], barriers: [], plans: [] };
@@ -764,27 +796,25 @@ function buildMaturityProfile(assessments, allRatings, stateName) {
       const d = dimensionData[dimName];
       return {
         dimension: dimName,
-        asIs: d.asIs.length > 0 ? (d.asIs.reduce((a, b) => a + b, 0) / d.asIs.length).toFixed(1) : '',
-        toBe: d.toBe.length > 0 ? (d.toBe.reduce((a, b) => a + b, 0) / d.toBe.length).toFixed(1) : '',
+        asIs:
+          d.asIs.length > 0
+            ? (d.asIs.reduce((a, b) => a + b, 0) / d.asIs.length).toFixed(1)
+            : '',
+        toBe:
+          d.toBe.length > 0
+            ? (d.toBe.reduce((a, b) => a + b, 0) / d.toBe.length).toFixed(1)
+            : '',
         notes: d.notes.join('; '),
         barriers: d.barriers.join('; '),
         plans: d.plans.join('; '),
       };
     });
 
-    const areaProfile = {
+    areas.push({
       domainName: assessment.capabilityDomainName,
       areaName: assessment.capabilityAreaName,
       rows,
-    };
-    
-    // Add organizational assessment metadata
-    if (isOrganizational) {
-      areaProfile.isOrganizationalAssessment = true;
-      areaProfile.organizationalType = orgType;
-    }
-
-    areas.push(areaProfile);
+    });
   }
 
   return { stateName, areas };
@@ -798,7 +828,8 @@ function buildMaturityProfile(assessments, allRatings, stateName) {
 const GUARANTEED_DOMAINS = [
   'claims-encounter-management',
   'financial-management',
-  ENTERPRISE_GOVERNANCE_DOMAIN_ID, // Always include organizational assessments
+  ENTERPRISE_GOVERNANCE_DOMAIN_ID, // Outcomes & Roles organizational assessments
+  ENTERPRISE_ARCHITECTURE_DOMAIN_ID, // Organizational Enterprise Architecture
 ];
 
 // Also include at least one enterprise domain for aggregate testing
@@ -881,11 +912,13 @@ async function generateTestImportZip(domains, stateName, outputPath, description
   for (const domain of domains) {
     const isGuaranteed = domain.isGuaranteed || false;
     const domainIsEnterprise = isEnterpriseDomain(domain.id);
-    const domainIsGovernance = domain.id === ENTERPRISE_GOVERNANCE_DOMAIN_ID;
-    
+    const domainIsOrganizational =
+      domain.id === ENTERPRISE_GOVERNANCE_DOMAIN_ID ||
+      domain.id === ENTERPRISE_ARCHITECTURE_DOMAIN_ID;
+
     let domainType = 'standard';
     if (domainIsEnterprise) domainType = 'enterprise';
-    if (domainIsGovernance) domainType = 'organizational';
+    if (domainIsOrganizational) domainType = 'organizational';
     
     console.log(`Generating data for domain: ${domain.name}${isGuaranteed ? ' [GUARANTEED]' : ''} (${domainType})`);
     let domainHasAttachment = false;
@@ -1099,12 +1132,14 @@ async function main() {
   const standardAspects = getStandardDimensionAspects().length;
   const outcomesAspects = getOrganizationalAspects('outcomes').length;
   const rolesAspects = getOrganizationalAspects('roles').length;
+  const eaAspects = getOrganizationalAspects('enterprise-architecture').length;
 
   console.log('MITA 4.0 Test Import Generator');
   console.log(`Total capability areas in model: ${totalAreas}`);
   console.log(`Standard B-I-T aspects per assessment: ${standardAspects}`);
   console.log(`Organizational Outcomes aspects: ${outcomesAspects}`);
   console.log(`Organizational Roles aspects: ${rolesAspects}`);
+  console.log(`Organizational Enterprise Architecture aspects: ${eaAspects}`);
   console.log(`Enterprise domains: ${ENTERPRISE_DOMAIN_IDS.join(', ')}`);
 
   if (mode === 'small' || mode === 'both') {

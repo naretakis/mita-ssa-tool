@@ -1,5 +1,7 @@
 # MITA 4.0 Maturity Model (List Format)
 
+> **Note:** This is a historical snapshot of an earlier maturity model (Jan 2026 / v0.2). The current authoritative source of truth for the application's maturity criteria is the May 3, 2026 PRA Submission, archived at [`docs/source-documents/2026-05-03/`](../source-documents/2026-05-03/). For the current criteria see `src/data/orbit-model.json` or [`PROJECT_FOUNDATION_v2.md`](../../PROJECT_FOUNDATION_v2.md).
+
 ## Version History
 
 | Version | Date             | Author             | Notes                                                       |

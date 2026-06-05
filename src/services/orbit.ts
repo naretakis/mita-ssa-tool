@@ -42,7 +42,7 @@ export function getOrbitModelVersion(): string {
 }
 
 /**
- * Get all dimension IDs (B-I-T only)
+ * Get all dimension IDs (B-I-T)
  * @returns Array of the three ORBIT dimension IDs for standard assessments
  */
 export function getAllDimensionIds(): OrbitDimensionId[] {
@@ -95,7 +95,7 @@ export function getTechnologyDimension(): TechnologyDimension {
 
 /**
  * Get all Technology sub-dimensions
- * @returns Array of all seven Technology sub-dimensions
+ * @returns Array of all Technology sub-dimensions
  */
 export function getTechnologySubDimensions(): TechnologySubDimension[] {
   return orbitModel.dimensions.technology.subDimensions;
@@ -189,7 +189,7 @@ export function getAllMaturityLevels(): Record<LevelKey | 'notApplicable', Matur
 }
 
 /**
- * Get total aspect count across all standard dimensions (B-I-T)
+ * Get total aspect count across all standard dimensions (B-EA-I-T)
  * @returns Total number of aspects for standard capability assessments
  */
 export function getTotalAspectCount(): number {
@@ -388,7 +388,7 @@ export function getOrganizationalAspect(
  * @returns Array of organizational assessment type IDs
  */
 export function getOrganizationalAssessmentTypes(): OrganizationalAssessmentId[] {
-  return ['outcomes', 'roles'];
+  return ['outcomes', 'roles', 'enterprise-architecture'];
 }
 
 /**
@@ -397,5 +397,8 @@ export function getOrganizationalAssessmentTypes(): OrganizationalAssessmentId[]
  * @returns Total number of aspects across all organizational assessments
  */
 export function getTotalOrganizationalAspectCount(): number {
-  return getOrganizationalAspectCount('outcomes') + getOrganizationalAspectCount('roles');
+  return getOrganizationalAssessmentTypes().reduce(
+    (sum, type) => sum + getOrganizationalAspectCount(type),
+    0
+  );
 }

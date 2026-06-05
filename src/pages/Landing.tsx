@@ -57,8 +57,8 @@ export default function Landing(): JSX.Element {
             Assess your Medicaid Enterprise maturity using the ORBIT framework
           </Typography>
           <Typography variant="body1" sx={{ mb: 4, opacity: 0.85, maxWidth: 600 }}>
-            A free, open-source tool for State Medicaid Agencies to evaluate capabilities across 75
-            areas and 5 ORBIT dimensions. Your data stays private—stored only in your browser.
+            A free, open-source tool for State Medicaid Agencies to evaluate capabilities across the
+            MITA maturity dimensions. Your data stays private—stored only in your browser.
           </Typography>
           <Button
             variant="contained"
@@ -123,7 +123,7 @@ export default function Landing(): JSX.Element {
                 1. Select a Capability
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Browse the Dashboard to see all 75 capability areas organized by domain. Click any
+                Browse the Dashboard to see all 66 capability areas organized by domain. Click any
                 area to start its assessment.
               </Typography>
             </Grid>
@@ -132,8 +132,8 @@ export default function Landing(): JSX.Element {
                 2. Rate Each Dimension
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Evaluate your maturity across the five ORBIT dimensions using the guided questions.
-                Add notes and attach evidence as you go.
+                Evaluate your maturity across the ORBIT dimensions using the guided questions. Add
+                notes and attach evidence as you go.
               </Typography>
             </Grid>
             <Grid item xs={12} md={4}>

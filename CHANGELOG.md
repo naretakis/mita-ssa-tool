@@ -5,7 +5,69 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.1.0] - 2026-02-02
+## [3.0.0] - 2026-06-03
+
+This is a major release that ingests the final MITA workgroup PRA submission (May 3, 2026) as the official source of truth for the MITA 4.0 maturity criteria. It is a clean break from prior data — IndexedDB will clear existing assessment data on first load to avoid orphaned ratings.
+
+This release supersedes an unreleased April 26 v3.0.0 working draft. Users upgrading from v2.1.0 see the cumulative changes summarized below; the underlying model is the May 3 PRA submission verbatim.
+
+### Restructured (vs v2.1.0)
+
+- **Business Architecture**: Reworked from 7 enterprise-flavored aspects to 5 process-focused aspects (`Business Process Performance`, `Business Process Documentation`, `Business Process Governance`, `Business Process Automation`, `Business Process Reporting`)
+- **Information**: Reworked from 11 data-management aspects to 10 information-focused aspects with new ordering (`Information Classification` first); `Metadata Management`, `Information Reporting`, and `Information Metadata` removed per workgroup direction
+- **Technology**: Consolidated from 22 aspects across 7 sub-dimensions to 11 aspects across 2 sub-dimensions (`Technical Infrastructure Management` with 6 aspects; `Application Management` with 5 aspects)
+- **Outcomes & Roles**: Extracted to organizational-level assessments under a new `Enterprise Governance` Support-layer domain. Outcomes has 6 aspects; Roles has 5 (was 6 — `Technology Resources` removed in May 3 source)
+- **Enterprise Architecture**: New organizational-level assessment under a new `Enterprise Architecture` Support-layer domain with 4 aspects (`Business Capability`, `Enterprise Architecture`, `Policy Management`, `Strategic Planning`) — extracted from the old Business Architecture
+- **Technical capability domain**: Restructured from 7 categories / 22 areas to 2 categories / 11 areas, mirroring the Technology dimension
+- **Capability totals**: 75 areas / 14 domains → 66 areas / 16 domains
+- **Aspect totals**: 52 → 41 (26 standard + 15 organizational)
+
+### Added
+
+- New source document `MITA Maturity Criteria_PRA Submission 2026-05-03.docx` archived under `docs/source-documents/2026-05-03/`
+- `scripts/extract-new-docx.py` to extract aspects from the May 3 PRA submission docx
+- `scripts/generate-orbit-model-v3.py` to generate `orbit-model.json` from the extracted aspects
+- Database schema v3 migration that clears all existing data (model is incompatible with prior versions)
+- New `enterprise-architecture-domain` capability domain (Support layer) with `organizational-enterprise-architecture` area
+- New `enterprise-governance` capability domain (Support layer) with `organizational-outcomes` and `organizational-roles` areas
+- `OrganizationalAssessmentId` and `RatingDimensionId` types
+- Helper functions in `orbit.ts` for organizational assessments and enterprise-domain aggregates
+
+### Changed
+
+- **Maturity model now reflects May 3, 2026 PRA submission verbatim** — single official source replaces the prior April 26 working drafts
+- Renamed dimension: `Information & Data` → `Information` (id `informationData` → `information`)
+- Renamed domains: `Data Management` → `Enterprise Data Management`; `Technical` → `Enterprise Technology`
+- Enterprise Data Management is now assessed B-T with Information shown as an aggregate of all other finalized assessments
+- Enterprise Technology is now assessed B-I with Technology shown as an aggregate of all other finalized assessments
+- `OrbitDimensionId` reduced to `'businessArchitecture' | 'information' | 'technology'` (Outcomes/Roles/EA moved to organizational assessments)
+- Sub-dimension display name `Technology Infrastructure Management` → `Technical Infrastructure Management` (id `technologyInfrastructureManagement` retained for stability)
+- Adopted source-verbatim Technology aspect names with one typo fix:
+  - `Identify, Access, and Consent` → `Identity, Access and Consent` (typo corrected)
+  - `Development, Testing, Release, and Security Compliance` → `Development, Testing, Release and Security Compliance`
+  - `Business Rules and Workflow` → `Business Rules and Workflows`
+  - `User Interface and Session Management` → `User Interfaces and Session Management`
+- `capabilities.json` Technical capability area names and IDs aligned with the new Technology aspect names so platform-capability and platform-maturity views stay 1-to-1
+- ORBIT model schema simplified per source: per-level question checklists removed in favor of one aspect-level question + per-level criteria + per-level "Suggested Documentation" (stored as `evidence`)
+- Outcomes/Roles aspect descriptions and per-level descriptions populated from the docx (previously sparse)
+- Dashboard groups domains by layer (Strategic, Core, Support) with section headers
+- CSV export emits B-I-T rows for standard areas; organizational assessments use an `Aspect` header
+- App version 2.1.0 → 3.0.0
+
+### Removed
+
+- Roles aspect `Technology Resources` (per May 3 source)
+- Per-level question checklists in Information and Technology aspects (now a single aspect-level question per source)
+- Outcomes/Roles dimensions from per-capability assessments (moved to organizational level)
+
+### Documentation
+
+- Restructured `docs/` into `source-documents/` (archived by date), `reference/` (reference snapshots), and `decisions/` (historic specs)
+- Folded former `docs/updated-documents/` (April 26 drop) under `docs/source-documents/2026-04-26/`
+- Folded former `docs/double-check-docs/` under `docs/source-documents/pre-pilot-originals/`
+- Updated `README.md` and `PROJECT_FOUNDATION_v2.md` to describe the May 3 model
+
+---
 
 ### Changed
 

@@ -16,15 +16,15 @@ The MITA 4.0 State Self-Assessment Tool is a Progressive Web App (PWA) that enab
 
 ### Key Domain Terminology
 
-| Term                  | Definition                                                                                                |
-| --------------------- | --------------------------------------------------------------------------------------------------------- |
-| **Capability Domain** | High-level capability grouping (e.g., "Provider Management"). 14 domains across 3 layers.                 |
-| **Capability Area**   | Specific capability being assessed (e.g., "Provider Enrollment"). 75 total areas.                         |
-| **ORBIT**             | Assessment framework: **O**utcomes, **R**oles, **B**usiness Architecture, **I**nformation, **T**echnology |
-| **Dimension**         | One of the 5 ORBIT categories. Business Architecture, Information, and Technology are required.           |
-| **Sub-Dimension**     | Only applies to Technology (7 sub-dimensions: Infrastructure, Integration, etc.)                          |
-| **Aspect**            | Individual assessment criteria within a dimension (52 total aspects)                                      |
-| **Maturity Level**    | Rating from 1 (Initial) to 5 (Optimized), or N/A (-1)                                                     |
+| Term                  | Definition                                                                                                                                                                                     |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Capability Domain** | High-level capability grouping (e.g., "Provider Management"). 16 domains across 3 layers.                                                                                                      |
+| **Capability Area**   | Specific capability being assessed (e.g., "Provider Enrollment"). 66 total areas.                                                                                                              |
+| **ORBIT**             | Assessment framework: **O**utcomes, **R**oles, **B**usiness Architecture, **I**nformation, **T**echnology. B-I-T are required per-capability dimensions; O & R are organizational assessments. |
+| **Dimension**         | One of the 3 standard ORBIT categories assessed per capability (B, I, T). All required.                                                                                                        |
+| **Sub-Dimension**     | Only applies to Technology (2 sub-dimensions: Technical Infrastructure Management, Application Management)                                                                                     |
+| **Aspect**            | Individual assessment criteria within a dimension. 26 standard + 15 organizational = 41 total                                                                                                  |
+| **Maturity Level**    | Rating from 1 (Initial) to 5 (Optimized), or N/A (-1)                                                                                                                                          |
 
 ### Primary Data Files
 
@@ -44,13 +44,13 @@ The application uses two JSON files that define **what** and **how** assessments
 
 User data is stored locally in IndexedDB via Dexie.js:
 
-| Table                   | Purpose                                                           |
-| ----------------------- | ----------------------------------------------------------------- |
-| `capabilityAssessments` | One record per capability area being assessed                     |
-| `orbitRatings`          | One record per aspect per assessment (52 aspects × N assessments) |
-| `attachments`           | File attachments stored as Blobs                                  |
-| `assessmentHistory`     | Snapshots of finalized assessments                                |
-| `tags`                  | User-defined tags for organization                                |
+| Table                   | Purpose                                                                                                   |
+| ----------------------- | --------------------------------------------------------------------------------------------------------- |
+| `capabilityAssessments` | One record per capability area being assessed                                                             |
+| `orbitRatings`          | One record per aspect per assessment (up to 26 standard aspects × N assessments + organizational ratings) |
+| `attachments`           | File attachments stored as Blobs                                                                          |
+| `assessmentHistory`     | Snapshots of finalized assessments                                                                        |
+| `tags`                  | User-defined tags for organization                                                                        |
 
 ---
 
@@ -269,12 +269,9 @@ interface CapabilityAssessment {
 
 // Unions and computed types - use type
 type AssessmentStatus = 'in_progress' | 'finalized';
-type OrbitDimensionId =
-  | 'outcomes'
-  | 'roles'
-  | 'businessArchitecture'
-  | 'information'
-  | 'technology';
+type OrbitDimensionId = 'businessArchitecture' | 'information' | 'technology';
+type OrganizationalAssessmentId = 'outcomes' | 'roles' | 'enterprise-architecture';
+type RatingDimensionId = OrbitDimensionId | OrganizationalAssessmentId;
 type MaturityLevelWithNA = -1 | 0 | 1 | 2 | 3 | 4 | 5;
 type ScoreMap = Record<string, number>;
 ```
@@ -284,7 +281,7 @@ type ScoreMap = Record<string, number>;
 Use type guards for runtime type checking, especially with the capability model:
 
 ```typescript
-// Type guard for categorized domains (Data Management, Technical)
+// Type guard for categorized domains (Enterprise Data Management, Enterprise Technology)
 export function isCategorizedDomain(
   domain: CapabilityDomain
 ): domain is CategorizedCapabilityDomain {
@@ -676,7 +673,7 @@ const style = useMemo(() => ({ margin: 10 }), []);
 
 - Use `useLiveQuery` for automatic updates from IndexedDB
 - Implement loading states for async operations
-- The app loads all assessments/ratings upfront (75 areas × 52 aspects is manageable)
+- The app loads all assessments/ratings upfront (66 areas × 26 standard aspects is manageable)
 
 ### Bundle Size
 

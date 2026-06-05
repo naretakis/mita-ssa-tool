@@ -17,28 +17,24 @@ import { db } from '../db';
 import { createHistorySnapshot, calculateDimensionScores, toHistoricalRatings } from '../history';
 import { extractAttachmentIdFromFileName } from './exportService';
 import { isOrganizationalAssessmentArea, TIMESTAMP_TOLERANCE_MS } from '../../constants';
+import { getAspect, getOrganizationalAspect, getOrganizationalAssessmentTypes } from '../orbit';
 import type { ExportData, ImportResult, ImportItemResult, ImportProgressCallback } from './types';
 import type {
   CapabilityAssessment,
   Attachment,
+  HistoricalRating,
   OrbitDimensionId,
+  OrganizationalAssessmentId,
   RatingDimensionId,
+  TechnologySubDimensionId,
 } from '../../types';
 
 /** Current supported export version */
-const SUPPORTED_VERSIONS = ['1.0'];
+const SUPPORTED_VERSIONS = ['1.0', '2.0'];
 
 /**
- * Maps legacy dimension IDs to current dimension IDs.
- * Used for backwards compatibility when importing older exports.
- */
-const LEGACY_DIMENSION_ID_MAP: Record<string, OrbitDimensionId> = {
-  informationData: 'information',
-};
-
-/**
- * Valid dimension IDs for standard capability assessments (B-I-T only).
- * Outcomes and Roles are only valid for organizational assessments.
+ * Valid dimension IDs for standard capability assessments (B-I-T).
+ * Organizational assessments (Outcomes, Roles, Enterprise Architecture) use their own IDs.
  */
 const STANDARD_DIMENSION_IDS: OrbitDimensionId[] = [
   'businessArchitecture',
@@ -49,37 +45,66 @@ const STANDARD_DIMENSION_IDS: OrbitDimensionId[] = [
 /**
  * Organizational assessment dimension IDs.
  */
-const ORGANIZATIONAL_DIMENSION_IDS: RatingDimensionId[] = ['outcomes', 'roles'];
+const ORGANIZATIONAL_DIMENSION_IDS: RatingDimensionId[] = [
+  'outcomes',
+  'roles',
+  'enterprise-architecture',
+];
+
+const ORGANIZATIONAL_TYPES = new Set<string>(getOrganizationalAssessmentTypes());
 
 /**
- * Normalizes a dimension ID, mapping legacy IDs to current ones.
- * @param dimensionId - The dimension ID from imported data
- * @returns The normalized dimension ID
+ * Returns true if the (dimensionId, aspectId, subDimensionId) tuple corresponds
+ * to an aspect that exists in the current ORBIT model. Used to filter out
+ * orphaned ratings from pre-3.0.0 exports whose aspect IDs have been renamed
+ * or removed.
  */
-function normalizeDimensionId(dimensionId: string): RatingDimensionId {
-  return (LEGACY_DIMENSION_ID_MAP[dimensionId] ?? dimensionId) as RatingDimensionId;
+function aspectExistsInCurrentModel(rating: {
+  dimensionId: string;
+  aspectId: string;
+  subDimensionId?: string;
+}): boolean {
+  if (ORGANIZATIONAL_TYPES.has(rating.dimensionId)) {
+    return Boolean(
+      getOrganizationalAspect(rating.dimensionId as OrganizationalAssessmentId, rating.aspectId)
+    );
+  }
+  if (STANDARD_DIMENSION_IDS.includes(rating.dimensionId as OrbitDimensionId)) {
+    return Boolean(
+      getAspect(
+        rating.dimensionId as OrbitDimensionId,
+        rating.aspectId,
+        rating.subDimensionId as TechnologySubDimensionId | undefined
+      )
+    );
+  }
+  return false;
 }
 
 /**
  * Checks if a rating should be imported for a given assessment.
- * - For organizational assessments: only import 'outcomes' or 'roles' ratings
- * - For standard assessments: only import B-I-T ratings, skip orphaned O&R
+ * - For organizational assessments: only import organizational ratings
+ * - For standard assessments: only import B-I-T ratings, skip organizational
+ * - In both cases, skip ratings whose aspectId no longer exists in the current
+ *   ORBIT model (orphaned by a model update such as the v3.0.0 release)
  *
  * @param rating - The rating to check
  * @param isOrganizational - Whether the assessment is organizational
  * @returns True if the rating should be imported
  */
-function shouldImportRating(rating: { dimensionId: string }, isOrganizational: boolean): boolean {
-  const normalizedDimId = normalizeDimensionId(rating.dimensionId);
+function shouldImportRating(
+  rating: { dimensionId: string; aspectId: string; subDimensionId?: string },
+  isOrganizational: boolean
+): boolean {
+  const dimId = rating.dimensionId as RatingDimensionId;
 
   if (isOrganizational) {
-    // Organizational assessments only accept outcomes/roles ratings
-    return ORGANIZATIONAL_DIMENSION_IDS.includes(normalizedDimId);
+    if (!ORGANIZATIONAL_DIMENSION_IDS.includes(dimId)) return false;
   } else {
-    // Standard assessments only accept B-I-T ratings
-    // Skip orphaned O&R ratings from old exports
-    return STANDARD_DIMENSION_IDS.includes(normalizedDimId as OrbitDimensionId);
+    if (!STANDARD_DIMENSION_IDS.includes(dimId as OrbitDimensionId)) return false;
   }
+
+  return aspectExistsInCurrentModel(rating);
 }
 
 /**
@@ -280,7 +305,7 @@ export async function importFromZip(
                     );
                     return (
                       originalRating &&
-                      r.dimensionId === normalizeDimensionId(originalRating.dimensionId) &&
+                      r.dimensionId === (originalRating.dimensionId as RatingDimensionId) &&
                       r.aspectId === originalRating.aspectId
                     );
                   })
@@ -389,8 +414,20 @@ async function processImport(
   for (const historyEntry of data.data.history) {
     const existing = await db.assessmentHistory.get(historyEntry.id);
     if (!existing) {
+      // Filter out historical ratings whose aspect IDs no longer exist in the
+      // current ORBIT model. This prevents pre-v3.0.0 history snapshots from
+      // showing orphaned aspects (e.g., dropped Roles "Technology Resources",
+      // renamed "Business Rules and Workflow") in the history view.
+      const filteredRatings: HistoricalRating[] = historyEntry.ratings.filter((r) =>
+        aspectExistsInCurrentModel({
+          dimensionId: r.dimensionId,
+          aspectId: r.aspectId,
+          subDimensionId: r.subDimensionId,
+        })
+      );
       await db.assessmentHistory.add({
         ...historyEntry,
+        ratings: filteredRatings,
         snapshotDate: new Date(historyEntry.snapshotDate),
       });
     }
@@ -446,7 +483,7 @@ async function processAssessmentImport(
         ...rating,
         id: uuidv4(),
         capabilityAssessmentId: newAssessmentId,
-        dimensionId: normalizeDimensionId(rating.dimensionId),
+        dimensionId: rating.dimensionId as RatingDimensionId,
         updatedAt: new Date(rating.updatedAt),
         attachmentIds: [], // Attachments handled separately
       });
@@ -519,7 +556,7 @@ async function processAssessmentImport(
         ...rating,
         id: uuidv4(),
         capabilityAssessmentId: existingAssessment.id,
-        dimensionId: normalizeDimensionId(rating.dimensionId),
+        dimensionId: rating.dimensionId as RatingDimensionId,
         updatedAt: new Date(rating.updatedAt),
         attachmentIds: [],
       });
@@ -562,7 +599,7 @@ async function processAssessmentImport(
       // Normalize dimension IDs for backwards compatibility with older exports
       const normalizedRatings = importedRatings.map((r) => ({
         ...r,
-        dimensionId: normalizeDimensionId(r.dimensionId),
+        dimensionId: r.dimensionId as RatingDimensionId,
       }));
       await db.assessmentHistory.add({
         id: uuidv4(),

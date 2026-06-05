@@ -84,9 +84,9 @@ export function calculateAverageScore(values: number[]): number | null {
  *
  * // For Technology dimension (averages sub-dimensions first)
  * calculateDimensionScore('technology', [
- *   {currentLevel: 3, subDimensionId: 'infrastructure'},
- *   {currentLevel: 4, subDimensionId: 'infrastructure'},
- *   {currentLevel: 5, subDimensionId: 'integration'},
+ *   {currentLevel: 3, subDimensionId: 'technologyInfrastructureManagement'},
+ *   {currentLevel: 4, subDimensionId: 'technologyInfrastructureManagement'},
+ *   {currentLevel: 5, subDimensionId: 'applicationManagement'},
  * ])
  * // returns 4.3 (avg of 3.5 and 5.0)
  */

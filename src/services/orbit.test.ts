@@ -110,22 +110,22 @@ describe('orbit service', () => {
       expect(tech).toBeDefined();
       expect(tech.id).toBe('technology');
       expect(tech.subDimensions).toBeInstanceOf(Array);
-      expect(tech.subDimensions.length).toBe(7);
+      expect(tech.subDimensions.length).toBe(2);
     });
   });
 
   describe('getTechnologySubDimensions', () => {
-    it('should return all seven technology sub-dimensions', () => {
+    it('should return all technology sub-dimensions', () => {
       const subDimensions = getTechnologySubDimensions();
-      expect(subDimensions.length).toBe(7);
+      expect(subDimensions.length).toBe(2);
     });
   });
 
   describe('getTechnologySubDimension', () => {
     it('should return a specific sub-dimension', () => {
-      const subDim = getTechnologySubDimension('infrastructure');
+      const subDim = getTechnologySubDimension('technologyInfrastructureManagement');
       expect(subDim).toBeDefined();
-      expect(subDim?.name).toBe('Infrastructure');
+      expect(subDim?.name).toBe('Technical Infrastructure Management');
     });
 
     it('should return undefined for invalid sub-dimension', () => {
@@ -158,7 +158,7 @@ describe('orbit service', () => {
 
   describe('getAspectsForSubDimension', () => {
     it('should return aspects for a technology sub-dimension', () => {
-      const aspects = getAspectsForSubDimension('infrastructure');
+      const aspects = getAspectsForSubDimension('technologyInfrastructureManagement');
       expect(aspects.length).toBeGreaterThan(0);
     });
   });
@@ -175,7 +175,11 @@ describe('orbit service', () => {
     });
 
     it('should return an aspect from a technology sub-dimension', () => {
-      const aspect = getAspect('technology', 'compute-hosting', 'infrastructure');
+      const aspect = getAspect(
+        'technology',
+        'compute-and-storage',
+        'technologyInfrastructureManagement'
+      );
       expect(aspect).toBeDefined();
     });
 
@@ -212,9 +216,9 @@ describe('orbit service', () => {
   });
 
   describe('getTotalAspectCount', () => {
-    it('should return total count of B-I-T aspects', () => {
+    it('should return total count of B-EA-I-T aspects', () => {
       const count = getTotalAspectCount();
-      expect(count).toBeGreaterThan(30); // Should be around 40 for B-I-T
+      expect(count).toBe(26);
     });
   });
 
@@ -231,7 +235,7 @@ describe('orbit service', () => {
 
     it('should return aspect count for technology (all sub-dimensions)', () => {
       const count = getAspectCountForDimension('technology');
-      expect(count).toBeGreaterThan(15);
+      expect(count).toBe(11);
     });
   });
 
@@ -261,9 +265,9 @@ describe('orbit service', () => {
 
   describe('getSubDimensionForAspect', () => {
     it('should return sub-dimension for a technology aspect', () => {
-      const subDim = getSubDimensionForAspect('compute-hosting');
+      const subDim = getSubDimensionForAspect('compute-and-storage');
       expect(subDim).toBeDefined();
-      expect(subDim?.id).toBe('infrastructure');
+      expect(subDim?.id).toBe('technologyInfrastructureManagement');
     });
 
     it('should return undefined for non-technology aspect', () => {
@@ -293,10 +297,10 @@ describe('orbit service', () => {
     });
 
     it('should return location for a technology aspect', () => {
-      const location = getAspectLocation('compute-hosting');
+      const location = getAspectLocation('compute-and-storage');
       expect(location).toBeDefined();
       expect(location?.dimensionId).toBe('technology');
-      expect(location?.subDimensionId).toBe('infrastructure');
+      expect(location?.subDimensionId).toBe('technologyInfrastructureManagement');
     });
 
     it('should return undefined for invalid aspect', () => {
@@ -332,7 +336,7 @@ describe('orbit service', () => {
 
     it('should return aspects for roles', () => {
       const aspects = getOrganizationalAspects('roles');
-      expect(aspects.length).toBe(6);
+      expect(aspects.length).toBe(5);
     });
   });
 
@@ -342,9 +346,9 @@ describe('orbit service', () => {
       expect(count).toBe(6);
     });
 
-    it('should return 6 for roles', () => {
+    it('should return 5 for roles', () => {
       const count = getOrganizationalAspectCount('roles');
-      expect(count).toBe(6);
+      expect(count).toBe(5);
     });
   });
 
@@ -362,16 +366,16 @@ describe('orbit service', () => {
   });
 
   describe('getOrganizationalAssessmentTypes', () => {
-    it('should return outcomes and roles', () => {
+    it('should return all organizational assessment types', () => {
       const types = getOrganizationalAssessmentTypes();
-      expect(types).toEqual(['outcomes', 'roles']);
+      expect(types).toEqual(['outcomes', 'roles', 'enterprise-architecture']);
     });
   });
 
   describe('getTotalOrganizationalAspectCount', () => {
-    it('should return 12 (6 outcomes + 6 roles)', () => {
+    it('should return 15 (6 outcomes + 5 roles + 4 enterprise architecture)', () => {
       const count = getTotalOrganizationalAspectCount();
-      expect(count).toBe(12);
+      expect(count).toBe(15);
     });
   });
 });

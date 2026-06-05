@@ -527,7 +527,7 @@ describe('useScores', () => {
       const counts = result.current.getStatusCounts();
       expect(counts.inProgress).toBe(1);
       expect(counts.finalized).toBe(2);
-      expect(counts.total).toBe(76); // Total capability areas (74 original + 2 organizational)
+      expect(counts.total).toBe(66); // Total capability areas
     });
   });
 
@@ -601,13 +601,13 @@ describe('useScores', () => {
         overallScore: 3.5,
       });
 
-      // Use real aspect IDs from the ORBIT model (B-I-T dimensions only)
+      // Use real aspect IDs from the ORBIT model (B-EA-I-T dimensions only)
       await db.orbitRatings.bulkAdd([
         {
           id: 'r1',
           capabilityAssessmentId: 'a1',
           dimensionId: 'businessArchitecture',
-          aspectId: 'business-capability',
+          aspectId: 'business-process-performance',
           currentLevel: 3,
           questionResponses: [],
           evidenceResponses: [],
@@ -622,7 +622,7 @@ describe('useScores', () => {
           id: 'r2',
           capabilityAssessmentId: 'a1',
           dimensionId: 'businessArchitecture',
-          aspectId: 'business-process',
+          aspectId: 'business-process-documentation',
           currentLevel: 4,
           questionResponses: [],
           evidenceResponses: [],
@@ -637,7 +637,7 @@ describe('useScores', () => {
           id: 'r3',
           capabilityAssessmentId: 'a1',
           dimensionId: 'information',
-          aspectId: 'data-governance',
+          aspectId: 'information-quality',
           currentLevel: 5,
           questionResponses: [],
           evidenceResponses: [],

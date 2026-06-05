@@ -4,7 +4,7 @@ A Progressive Web App (PWA) enabling State Medicaid Agencies (SMAs) to self-asse
 
 ## Overview
 
-The MITA 4.0 State Self-Assessment Tool helps State Medicaid Agencies evaluate their Medicaid Enterprise Systems (MES) maturity across **75 capability areas** using the standardized **ORBIT Maturity Model**. The tool is:
+The MITA 4.0 State Self-Assessment Tool helps State Medicaid Agencies evaluate their Medicaid Enterprise Systems (MES) maturity across **66 capability areas** using the standardized **ORBIT Maturity Model**. The tool is:
 
 - **Privacy-First**: All data stays in your browser. No data is transmitted or stored remotely.
 - **Offline-First**: Full functionality after initial load, even without network connectivity.
@@ -12,15 +12,23 @@ The MITA 4.0 State Self-Assessment Tool helps State Medicaid Agencies evaluate t
 
 ### What is ORBIT?
 
-ORBIT is the MITA 4.0 maturity assessment framework with five dimensions:
+ORBIT is the MITA 4.0 maturity assessment framework. Each business capability area is assessed against three required dimensions:
 
-| Dimension                 | Required | Aspects                      |
-| ------------------------- | -------- | ---------------------------- |
-| **O**utcomes              | Optional | 6                            |
-| **R**oles                 | Optional | 6                            |
-| **B**usiness Architecture | Required | 7                            |
-| **I**nformation & Data    | Required | 11                           |
-| **T**echnology            | Required | 22 (across 7 sub-dimensions) |
+| Dimension                 | Aspects                      |
+| ------------------------- | ---------------------------- |
+| **B**usiness Architecture | 5                            |
+| **I**nformation           | 10                           |
+| **T**echnology            | 11 (across 2 sub-dimensions) |
+
+Three additional **organizational assessments** evaluate enterprise-level maturity (assessed once per organization, not per capability area):
+
+| Organizational Assessment              | Aspects |
+| -------------------------------------- | ------- |
+| Organizational Outcomes (Optional)     | 6       |
+| Organizational Roles (Optional)        | 5       |
+| Organizational Enterprise Architecture | 4       |
+
+> Outcomes and Roles ("O" and "R" in the original ORBIT acronym) were extracted from per-capability assessments to enterprise-level assessments because they describe organizational maturity rather than per-capability maturity.
 
 Each aspect is rated on a 5-level maturity scale:
 
@@ -29,12 +37,13 @@ Each aspect is rated on a 5-level maturity scale:
 - **Level 3**: Defined
 - **Level 4**: Managed
 - **Level 5**: Optimized
+- **N/A**: Not Applicable
 
 ## Features
 
 ### Dashboard
 
-- Hierarchical view of all 14 capability domains and 75 areas
+- Hierarchical view of all 16 capability domains and 66 areas grouped by layer (Strategic, Core, Support)
 - Progress tracking with visual indicators
 - Tag-based organization and filtering
 - Assessment history with snapshots
@@ -165,17 +174,19 @@ The application uses two primary JSON files that can be edited to update capabil
 
 Defines **what** can be assessed:
 
-- 14 capability domains across 3 layers (Strategic, Core, Support)
-- 75 capability areas with descriptions and topics
+- 16 capability domains across 3 layers (Strategic, Core, Support)
+- 66 capability areas with descriptions and topics
+- Two domains use sub-categories (Enterprise Data Management, Enterprise Technology)
 - No maturity questions—just metadata
 
 ### ORBIT Model (`orbit-model.json`)
 
 Defines **how** assessments are conducted:
 
-- 5 dimensions with 52 total aspects
-- Standardized maturity criteria applied to ALL capability areas
-- Questions and evidence requirements per maturity level
+- 3 standard dimensions (B, I, T) with 26 total aspects applied to every capability area
+- 3 organizational assessments (Outcomes, Roles, Enterprise Architecture) with 15 total aspects assessed once per organization
+- Standardized maturity criteria with descriptions and "Suggested Documentation" per maturity level
+- Sourced verbatim from the May 3, 2026 PRA submission
 
 ### Local Storage (IndexedDB)
 
@@ -215,8 +226,9 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 
 - [PROJECT_FOUNDATION_v2.md](PROJECT_FOUNDATION_v2.md) - Architecture and design decisions
 - [CHANGELOG.md](CHANGELOG.md) - Version history
-- [docs/MITA_4.0_Maturity_Model_List_Format.md](docs/MITA_4.0_Maturity_Model_List_Format.md) - ORBIT maturity criteria reference
-- [docs/MITA_4.0_Capability_Reference_Model.md](docs/MITA_4.0_Capability_Reference_Model.md) - Capability domains and areas reference
+- [docs/source-documents/](docs/source-documents/) - Source MITA documents archived by date
+- [docs/reference/](docs/reference/) - Reference snapshots of the capability model and maturity criteria
+- [docs/decisions/](docs/decisions/) - Historic spec/decision records
 
 ## License
 

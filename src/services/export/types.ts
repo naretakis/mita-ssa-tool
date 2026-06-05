@@ -10,6 +10,7 @@ import type {
   AssessmentHistory,
   Tag,
   OrbitDimensionId,
+  OrganizationalAssessmentId,
 } from '../../types';
 
 /**
@@ -149,7 +150,7 @@ export interface CapabilityAreaProfile {
   /** True if this is an organizational assessment (Outcomes/Roles) */
   isOrganizationalAssessment?: boolean;
   /** The organizational assessment type if applicable */
-  organizationalType?: 'outcomes' | 'roles';
+  organizationalType?: OrganizationalAssessmentId;
 }
 
 /**

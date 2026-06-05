@@ -1,308 +1,509 @@
 /**
- * About page - How to use the tool, understanding your data, and contributing
+ * Guide page
+ *
+ * A welcoming "what is this / how do I use it / how do I help" page aimed at
+ * first-time visitors. Structured as a newcomer journey:
+ *   1. What this is + core value props
+ *   2. Understanding MITA 4.0 and ORBIT (the five dimensions)
+ *   3. What the maturity scale means
+ *   4. How to use the tool (workflow)
+ *   5. Privacy and your data
+ *   6. Getting involved / contributing
  */
 
 import { JSX } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
-  Box,
-  Container,
-  Typography,
-  Paper,
-  Link,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Alert,
-  Divider,
+  Avatar,
+  Box,
   Button,
+  Chip,
+  Container,
+  Divider,
+  Grid,
+  Link,
+  Paper,
+  Stack,
+  Typography,
 } from '@mui/material';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import CloudOffIcon from '@mui/icons-material/CloudOff';
+import CodeIcon from '@mui/icons-material/Code';
 import GitHubIcon from '@mui/icons-material/GitHub';
-import LooksOneIcon from '@mui/icons-material/LooksOne';
-import LooksTwoIcon from '@mui/icons-material/LooksTwo';
-import Looks3Icon from '@mui/icons-material/Looks3';
-import Looks4Icon from '@mui/icons-material/Looks4';
-import Looks5Icon from '@mui/icons-material/Looks5';
-import Looks6Icon from '@mui/icons-material/Looks6';
-import WarningAmberIcon from '@mui/icons-material/WarningAmber';
-import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
+import BugReportOutlinedIcon from '@mui/icons-material/BugReportOutlined';
+import LightbulbOutlinedIcon from '@mui/icons-material/LightbulbOutlined';
+import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import { GITHUB_REPO_URL } from '../constants';
+import { SCORE_COLORS } from '../utils/colors';
+
+/** Core differentiators shown as a compact strip near the top. */
+const VALUE_PROPS = [
+  {
+    icon: LockOutlinedIcon,
+    title: 'Private by design',
+    body: 'Everything stays in your browser. No accounts, no servers, no tracking.',
+  },
+  {
+    icon: CloudOffIcon,
+    title: 'Works offline',
+    body: 'Full functionality after the first load, even without a connection.',
+  },
+  {
+    icon: CodeIcon,
+    title: 'Free & open source',
+    body: 'Built for State Medicaid Agencies and free for anyone to use or improve.',
+  },
+];
+
+/**
+ * The five ORBIT dimensions. The letters spell the framework's name.
+ * `scope` indicates whether the dimension is assessed for each capability area
+ * or once for the whole organization.
+ */
+const ORBIT_DIMENSIONS = [
+  {
+    letter: 'O',
+    name: 'Outcomes',
+    description: 'The goals and measurable results your Medicaid enterprise is working toward.',
+    scope: 'Organization-wide',
+    organizational: true,
+  },
+  {
+    letter: 'R',
+    name: 'Roles',
+    description: 'The people, responsibilities, and capacity that deliver your capabilities.',
+    scope: 'Organization-wide',
+    organizational: true,
+  },
+  {
+    letter: 'B',
+    name: 'Business Architecture',
+    description: 'The business processes that carry out each capability.',
+    scope: 'Per capability',
+    organizational: false,
+  },
+  {
+    letter: 'I',
+    name: 'Information',
+    description: 'How data is governed, structured, and kept fit for use.',
+    scope: 'Per capability',
+    organizational: false,
+  },
+  {
+    letter: 'T',
+    name: 'Technology',
+    description: 'The systems, infrastructure, and applications that support each capability.',
+    scope: 'Per capability',
+    organizational: false,
+  },
+];
+
+/** Maturity scale with plain-language descriptions of each level. */
+const MATURITY_LEVELS = [
+  {
+    level: 1,
+    name: 'Initial',
+    description: 'Ad hoc and inconsistent; success depends on individual effort.',
+    color: SCORE_COLORS.initial,
+  },
+  {
+    level: 2,
+    name: 'Developing',
+    description: 'Basic processes exist but are not yet standardized.',
+    color: SCORE_COLORS.developing,
+  },
+  {
+    level: 3,
+    name: 'Defined',
+    description: 'Standardized, documented, and applied consistently.',
+    color: SCORE_COLORS.good,
+  },
+  {
+    level: 4,
+    name: 'Managed',
+    description: 'Measured and actively managed using metrics.',
+    color: SCORE_COLORS.excellent,
+  },
+  {
+    level: 5,
+    name: 'Optimized',
+    description: 'Continuously improved, data-driven, and shared with peers.',
+    color: SCORE_COLORS.excellent,
+  },
+];
+
+/** The three-phase assessment workflow. */
+const WORKFLOW = [
+  {
+    number: 1,
+    title: 'Choose a capability',
+    body: 'Start on the Dashboard and pick any of the 66 capability areas. Add tags, like fiscal year or project, to stay organized.',
+  },
+  {
+    number: 2,
+    title: 'Rate and document',
+    body: 'Work through each dimension, rating maturity from 1 to 5 (or N/A). Capture notes, barriers, and plans, and attach supporting evidence.',
+  },
+  {
+    number: 3,
+    title: 'Finalize and export',
+    body: 'Lock in your results, then generate a PDF for stakeholders, a CSV in the CMS Maturity Profile format, or a full ZIP backup.',
+  },
+];
+
+/**
+ * A single "get involved" item. Renders as a link to a GitHub issue template
+ * when `href` is provided, otherwise as static text (e.g., in local dev where
+ * the repository URL is not configured).
+ */
+function EngagementItem({
+  icon,
+  title,
+  body,
+  href,
+}: {
+  icon: JSX.Element;
+  title: string;
+  body: string;
+  href: string | null;
+}): JSX.Element {
+  const content = (
+    <Stack direction="row" spacing={1.5} alignItems="flex-start">
+      {icon}
+      <Box>
+        <Typography variant="subtitle2" sx={{ fontWeight: 700, color: 'text.primary' }}>
+          {title}
+          {href && (
+            <ArrowForwardIcon
+              aria-hidden="true"
+              sx={{ fontSize: 14, ml: 0.5, verticalAlign: 'middle', color: 'primary.main' }}
+            />
+          )}
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
+          {body}
+        </Typography>
+      </Box>
+    </Stack>
+  );
+
+  if (!href) {
+    return content;
+  }
+
+  return (
+    <Link
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      underline="none"
+      aria-label={`${title} on GitHub (opens in new window)`}
+      sx={{
+        display: 'block',
+        p: 1.5,
+        borderRadius: 1,
+        transition: 'background-color 0.15s',
+        '&:hover': { backgroundColor: 'grey.100' },
+      }}
+    >
+      {content}
+    </Link>
+  );
+}
 
 export default function About(): JSX.Element {
+  const bugReportUrl = GITHUB_REPO_URL
+    ? `${GITHUB_REPO_URL}/issues/new?template=bug_report.md`
+    : null;
+  const featureRequestUrl = GITHUB_REPO_URL
+    ? `${GITHUB_REPO_URL}/issues/new?template=feature_request.md`
+    : null;
+
   return (
     <Container maxWidth="md" sx={{ py: 4 }}>
+      {/* --- Intro ------------------------------------------------------- */}
       <Typography variant="h4" component="h1" gutterBottom>
-        About This Tool
+        About this tool
+      </Typography>
+      <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+        The MITA 4.0 State Self-Assessment Tool helps State Medicaid Agencies measure the maturity
+        of their Medicaid Enterprise Systems and plan where to improve. You work through a guided
+        assessment, score your maturity, and export results to share with stakeholders or submit to
+        CMS — all without your data ever leaving your browser.
       </Typography>
 
-      <Typography variant="body1" paragraph color="text.secondary">
-        The MITA 4.0 State Self-Assessment Tool helps State Medicaid Agencies evaluate their
-        Medicaid Enterprise maturity. This page explains how to use the tool effectively and how
-        your data is managed.
-      </Typography>
+      {/* Value props strip */}
+      <Grid container spacing={2} sx={{ mb: 4 }}>
+        {VALUE_PROPS.map((prop) => {
+          const Icon = prop.icon;
+          return (
+            <Grid item xs={12} sm={4} key={prop.title}>
+              <Stack direction="row" spacing={1.5} alignItems="flex-start">
+                <Icon color="primary" aria-hidden="true" sx={{ mt: 0.25 }} />
+                <Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                    {prop.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {prop.body}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Grid>
+          );
+        })}
+      </Grid>
 
-      {/* How to Use This Tool */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          How to Use This Tool
+      {/* --- ORBIT ------------------------------------------------------- */}
+      <Paper sx={{ p: { xs: 3, md: 4 }, mb: 3 }} component="section" aria-labelledby="orbit-h">
+        <Typography variant="h5" component="h2" id="orbit-h" gutterBottom>
+          What is MITA 4.0 and ORBIT?
+        </Typography>
+        <Typography variant="body1" color="text.secondary" paragraph>
+          MITA 4.0 (Medicaid Information Technology Architecture) is the framework CMS uses to help
+          states assess and modernize their Medicaid systems. <strong>ORBIT</strong> is its maturity
+          model — five lenses you look through to evaluate each capability.
         </Typography>
 
-        <Typography variant="body1" paragraph>
-          The assessment process is designed to be straightforward. Here's the typical workflow:
+        <Stack spacing={1.5} sx={{ mt: 3 }}>
+          {ORBIT_DIMENSIONS.map((dim) => (
+            <Stack
+              key={dim.letter}
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
+              alignItems={{ xs: 'flex-start', sm: 'center' }}
+              sx={{
+                p: 2,
+                borderLeft: '4px solid',
+                borderColor: dim.organizational ? 'secondary.dark' : 'primary.main',
+                bgcolor: 'grey.50',
+              }}
+            >
+              <Avatar
+                aria-hidden="true"
+                variant="rounded"
+                sx={{
+                  bgcolor: dim.organizational ? 'secondary.dark' : 'primary.main',
+                  color: '#fff',
+                  width: 40,
+                  height: 40,
+                  fontWeight: 700,
+                  flexShrink: 0,
+                }}
+              >
+                {dim.letter}
+              </Avatar>
+              <Box sx={{ flexGrow: 1 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+                  {dim.name}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {dim.description}
+                </Typography>
+              </Box>
+              <Chip
+                label={dim.scope}
+                size="small"
+                variant="outlined"
+                color={dim.organizational ? 'secondary' : 'primary'}
+                sx={{ flexShrink: 0 }}
+              />
+            </Stack>
+          ))}
+        </Stack>
+
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 2.5 }}>
+          Business Architecture, Information, and Technology are assessed for each of the 66
+          capability areas. Outcomes and Roles are assessed once for your whole organization,
+          alongside a separate Enterprise Architecture assessment.
+        </Typography>
+      </Paper>
+
+      {/* --- Maturity scale ---------------------------------------------- */}
+      <Paper sx={{ p: { xs: 3, md: 4 }, mb: 3 }} component="section" aria-labelledby="scale-h">
+        <Typography variant="h5" component="h2" id="scale-h" gutterBottom>
+          What the maturity scores mean
+        </Typography>
+        <Typography variant="body1" color="text.secondary" paragraph>
+          Everything you assess is rated on a five-level scale that runs from ad hoc to optimized.
+          You can also mark something <strong>N/A</strong> when a criterion does not apply to your
+          state.
         </Typography>
 
-        <List>
-          <ListItem alignItems="flex-start">
-            <ListItemIcon>
-              <LooksOneIcon color="primary" aria-hidden="true" />
-            </ListItemIcon>
-            <ListItemText
-              primary="Start from the Dashboard"
-              secondary="The Dashboard shows all 75 capability areas organized by domain. When you first arrive, everything will be marked as 'Not Started.' Click on any capability area to begin its assessment."
-            />
-          </ListItem>
+        <Grid container spacing={2} sx={{ mt: 1 }}>
+          {MATURITY_LEVELS.map((level) => (
+            <Grid item xs={12} sm={6} md key={level.level}>
+              <Box
+                sx={{
+                  height: '100%',
+                  p: 2,
+                  borderTop: '4px solid',
+                  borderColor: level.color,
+                  bgcolor: 'grey.50',
+                }}
+              >
+                <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 0.5 }}>
+                  <Box
+                    aria-hidden="true"
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      borderRadius: '50%',
+                      bgcolor: level.color,
+                      color: '#fff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '0.8rem',
+                      fontWeight: 700,
+                      flexShrink: 0,
+                    }}
+                  >
+                    {level.level}
+                  </Box>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>
+                    {level.name}
+                  </Typography>
+                </Stack>
+                <Typography variant="body2" color="text.secondary">
+                  {level.description}
+                </Typography>
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+      </Paper>
 
-          <ListItem alignItems="flex-start">
-            <ListItemIcon>
-              <LooksTwoIcon color="primary" aria-hidden="true" />
-            </ListItemIcon>
-            <ListItemText
-              primary="Complete the ORBIT Assessment"
-              secondary="Each capability is assessed across five ORBIT dimensions: Outcomes, Roles, Business Architecture, Information, and Technology. For each dimension, you'll rate your current maturity level (1-5) and can optionally set a target level. The tool provides guiding questions to help you determine the appropriate level."
-            />
-          </ListItem>
+      {/* --- Workflow ---------------------------------------------------- */}
+      <Paper sx={{ p: { xs: 3, md: 4 }, mb: 3 }} component="section" aria-labelledby="workflow-h">
+        <Typography variant="h5" component="h2" id="workflow-h" gutterBottom>
+          How to use the tool
+        </Typography>
+        <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
+          An assessment moves through three phases. You can stop and resume at any time — your work
+          saves automatically.
+        </Typography>
 
-          <ListItem alignItems="flex-start">
-            <ListItemIcon>
-              <Looks3Icon color="primary" aria-hidden="true" />
-            </ListItemIcon>
-            <ListItemText
-              primary="Add Notes and Evidence"
-              secondary="Document your rationale, identify barriers to advancement, and outline plans for improvement. You can also attach supporting documents like policies, procedures, or screenshots."
-            />
-          </ListItem>
+        <Grid container spacing={3}>
+          {WORKFLOW.map((step) => (
+            <Grid item xs={12} md={4} key={step.number}>
+              <Stack direction="row" spacing={2} alignItems="flex-start">
+                <Avatar
+                  aria-hidden="true"
+                  sx={{
+                    bgcolor: 'primary.main',
+                    color: 'primary.contrastText',
+                    width: 32,
+                    height: 32,
+                    fontSize: '0.95rem',
+                    fontWeight: 700,
+                  }}
+                >
+                  {step.number}
+                </Avatar>
+                <Box>
+                  <Typography variant="subtitle1" component="h3" sx={{ fontWeight: 600, mb: 0.5 }}>
+                    {step.title}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {step.body}
+                  </Typography>
+                </Box>
+              </Stack>
+            </Grid>
+          ))}
+        </Grid>
 
-          <ListItem alignItems="flex-start">
-            <ListItemIcon>
-              <Looks4Icon color="primary" aria-hidden="true" />
-            </ListItemIcon>
-            <ListItemText
-              primary="Finalize Your Assessment"
-              secondary="Once you've completed all dimensions, finalize the assessment. This locks in your ratings and creates a snapshot in the assessment history. You can still edit finalized assessments later—the tool will preserve your previous ratings for reference."
-            />
-          </ListItem>
-
-          <ListItem alignItems="flex-start">
-            <ListItemIcon>
-              <Looks5Icon color="primary" aria-hidden="true" />
-            </ListItemIcon>
-            <ListItemText
-              primary="Organize with Tags"
-              secondary="Use tags to organize your assessments by project, fiscal year, module, or any other grouping that makes sense for your agency. Tags help you filter and find assessments quickly on the Dashboard."
-            />
-          </ListItem>
-
-          <ListItem alignItems="flex-start">
-            <ListItemIcon>
-              <Looks6Icon color="primary" aria-hidden="true" />
-            </ListItemIcon>
-            <ListItemText
-              primary="Export Your Results"
-              secondary="Generate reports in multiple formats: PDF for stakeholder presentations, CSV in the CMS Maturity Profile format, or a complete ZIP backup that includes all your data and attachments."
-            />
-          </ListItem>
-        </List>
-
-        <Box sx={{ mt: 2 }}>
-          <Button variant="contained" component={RouterLink} to="/dashboard">
-            Go to Dashboard
+        <Box sx={{ mt: 3 }}>
+          <Button
+            variant="contained"
+            component={RouterLink}
+            to="/dashboard"
+            endIcon={<ArrowForwardIcon />}
+          >
+            Start assessing
           </Button>
         </Box>
       </Paper>
 
-      {/* Understanding Your Data */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          Understanding Your Data
+      {/* --- Privacy ----------------------------------------------------- */}
+      <Paper sx={{ p: { xs: 3, md: 4 }, mb: 3 }} component="section" aria-labelledby="privacy-h">
+        <Typography variant="h5" component="h2" id="privacy-h" gutterBottom>
+          Your data stays with you
         </Typography>
-
-        <Typography variant="body1" paragraph>
-          This tool stores all assessment data locally in your web browser. No data is ever sent to
-          external servers—your assessments are completely private and remain on your device.
+        <Typography variant="body1" color="text.secondary" paragraph>
+          All assessment data is stored locally in your browser using IndexedDB. Nothing is
+          transmitted to a server, and no one else can see your responses.
         </Typography>
-
-        <Alert severity="warning" icon={<WarningAmberIcon />} sx={{ mb: 2 }}>
+        <Alert severity="warning" sx={{ mb: 2 }}>
           <Typography variant="body2">
-            <strong>Important:</strong> Because data is stored in your browser, clearing your
-            browser data or using a different browser/device will result in losing your assessments.
-            We strongly recommend exporting your data regularly as a backup.
+            <strong>Back up your work.</strong> Because data lives in your browser, clearing browser
+            data or switching devices will erase your assessments. Export a ZIP backup regularly so
+            you can restore or move your work.
           </Typography>
         </Alert>
-
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 2, fontWeight: 600 }}>
-          Backing Up Your Work
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Use the <strong>Import/Export</strong> page to:
-        </Typography>
-        <List dense>
-          <ListItem>
-            <ListItemText primary="• Export a ZIP file containing all your assessments and attachments" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• Import a previously exported ZIP to restore your data" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="• Transfer assessments between browsers or devices" />
-          </ListItem>
-        </List>
-
-        <Box sx={{ mt: 2 }}>
-          <Button variant="outlined" component={RouterLink} to="/import-export">
-            Go to Import/Export
-          </Button>
-        </Box>
+        <Button variant="outlined" component={RouterLink} to="/import-export">
+          Open Import / Export
+        </Button>
       </Paper>
 
-      {/* About MITA 4.0 and ORBIT */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h5" component="h2" gutterBottom>
-          About MITA 4.0 and ORBIT
-        </Typography>
-
-        <Typography variant="body1" paragraph>
-          The Medicaid Information Technology Architecture (MITA) 4.0 framework helps State Medicaid
-          Agencies assess and improve their Medicaid Enterprise Systems. The ORBIT Maturity Model is
-          the assessment framework used in MITA 4.0.
-        </Typography>
-
-        <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600 }}>
-          ORBIT Dimensions
-        </Typography>
-        <Typography variant="body1" paragraph>
-          Each capability area is assessed across five dimensions:
-        </Typography>
-        <List dense>
-          <ListItem>
-            <ListItemText
-              primary={
-                <>
-                  <strong>Outcomes</strong> (Optional)
-                </>
-              }
-              secondary="Business results and value delivery"
-            />
-          </ListItem>
-          <ListItem>
-            <ListItemText
-              primary={
-                <>
-                  <strong>Roles</strong> (Optional)
-                </>
-              }
-              secondary="Organizational structure and responsibilities"
-            />
-          </ListItem>
-          <ListItem>
-            <ListItemText
-              primary={
-                <>
-                  <strong>Business Architecture</strong> (Required)
-                </>
-              }
-              secondary="Process design and enterprise alignment"
-            />
-          </ListItem>
-          <ListItem>
-            <ListItemText
-              primary={
-                <>
-                  <strong>Information</strong> (Required)
-                </>
-              }
-              secondary="Data governance and management"
-            />
-          </ListItem>
-          <ListItem>
-            <ListItemText
-              primary={
-                <>
-                  <strong>Technology</strong> (Required)
-                </>
-              }
-              secondary="Infrastructure, integration, and security (includes 7 sub-dimensions)"
-            />
-          </ListItem>
-        </List>
-
-        <Typography variant="subtitle1" gutterBottom sx={{ mt: 2, fontWeight: 600 }}>
-          Maturity Levels
-        </Typography>
-        <Typography variant="body1">
-          Each dimension is rated on a scale from 1 to 5, with an option for N/A when a criterion
-          doesn't apply:
-        </Typography>
-        <List dense>
-          <ListItem>
-            <ListItemText primary="Level 1: Initial" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="Level 2: Developing" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="Level 3: Defined" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="Level 4: Managed" />
-          </ListItem>
-          <ListItem>
-            <ListItemText primary="Level 5: Optimized" />
-          </ListItem>
-        </List>
-      </Paper>
-
-      {/* Open Source */}
-      <Paper sx={{ p: 3 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <GitHubIcon aria-hidden="true" sx={{ mr: 1 }} />
-          <Typography variant="h5" component="h2">
-            Open Source
+      {/* --- Get involved ------------------------------------------------ */}
+      <Paper sx={{ p: { xs: 3, md: 4 } }} component="section" aria-labelledby="involved-h">
+        <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
+          <GitHubIcon aria-hidden="true" />
+          <Typography variant="h5" component="h2" id="involved-h">
+            Get involved
           </Typography>
-        </Box>
-
-        <Typography variant="body1" paragraph>
-          This tool is open source and freely available. It was built to support State Medicaid
-          Agencies in conducting their MITA 4.0 self-assessments.
+        </Stack>
+        <Typography variant="body1" color="text.secondary" paragraph>
+          This is an open-source project and contributions are welcome — whether you are a Medicaid
+          professional, a developer, or just have an idea to share.
         </Typography>
+
+        <Grid container spacing={2} sx={{ mb: 3 }}>
+          <Grid item xs={12} sm={6}>
+            <EngagementItem
+              icon={<BugReportOutlinedIcon color="primary" aria-hidden="true" sx={{ mt: 0.25 }} />}
+              title="Report a bug"
+              body="Something not working right? Open an issue so we can fix it."
+              href={bugReportUrl}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <EngagementItem
+              icon={<LightbulbOutlinedIcon color="primary" aria-hidden="true" sx={{ mt: 0.25 }} />}
+              title="Suggest a feature"
+              body="Have an idea that would make the tool more useful? We would love to hear it."
+              href={featureRequestUrl}
+            />
+          </Grid>
+        </Grid>
 
         {GITHUB_REPO_URL && (
-          <>
-            <Alert severity="info" icon={<InfoOutlinedIcon />} sx={{ mb: 2 }}>
-              <Typography variant="body2">
-                Interested in contributing or reporting an issue? Visit our GitHub repository for
-                documentation, source code, and contribution guidelines.
-              </Typography>
-            </Alert>
-
-            <Link
-              href={GITHUB_REPO_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="View on GitHub (opens in new window)"
-              sx={{ display: 'inline-flex', alignItems: 'center' }}
-            >
-              <GitHubIcon aria-hidden="true" sx={{ mr: 0.5, fontSize: 18 }} />
-              View on GitHub
-            </Link>
-
-            <Divider sx={{ my: 2 }} />
-          </>
+          <Button
+            variant="contained"
+            href={GITHUB_REPO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            startIcon={<GitHubIcon />}
+            aria-label="View the project on GitHub (opens in new window)"
+          >
+            View on GitHub
+          </Button>
         )}
 
-        <Typography variant="body2" color="text.secondary">
-          Built with React, TypeScript, and Material UI. Data stored locally using IndexedDB.
+        <Divider sx={{ my: 3 }} />
+        <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
+          Built with
         </Typography>
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          <Chip label="React" size="small" variant="outlined" />
+          <Chip label="TypeScript" size="small" variant="outlined" />
+          <Chip label="Material UI" size="small" variant="outlined" />
+          <Chip label="IndexedDB" size="small" variant="outlined" />
+          <Chip label="Progressive Web App" size="small" variant="outlined" />
+        </Stack>
       </Paper>
     </Container>
   );
