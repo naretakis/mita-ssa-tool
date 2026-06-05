@@ -57,9 +57,8 @@ export default function Landing(): JSX.Element {
             Assess your Medicaid Enterprise maturity using the ORBIT framework
           </Typography>
           <Typography variant="body1" sx={{ mb: 4, opacity: 0.85, maxWidth: 600 }}>
-            A free, open-source tool for State Medicaid Agencies to evaluate capabilities across 66
-            areas and the ORBIT maturity dimensions. Your data stays private—stored only in your
-            browser.
+            A free, open-source tool for State Medicaid Agencies to evaluate capabilities across the
+            MITA maturity dimensions. Your data stays private—stored only in your browser.
           </Typography>
           <Button
             variant="contained"
