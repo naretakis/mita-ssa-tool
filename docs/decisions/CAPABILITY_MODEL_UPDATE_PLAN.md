@@ -435,16 +435,16 @@ compiles and behaves correctly at the data level.
 
 ### Wave 3 — Results & scores
 
-- [ ] `useScores`: `getOrganizationalScoresForAssessment` returns one `DimensionScore`
+- [x] `useScores`: `getOrganizationalScoresForAssessment` returns one `DimensionScore`
       per section (3 for the combined area); completion percentage uses per-area
       aspect totals (26 standard / 15 organizational) — fixes the existing 26-divisor
       inaccuracy for org areas
-- [ ] `AreaResults.tsx`: render 3 section tables + grouped aspect chart for the
+- [x] `AreaResults.tsx`: render 3 section tables + grouped aspect chart for the
       combined area
-- [ ] `ResultsMasterDetail` / `DomainResults` / `DomainTable`: remove category
+- [x] `ResultsMasterDetail` / `DomainResults` / `DomainTable`: remove category
       rendering; verify EA-under-Strategic and renamed domains display correctly
-- [ ] Update affected tests
-- [ ] Verify: typecheck, lint, tests green
+- [x] Update affected tests
+- [x] Verify: typecheck, lint, tests green
 
 ### Wave 4 — Export & import
 

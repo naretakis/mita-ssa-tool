@@ -338,6 +338,88 @@ describe('useScores', () => {
 
       expect(result.current.getCapabilityCompletion('non-existent')).toBe(0);
     });
+
+    /** Minimal rating fixture for completion-denominator tests */
+    const completionRating = (
+      id: string,
+      assessmentId: string,
+      dimensionId: 'outcomes' | 'businessArchitecture',
+      aspectId: string
+    ): Parameters<typeof db.orbitRatings.add>[0] => ({
+      id,
+      capabilityAssessmentId: assessmentId,
+      dimensionId,
+      aspectId,
+      currentLevel: 3,
+      questionResponses: [],
+      evidenceResponses: [],
+      notes: '',
+      barriers: '',
+      plans: '',
+      carriedForward: false,
+      attachmentIds: [],
+      updatedAt: new Date(),
+    });
+
+    it('should use the 15-aspect denominator for the combined organizational area', async () => {
+      await db.capabilityAssessments.add({
+        id: 'org1',
+        capabilityDomainId: 'enterprise-architecture-domain',
+        capabilityDomainName: 'Enterprise Architecture',
+        capabilityAreaId: 'enterprise-governance',
+        capabilityAreaName: 'Enterprise Governance',
+        status: 'in_progress',
+        tags: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      // 3 of 15 organizational aspects assessed -> 20%
+      await db.orbitRatings.bulkAdd([
+        completionRating('r1', 'org1', 'outcomes', 'culture-mindset'),
+        completionRating('r2', 'org1', 'outcomes', 'capability'),
+        completionRating('r3', 'org1', 'outcomes', 'quality-consistency'),
+      ]);
+
+      const { result } = renderHook(() => useScores());
+
+      await waitFor(() => {
+        expect(result.current.scoresByArea.size).toBe(1);
+      });
+
+      expect(result.current.getCapabilityCompletion('enterprise-governance')).toBe(20);
+    });
+
+    it('should exclude the aggregated dimension from enterprise-domain denominators', async () => {
+      // data-management aggregates Information (10 aspects): denominator 26 - 10 = 16
+      await db.capabilityAssessments.add({
+        id: 'ent1',
+        capabilityDomainId: 'data-management',
+        capabilityDomainName: 'Data Management',
+        capabilityAreaId: 'data-governance',
+        capabilityAreaName: 'Data Governance',
+        status: 'in_progress',
+        tags: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      // 4 of 16 assessable aspects assessed -> 25%
+      await db.orbitRatings.bulkAdd([
+        completionRating('r1', 'ent1', 'businessArchitecture', 'business-process-performance'),
+        completionRating('r2', 'ent1', 'businessArchitecture', 'business-process-documentation'),
+        completionRating('r3', 'ent1', 'businessArchitecture', 'business-process-governance'),
+        completionRating('r4', 'ent1', 'businessArchitecture', 'business-process-automation'),
+      ]);
+
+      const { result } = renderHook(() => useScores());
+
+      await waitFor(() => {
+        expect(result.current.scoresByArea.size).toBe(1);
+      });
+
+      expect(result.current.getCapabilityCompletion('data-governance')).toBe(25);
+    });
   });
 
   describe('getCapabilityTags', () => {

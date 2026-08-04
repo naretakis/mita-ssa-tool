@@ -129,7 +129,8 @@ function buildStandardNavItems(domainId?: string): NavItem[] {
         ? `Aggregate ${dim.name} score from all finalized capability assessments`
         : dim.description,
       isRequired: dim.required,
-      aspectCount: dim.aspects.length,
+      // Aggregate dimensions have no manually assessable aspects
+      aspectCount: isAggregate ? 0 : dim.aspects.length,
       isAggregate,
     });
   }

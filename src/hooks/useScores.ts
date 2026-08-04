@@ -11,7 +11,7 @@ import { getTotalAreaCount, getAreasByDomainId, getAreaWithDomain } from '../ser
 import { calculateAverageScore, calculateDimensionScore } from '../services/scoring';
 import {
   getAllDimensionIds,
-  getTotalAspectCount,
+  getAssessableAspectCountForArea,
   getTechnologySubDimensions,
   getAspectsForDimension,
   getAspectsForSubDimension,
@@ -107,13 +107,19 @@ export function useScores(): UseScoresReturn {
 
     // Build score data for each capability area
     const scoresByArea = new Map<string, CapabilityScoreData>();
-    const totalAspects = getTotalAspectCount();
 
     for (const assessment of assessments) {
       const assessmentRatings = ratingsByAssessment.get(assessment.id) ?? [];
       const assessedCount = assessmentRatings.filter(
         (r) => r.currentLevel > 0 || r.currentLevel === -1
       ).length;
+
+      // Per-area denominator: 26 standard, 15 organizational, and standard
+      // minus the aggregated dimension for enterprise-domain areas
+      const totalAspects = getAssessableAspectCountForArea(
+        assessment.capabilityAreaId,
+        assessment.capabilityDomainId
+      );
 
       scoresByArea.set(assessment.capabilityAreaId, {
         capabilityAreaId: assessment.capabilityAreaId,
@@ -123,7 +129,8 @@ export function useScores(): UseScoresReturn {
         assessmentDate: assessment.finalizedAt ?? assessment.updatedAt,
         tags: assessment.tags,
         status: assessment.status,
-        completionPercentage: Math.round((assessedCount / totalAspects) * 100),
+        completionPercentage:
+          totalAspects > 0 ? Math.round((assessedCount / totalAspects) * 100) : 0,
       });
     }
 

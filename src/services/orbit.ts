@@ -7,7 +7,11 @@
  */
 
 import orbitData from '../data/orbit-model.json';
-import { DOMAIN_AGGREGATE_DIMENSIONS, ENTERPRISE_DOMAIN_IDS } from '../constants';
+import {
+  DOMAIN_AGGREGATE_DIMENSIONS,
+  ENTERPRISE_DOMAIN_IDS,
+  isOrganizationalAssessmentArea,
+} from '../constants';
 import type {
   OrbitModel,
   OrbitDimension,
@@ -401,4 +405,30 @@ export function getTotalOrganizationalAspectCount(): number {
     (sum, type) => sum + getOrganizationalAspectCount(type),
     0
   );
+}
+
+/**
+ * Get the number of aspects a user can actually assess for a capability area.
+ * Used as the completion-percentage denominator.
+ *
+ * - Combined organizational area: all organizational aspects (15)
+ * - Areas in enterprise domains: standard aspects minus the aggregated
+ *   dimension's aspects (that dimension cannot be manually assessed)
+ * - All other areas: all standard aspects (26)
+ *
+ * @param areaId - The capability area ID
+ * @param domainId - The area's parent domain ID
+ * @returns Number of manually assessable aspects for the area
+ */
+export function getAssessableAspectCountForArea(areaId: string, domainId: string): number {
+  if (isOrganizationalAssessmentArea(areaId)) {
+    return getTotalOrganizationalAspectCount();
+  }
+
+  const aggregatedDimension = getAggregatedDimensionForDomain(domainId);
+  if (aggregatedDimension) {
+    return getTotalAspectCount() - getAspectCountForDimension(aggregatedDimension);
+  }
+
+  return getTotalAspectCount();
 }

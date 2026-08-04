@@ -92,7 +92,8 @@ function buildNavItems(domainId?: string): NavItem[] {
         ? `Aggregate ${dim.name} score from all finalized capability assessments`
         : dim.description,
       isRequired: dim.required,
-      aspectCount: dim.aspects.length,
+      // Aggregate dimensions have no manually assessable aspects
+      aspectCount: isAggregate ? 0 : dim.aspects.length,
       isAggregate,
     });
   }
@@ -108,7 +109,7 @@ function buildNavItems(domainId?: string): NavItem[] {
       name: techDim.name,
       description: `Aggregate ${techDim.name} score from all finalized capability assessments`,
       isRequired: true,
-      aspectCount: techDim.subDimensions.reduce((sum, sd) => sum + sd.aspects.length, 0),
+      aspectCount: 0, // No aspects to assess - it's aggregate
       isAggregate: true,
     });
   } else {
