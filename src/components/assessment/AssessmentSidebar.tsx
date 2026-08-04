@@ -6,11 +6,13 @@
  * Supports organizational assessments (Outcomes/Roles) with direct aspect navigation.
  */
 
-import { JSX } from 'react';
+import { Fragment, JSX } from 'react';
 import {
   Box,
   List,
+  ListItem,
   ListItemButton,
+  ListSubheader,
   Typography,
   LinearProgress,
   Divider,
@@ -22,6 +24,7 @@ import {
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import FlagIcon from '@mui/icons-material/Flag';
 import BarChartIcon from '@mui/icons-material/BarChart';
+import { getOrganizationalAssessment } from '../../services/orbit';
 import type {
   OrbitDimensionId,
   TechnologySubDimensionId,
@@ -272,59 +275,87 @@ export function AssessmentSidebar({
           </Typography>
         </Box>
 
-        {/* Aspect Navigation */}
+        {/* Aspect Navigation - grouped by organizational section */}
         <Box sx={{ flex: 1, overflow: 'auto' }} component="nav" aria-label="Assessment aspects">
-          <List disablePadding role="list">
-            {dimensions.map((dim) => {
+          <List disablePadding>
+            {dimensions.map((dim, index) => {
               const selected = isSelected(dim);
               const displayScore = dim.averageScore;
 
+              // Render a section header when the organizational section changes
+              const startsNewSection =
+                dim.organizationalType !== undefined &&
+                dim.organizationalType !== dimensions[index - 1]?.organizationalType;
+
               return (
-                <ListItemButton
-                  key={dim.aspectId ?? dim.dimensionId}
-                  selected={selected}
-                  onClick={() => onDimensionSelect(dim.aspectId as OrbitDimensionId)}
-                  aria-current={selected ? 'true' : undefined}
-                  aria-label={`${dim.name}, ${dim.assessedCount} of ${dim.totalCount} assessed${displayScore !== null ? `, score ${formatScore(displayScore)}` : ''}`}
-                  sx={{
-                    py: 0.75,
-                    px: 1.5,
-                    minHeight: 36,
-                    '&.Mui-selected': {
-                      bgcolor: alpha(theme.palette.primary.main, 0.1),
-                      borderLeft: '3px solid',
-                      borderColor: 'primary.main',
-                      '&:hover': {
-                        bgcolor: alpha(theme.palette.primary.main, 0.15),
-                      },
-                    },
-                  }}
-                >
-                  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>
-                    <Typography
-                      variant="body2"
+                <Fragment key={dim.aspectId ?? dim.dimensionId}>
+                  {startsNewSection && dim.organizationalType && (
+                    <ListSubheader
+                      disableSticky
                       sx={{
-                        fontWeight: selected ? 600 : 400,
-                        flex: 1,
-                        fontSize: '0.8125rem',
-                      }}
-                    >
-                      {dim.name}
-                    </Typography>
-                    {getProgressChip(dim.assessedCount, dim.totalCount)}
-                    <Typography
-                      variant="caption"
-                      sx={{
+                        px: 1.5,
+                        py: 0.5,
+                        lineHeight: 1.5,
+                        bgcolor: 'grey.100',
+                        borderBottom: '1px solid',
+                        borderColor: 'divider',
                         fontWeight: 600,
-                        minWidth: 24,
-                        textAlign: 'right',
                         color: 'text.secondary',
+                        fontSize: '0.65rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: 0.5,
                       }}
                     >
-                      {displayScore !== null ? formatScore(displayScore) : '—'}
-                    </Typography>
-                  </Box>
-                </ListItemButton>
+                      {getOrganizationalAssessment(dim.organizationalType).name}
+                    </ListSubheader>
+                  )}
+                  <ListItem disablePadding>
+                    <ListItemButton
+                      selected={selected}
+                      onClick={() => onDimensionSelect(dim.aspectId as OrbitDimensionId)}
+                      aria-current={selected ? 'true' : undefined}
+                      aria-label={`${dim.name}, ${dim.assessedCount} of ${dim.totalCount} assessed${displayScore !== null ? `, score ${formatScore(displayScore)}` : ''}`}
+                      sx={{
+                        py: 0.75,
+                        px: 1.5,
+                        minHeight: 36,
+                        '&.Mui-selected': {
+                          bgcolor: alpha(theme.palette.primary.main, 0.1),
+                          borderLeft: '3px solid',
+                          borderColor: 'primary.main',
+                          '&:hover': {
+                            bgcolor: alpha(theme.palette.primary.main, 0.15),
+                          },
+                        },
+                      }}
+                    >
+                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 1 }}>
+                        <Typography
+                          variant="body2"
+                          sx={{
+                            fontWeight: selected ? 600 : 400,
+                            flex: 1,
+                            fontSize: '0.8125rem',
+                          }}
+                        >
+                          {dim.name}
+                        </Typography>
+                        {getProgressChip(dim.assessedCount, dim.totalCount)}
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontWeight: 600,
+                            minWidth: 24,
+                            textAlign: 'right',
+                            color: 'text.secondary',
+                          }}
+                        >
+                          {displayScore !== null ? formatScore(displayScore) : '—'}
+                        </Typography>
+                      </Box>
+                    </ListItemButton>
+                  </ListItem>
+                </Fragment>
               );
             })}
           </List>

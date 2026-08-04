@@ -39,7 +39,6 @@ interface AssessmentContextBarProps {
   areaName: string;
   areaDescription: string;
   areaTopics: string[];
-  categoryName?: string;
   tags: string[];
   tagSuggestions: string[];
   onTagAdd: (tag: string) => void;
@@ -57,7 +56,6 @@ export function AssessmentContextBar({
   areaName,
   areaDescription,
   areaTopics,
-  categoryName,
   tags,
   tagSuggestions,
   onTagAdd,
@@ -386,29 +384,12 @@ export function AssessmentContextBar({
         >
           {/* Indent to align with capability name */}
           <Box sx={{ pl: 5 }}>
-            {/* Category badge if present */}
-            {categoryName && (
-              <Chip
-                label={categoryName}
-                size="small"
-                sx={{
-                  mt: 1.5,
-                  mb: 1,
-                  height: 22,
-                  fontSize: '0.75rem',
-                  bgcolor: alpha(theme.palette.primary.main, 0.1),
-                  color: 'primary.dark',
-                  fontWeight: 500,
-                }}
-              />
-            )}
-
             {/* Description */}
             <Typography
               variant="body2"
               color="text.secondary"
               sx={{
-                mt: categoryName ? 0 : 1.5,
+                mt: 1.5,
                 mb: 1.5,
                 lineHeight: 1.6,
               }}

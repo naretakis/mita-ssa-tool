@@ -46,6 +46,7 @@ import {
   AssessmentSidebar,
   DimensionPage,
   AggregateDimensionView,
+  InformationManagementNotice,
 } from '../components/assessment';
 import type {
   OrbitDimensionId,
@@ -713,6 +714,9 @@ export default function Assessment(): JSX.Element {
         lastSaved={lastSaved}
         disabled={isViewMode}
       />
+
+      {/* Information Management guidance (Info Mgmt pattern areas only) */}
+      {capabilityInfo.area.informationManagement && <InformationManagementNotice />}
 
       {/* View Mode Alert */}
       {isViewMode && (

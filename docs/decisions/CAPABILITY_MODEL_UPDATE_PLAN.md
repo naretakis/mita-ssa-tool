@@ -417,20 +417,20 @@ compiles and behaves correctly at the data level.
 
 ### Wave 2 — Assessment flow UI
 
-- [ ] `Assessment.tsx`: build org nav from all three sections with section grouping;
+- [x] `Assessment.tsx`: build org nav from all three sections with section grouping;
       per-aspect navigation within sections; 15-aspect progress denominator
-- [ ] `AssessmentSidebar`: render section headers for organizational mode
-- [ ] Information Management disclaimer banner per Section 8 (new small component or
+- [x] `AssessmentSidebar`: render section headers for organizational mode
+- [x] Information Management disclaimer banner per Section 8 (new small component or
       inline Alert; data-driven off the area flag)
-- [ ] `AssessmentContextBar`: remove `categoryName` prop and rendering
-- [ ] `HistoryView.tsx`: add an organizational branch to `buildNavItems` (it currently
+- [x] `AssessmentContextBar`: remove `categoryName` prop and rendering
+- [x] `HistoryView.tsx`: add an organizational branch to `buildNavItems` (it currently
       renders only B-I-T nav items, so a snapshot of the combined area would show
       empty dimension pages — pre-existing gap for v3 org areas that v4 makes
       prominent); mirror Assessment.tsx's organizational navigation for historical
       ratings
-- [ ] Component tests: combined org navigation, disclaimer renders only on flagged
+- [x] Component tests: combined org navigation, disclaimer renders only on flagged
       areas, accessibility check (vitest-axe) on the banner, HistoryView org rendering
-- [ ] Verify: typecheck, lint, tests green; manual smoke of the combined assessment
+- [x] Verify: typecheck, lint, tests green; manual smoke of the combined assessment
       page and one Info Mgmt area
 
 ### Wave 3 — Results & scores
