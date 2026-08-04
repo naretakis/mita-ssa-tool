@@ -4,11 +4,11 @@
 
 A Progressive Web App (PWA) enabling State Medicaid Agencies (SMAs) to self-assess their Medicaid Enterprise maturity using the **MITA 4.0 ORBIT Maturity Model**. The application is fully client-side, offline-first, and stores all data locally in the browser.
 
-**Version:** 3.0  
-**Last Updated:** June 3, 2026  
+**Version:** 4.0  
+**Last Updated:** July 30, 2026  
 **Target Deployment:** GitHub Pages
 
-> **Note:** This document (v2) reflects the current implementation, which now ingests the May 3, 2026 PRA submission as the official maturity model source.
+> **Note:** This document (v2) reflects the current implementation: the May 3, 2026 PRA submission is the maturity model source, and the July 2026 BA working group capability model (slides 4–6) is the capability reference model source. See `docs/decisions/CAPABILITY_MODEL_UPDATE_PLAN.md` for the v4 change record.
 
 ---
 
@@ -55,8 +55,8 @@ mita-4.0/
 │   │   └── results/          # Results visualization components
 │   ├── constants/            # Application constants
 │   ├── data/
-│   │   ├── capabilities.json # Capability domains and areas (75 areas)
-│   │   ├── orbit-model.json  # ORBIT maturity criteria (52 aspects)
+│   │   ├── capabilities.json # Capability domains and areas (72 areas)
+│   │   ├── orbit-model.json  # ORBIT maturity criteria (41 aspects)
 │   │   └── templates/        # Export templates (CSV)
 │   ├── hooks/                # Custom React hooks
 │   ├── pages/                # Route page components
@@ -95,13 +95,12 @@ mita-4.0/
 
 #### 1. `src/data/capabilities.json` — Capability Reference Model
 
-Defines **what** can be assessed. Contains 66 capability areas across 16 domains organized into three layers.
+Defines **what** can be assessed. Contains 72 capability areas across 14 domains organized into three layers. The metamodel is strictly two levels (Domain → Area); there is no category tier.
 
 **Domain Structure:**
 
 ```typescript
-// Standard domain (most domains)
-interface StandardCapabilityDomain {
+interface CapabilityDomain {
   id: string;
   name: string;
   layer: 'strategic' | 'core' | 'support';
@@ -109,20 +108,12 @@ interface StandardCapabilityDomain {
   areas: CapabilityArea[];
 }
 
-// Categorized domain (Enterprise Data Management, Enterprise Technology)
-interface CategorizedCapabilityDomain {
-  id: string;
-  name: string;
-  layer: 'strategic' | 'core' | 'support';
-  description: string;
-  categories: CapabilityCategory[]; // Contains nested areas
-}
-
 interface CapabilityArea {
   id: string;
   name: string;
   description: string;
   topics: string[];
+  informationManagement?: boolean; // Drives the Info Mgmt assessment guidance banner
 }
 ```
 
@@ -130,10 +121,15 @@ interface CapabilityArea {
 
 | Layer     | Domains | Capability Areas |
 | --------- | ------- | ---------------- |
-| Strategic | 2       | 5                |
-| Core      | 8       | 30               |
-| Support   | 6       | 31               |
-| **Total** | **16**  | **66**           |
+| Strategic | 3       | 10               |
+| Core      | 7       | 33               |
+| Support   | 4       | 29               |
+| **Total** | **14**  | **72**           |
+
+Eleven business domains each contain an `<X> Information Management` area
+(flagged `informationManagement: true`). These show an in-app guidance banner:
+assess information maturity once per domain there, or per-area via the
+Information dimension when assessing a single capability area.
 
 #### 2. `src/data/orbit-model.json` — ORBIT Maturity Criteria
 
@@ -153,14 +149,21 @@ Defines **how** assessments are conducted. Each business capability area is asse
 1. Technical Infrastructure Management (6 aspects)
 2. Application Management (5 aspects)
 
-**Organizational Assessments (assessed once per organization):**
+**Organizational Assessment (assessed once per organization):**
 
-| Assessment                             | Aspects |
+The single **Enterprise Governance** capability area (Enterprise Architecture
+domain, Strategic layer) hosts all organizational aspects in three sections:
+
+| Section                                | Aspects |
 | -------------------------------------- | ------- |
-| Organizational Outcomes (Optional)     | 6       |
-| Organizational Roles (Optional)        | 5       |
+| Organizational Outcomes                | 6       |
+| Organizational Roles                   | 5       |
 | Organizational Enterprise Architecture | 4       |
 | **Total**                              | **15**  |
+
+Its overall score is the average of the section averages (sections with no
+assessed aspects are excluded), mirroring how standard assessments average
+their dimension scores.
 
 **Grand total aspects: 41 (26 standard + 15 organizational)**
 
@@ -168,10 +171,10 @@ Defines **how** assessments are conducted. Each business capability area is asse
 
 Two domains have special aggregate dimension handling:
 
-| Domain                     | Assessment Model | Aggregate Dimension |
-| -------------------------- | ---------------- | ------------------- |
-| Enterprise Data Management | B-T              | Information         |
-| Enterprise Technology      | B-I              | Technology          |
+| Domain                | Assessment Model | Aggregate Dimension |
+| --------------------- | ---------------- | ------------------- |
+| Data Management       | B-T              | Information         |
+| Technology Management | B-I              | Technology          |
 
 For these enterprise domains:
 

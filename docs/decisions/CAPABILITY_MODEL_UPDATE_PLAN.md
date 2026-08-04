@@ -464,18 +464,18 @@ compiles and behaves correctly at the data level.
 
 ### Wave 5 — Docs, version, release
 
-- [ ] `CHANGELOG.md`: 4.0.0 entry (Restructured/Added/Changed/Removed, including the
+- [x] `CHANGELOG.md`: 4.0.0 entry (Restructured/Added/Changed/Removed, including the
       scoring method for the combined area and the disclaimer feature)
-- [ ] `PROJECT_FOUNDATION_v2.md`: capability model summary tables, org assessment
+- [x] `PROJECT_FOUNDATION_v2.md`: capability model summary tables, org assessment
       description, layer counts, routes/hooks unchanged
-- [ ] In-app static copy: `Landing.tsx` ("all 66 capability areas"), `About.tsx`
+- [x] In-app static copy: `Landing.tsx` ("all 66 capability areas"), `About.tsx`
       ("66 capability areas" and the Outcomes/Roles/"separate Enterprise
       Architecture assessment" paragraph) — update to 72 areas and the combined
       Enterprise Governance assessment; grep `src/` for `66` to catch stragglers
-- [ ] `README.md` + `docs/reference/MITA_4.0_Capability_Reference_Model.md`: update
+- [x] `README.md` + `docs/reference/MITA_4.0_Capability_Reference_Model.md`: update
       counts/structure snapshot
-- [ ] `package.json` 3.0.0 → 4.0.0; `npm install --package-lock-only`
-- [ ] Full verification: `npm run typecheck && npm run lint && npm test && npm run build`
+- [x] `package.json` 3.0.0 → 4.0.0; `npm install --package-lock-only`
+- [x] Full verification: `npm run typecheck && npm run lint && npm test && npm run build`
 - [ ] Manual staging checklist (below), then push branch and open PR for the working
       group's staging review (per the meeting plan)
 

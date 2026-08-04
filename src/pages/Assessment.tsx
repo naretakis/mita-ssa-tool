@@ -139,7 +139,7 @@ function buildStandardNavItems(domainId?: string): NavItem[] {
   const isTechAggregate = aggregatedDimension === 'technology';
 
   if (isTechAggregate) {
-    // For Enterprise Technology domain, Technology is a single aggregate item
+    // For the Technology Management domain, Technology is a single aggregate item
     const techDim = orbitModel.dimensions.technology;
     items.push({
       dimensionId: 'technology',

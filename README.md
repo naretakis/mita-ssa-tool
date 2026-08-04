@@ -4,7 +4,7 @@ A Progressive Web App (PWA) enabling State Medicaid Agencies (SMAs) to self-asse
 
 ## Overview
 
-The MITA 4.0 State Self-Assessment Tool helps State Medicaid Agencies evaluate their Medicaid Enterprise Systems (MES) maturity across **66 capability areas** using the standardized **ORBIT Maturity Model**. The tool is:
+The MITA 4.0 State Self-Assessment Tool helps State Medicaid Agencies evaluate their Medicaid Enterprise Systems (MES) maturity across **72 capability areas** using the standardized **ORBIT Maturity Model**. The tool is:
 
 - **Privacy-First**: All data stays in your browser. No data is transmitted or stored remotely.
 - **Offline-First**: Full functionality after initial load, even without network connectivity.
@@ -20,15 +20,15 @@ ORBIT is the MITA 4.0 maturity assessment framework. Each business capability ar
 | **I**nformation           | 10                           |
 | **T**echnology            | 11 (across 2 sub-dimensions) |
 
-Three additional **organizational assessments** evaluate enterprise-level maturity (assessed once per organization, not per capability area):
+The combined **Enterprise Governance** capability area (Enterprise Architecture domain, Strategic layer) evaluates enterprise-level maturity once per organization across three sections:
 
-| Organizational Assessment              | Aspects |
+| Organizational Section                 | Aspects |
 | -------------------------------------- | ------- |
-| Organizational Outcomes (Optional)     | 6       |
-| Organizational Roles (Optional)        | 5       |
+| Organizational Outcomes                | 6       |
+| Organizational Roles                   | 5       |
 | Organizational Enterprise Architecture | 4       |
 
-> Outcomes and Roles ("O" and "R" in the original ORBIT acronym) were extracted from per-capability assessments to enterprise-level assessments because they describe organizational maturity rather than per-capability maturity.
+> Outcomes and Roles ("O" and "R" in the original ORBIT acronym) describe organizational maturity rather than per-capability maturity, so they are assessed once in the combined Enterprise Governance assessment rather than per capability area.
 
 Each aspect is rated on a 5-level maturity scale:
 
@@ -43,7 +43,7 @@ Each aspect is rated on a 5-level maturity scale:
 
 ### Dashboard
 
-- Hierarchical view of all 16 capability domains and 66 areas grouped by layer (Strategic, Core, Support)
+- Hierarchical view of all 14 capability domains and 72 areas grouped by layer (Strategic, Core, Support)
 - Progress tracking with visual indicators
 - Tag-based organization and filtering
 - Assessment history with snapshots
@@ -174,9 +174,10 @@ The application uses two primary JSON files that can be edited to update capabil
 
 Defines **what** can be assessed:
 
-- 16 capability domains across 3 layers (Strategic, Core, Support)
-- 66 capability areas with descriptions and topics
-- Two domains use sub-categories (Enterprise Data Management, Enterprise Technology)
+- 14 capability domains across 3 layers (Strategic, Core, Support)
+- 72 capability areas with descriptions and topics (strictly Domain → Area, no category tier)
+- 11 "Information Management" areas flagged for in-app assessment guidance
+- Sourced from the BA working group capability model (July 2026, slides 4–6)
 - No maturity questions—just metadata
 
 ### ORBIT Model (`orbit-model.json`)

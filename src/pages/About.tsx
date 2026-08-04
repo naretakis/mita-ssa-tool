@@ -138,7 +138,7 @@ const WORKFLOW = [
   {
     number: 1,
     title: 'Choose a capability',
-    body: 'Start on the Dashboard and pick any of the 66 capability areas. Add tags, like fiscal year or project, to stay organized.',
+    body: 'Start on the Dashboard and pick any of the 72 capability areas. Add tags, like fiscal year or project, to stay organized.',
   },
   {
     number: 2,
@@ -314,9 +314,9 @@ export default function About(): JSX.Element {
         </Stack>
 
         <Typography variant="body2" color="text.secondary" sx={{ mt: 2.5 }}>
-          Business Architecture, Information, and Technology are assessed for each of the 66
-          capability areas. Outcomes and Roles are assessed once for your whole organization,
-          alongside a separate Enterprise Architecture assessment.
+          Business Architecture, Information, and Technology are assessed for each of the 72
+          capability areas. Outcomes, Roles, and Enterprise Architecture are assessed once for your
+          whole organization in the combined Enterprise Governance assessment.
         </Typography>
       </Paper>
 

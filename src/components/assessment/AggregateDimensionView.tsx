@@ -4,8 +4,8 @@
  * Displays aggregate score for enterprise domains where a dimension
  * is calculated from other finalized assessments rather than manually assessed.
  * Used for:
- * - Enterprise Data Management: Information dimension (aggregate)
- * - Enterprise Technology: Technology dimension (aggregate)
+ * - Data Management: Information dimension (aggregate)
+ * - Technology Management: Technology dimension (aggregate)
  */
 
 import { JSX, useState } from 'react';

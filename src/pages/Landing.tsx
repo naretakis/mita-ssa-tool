@@ -123,7 +123,7 @@ export default function Landing(): JSX.Element {
                 1. Select a Capability
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Browse the Dashboard to see all 66 capability areas organized by domain. Click any
+                Browse the Dashboard to see all 72 capability areas organized by domain. Click any
                 area to start its assessment.
               </Typography>
             </Grid>

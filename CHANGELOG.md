@@ -5,6 +5,46 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.0.0] - 2026-07-30
+
+This major release aligns the tool with the revised MITA 4.0 Capability Reference Model presented by the BA working group (July 2026, slides 4–6 of the capability overview deck). The ORBIT maturity criteria are unchanged — all 41 aspects and level definitions remain the May 3, 2026 PRA submission verbatim. It is a clean break from prior data: IndexedDB clears existing assessment data on first load because capability area ids changed. See `docs/decisions/CAPABILITY_MODEL_UPDATE_PLAN.md` for the full scope record and decision log.
+
+### Restructured
+
+- **Capability model totals**: 16 domains / 66 areas → **14 domains / 72 areas** (Strategic 3/10, Core 7/33, Support 4/29)
+- **Enterprise Architecture domain**: moved Support → **Strategic**; now contains the single combined **Enterprise Governance** capability area hosting all 15 organizational aspects in three sections (Organizational Outcomes, Organizational Roles, Organizational Enterprise Architecture)
+- **Organizational assessments consolidated**: the three separate organizational areas (`organizational-outcomes`, `organizational-roles`, `organizational-enterprise-architecture`) merged into the one `enterprise-governance` area; the Enterprise Governance domain was dissolved
+- **Combined organizational scoring**: overall score = average of the three section averages (sections without assessed aspects excluded), mirroring how B-I-T assessments average dimension scores; sections weigh equally regardless of aspect counts (pending working-group affirmation in staging)
+- **Category tier removed**: the metamodel is strictly Domain → Area; Data Management and Technology Management areas are flat lists
+
+### Added
+
+- **"Information Management" pattern**: every business domain has an `<X> Information Management` capability area (11 total; 9 new — Contract and Financial already existed)
+- **Information Management guidance banner**: warning notice on Information Management area assessment pages explaining the assess-once-per-domain guidance (per BA working group meeting decision; conditional/aggregate workflow explicitly deferred)
+- New capability areas: Program Administration, Strategy Oversight and Accountability, Contractor Support Management, Provider Eligibility, and the 9 new Information Management areas — all with marked placeholder descriptions pending the updated Capability Reference Model document from NextGen
+- History view now renders the combined organizational assessment (sections and aspects); previously organizational snapshots displayed empty B-I-T pages
+- Import validation: assessments and history entries referencing capability areas not in the current model are skipped with reason "Capability area not in current model" (prevents unreachable orphan records from v3 exports)
+- CSV maturity profiles for the organizational assessment include `Section:` label rows grouping each section's aspects; the parser skips label rows on import
+- Database schema v4 migration (clean break, clears all data)
+- Archived sources under `docs/source-documents/2026-07-30/` (deck, meeting transcript, authoritative slide extraction); `scripts/extract-pptx.py` and `scripts/generate-capabilities-v4.py`
+
+### Changed
+
+- Renamed domains: Enterprise Data Management → **Data Management**; Enterprise Technology → **Technology Management** (ids `data-management`/`technical` retained; aggregate dimension behavior unchanged)
+- Renamed areas: Provider Screening → **Provider Eligibility** (placeholder description; slide 5 authoritative), Maintain Strategic Plan → **Strategic Plan Maintenance**, Develop Agency Roadmap → **Strategic Roadmap Management**, Member Eligibility/Enrollment Management → **Member Eligibility**/**Member Enrollment**, Accounts Receivable/Payable → **Accounts Receivable/Payable Management**, Data Quality → **Data Quality Management**, Data Storage and Warehousing → **Data Storage, Operations, and Warehousing**
+- Waiver Management moved from Care and Service Coordination to Plan and Policy Management
+- Completion percentages now use per-area denominators: 15 aspects for the combined organizational area, standard aspects minus the aggregated dimension for enterprise-domain areas (16 for Data Management areas, 15 for Technology Management areas), 26 otherwise — fixes the prior fixed-26 divisor
+- Assessment sidebar groups the organizational assessment's aspects under section headers; fixed a list-structure accessibility violation in the organizational navigation
+- PDF export renders the organizational assessment per section with section subheaders
+- In-app copy (Landing, Guide) updated to 72 areas and the combined organizational assessment
+
+### Removed
+
+- Business Relationship Management domain and its 2 areas
+- Enterprise Governance domain (dissolved into the combined area)
+- Capability areas: State Plan Administration, Business Intelligence & Data Science
+- `CategorizedCapabilityDomain`/`CapabilityCategory` types and all category handling
+
 ## [3.0.0] - 2026-06-03
 
 This is a major release that ingests the final MITA workgroup PRA submission (May 3, 2026) as the official source of truth for the MITA 4.0 maturity criteria. It is a clean break from prior data — IndexedDB will clear existing assessment data on first load to avoid orphaned ratings.

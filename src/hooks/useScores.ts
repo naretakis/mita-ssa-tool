@@ -400,7 +400,7 @@ export function useScores(): UseScoresReturn {
 
   /**
    * Calculate aggregate score for a dimension across all qualifying finalized assessments.
-   * Used for enterprise domains (Enterprise Data Management, Enterprise Technology).
+   * Used for enterprise domains (Data Management, Technology Management).
    * Excludes enterprise domains from the calculation to prevent circular dependencies.
    *
    * @param dimensionId - The dimension to aggregate (e.g., 'information' or 'technology')

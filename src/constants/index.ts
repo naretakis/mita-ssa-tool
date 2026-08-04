@@ -37,12 +37,12 @@ export const ENTERPRISE_DOMAIN_IDS = ['data-management', 'technical'] as const;
  * These domains show an aggregate score for the specified dimension
  * instead of allowing manual assessment.
  *
- * - Enterprise Data Management (data-management): Information is aggregated from other domains
- * - Enterprise Technology (technical): Technology is aggregated from other domains
+ * - Data Management (data-management): Information is aggregated from other domains
+ * - Technology Management (technical): Technology is aggregated from other domains
  */
 export const DOMAIN_AGGREGATE_DIMENSIONS: Partial<Record<string, OrbitDimensionId>> = {
-  'data-management': 'information', // Enterprise Data Management: BT (aggregate I)
-  technical: 'technology', // Enterprise Technology: BI (aggregate T)
+  'data-management': 'information', // Data Management: BT (aggregate I)
+  technical: 'technology', // Technology Management: BI (aggregate T)
 };
 
 // =============================================================================
