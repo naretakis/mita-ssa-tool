@@ -16,6 +16,7 @@ import {
   isEnterpriseDomain,
   getAggregatedDimensionForDomain,
   getOrganizationalAspects,
+  getOrganizationalAssessment,
 } from '../orbit';
 import { getOrganizationalSections } from '../../constants';
 import type {
@@ -564,6 +565,17 @@ function generateOrganizationalAreaProfile(
 
   for (const section of sections) {
     const aspects = getOrganizationalAspects(section);
+
+    // Section label row grouping the aspects that follow
+    rows.push({
+      dimension: getOrganizationalAssessment(section).name,
+      asIs: '',
+      toBe: '',
+      notes: '',
+      barriers: '',
+      plans: '',
+      isSectionLabel: true,
+    });
 
     for (const aspect of aspects) {
       // Find the rating for this aspect

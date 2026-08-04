@@ -57,11 +57,16 @@ function generateAreaSection(area: CapabilityAreaProfile): string[] {
   lines.push(isOrganizational ? CSV_HEADERS_ORGANIZATIONAL : CSV_HEADERS_STANDARD);
 
   if (isOrganizational) {
-    // For organizational assessments, output aspect rows directly
+    // For organizational assessments, output section label rows followed by
+    // their aspect rows (Outcomes, Roles, Enterprise Architecture)
     for (const row of area.rows) {
-      lines.push(
-        `${row.dimension},${row.asIs},${row.toBe},${escapeCSVField(row.notes)},${escapeCSVField(row.barriers)},${escapeCSVField(row.plans)}`
-      );
+      if (row.isSectionLabel) {
+        lines.push(`Section: ${escapeCSVField(row.dimension)},,,,,`);
+      } else {
+        lines.push(
+          `${row.dimension},${row.asIs},${row.toBe},${escapeCSVField(row.notes)},${escapeCSVField(row.barriers)},${escapeCSVField(row.plans)}`
+        );
+      }
     }
   } else {
     // For standard assessments, ensure all B-I-T dimensions are present in order
@@ -175,6 +180,12 @@ export function parseMaturityProfileCsv(csv: string): MaturityProfile | null {
     // Check for column headers (ORBIT for standard, Aspect for organizational)
     if (line.startsWith('ORBIT,') || line.startsWith('Aspect,')) {
       inDataSection = true;
+      continue;
+    }
+
+    // Skip organizational section label rows (e.g., "Section: Organizational
+    // Outcomes") - they group aspect rows but carry no rating data
+    if (line.startsWith('Section:')) {
       continue;
     }
 

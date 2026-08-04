@@ -589,4 +589,79 @@ Aspect 2,2.5,3.5,,,Plans here`;
       expect(rows[0]?.plans).toBe('Future plans');
     });
   });
+
+  describe('organizational section labels', () => {
+    const sectionedProfile = (): MaturityProfile =>
+      createProfile('Test State', 'Enterprise Architecture', [
+        {
+          domainName: 'Enterprise Architecture',
+          areaName: 'Enterprise Governance',
+          isOrganizationalAssessment: true,
+          rows: [
+            {
+              dimension: 'Organizational Outcomes',
+              asIs: '',
+              toBe: '',
+              notes: '',
+              barriers: '',
+              plans: '',
+              isSectionLabel: true,
+            },
+            {
+              dimension: 'Culture Mindset',
+              asIs: '3',
+              toBe: '4',
+              notes: 'outcome note',
+              barriers: '',
+              plans: '',
+            },
+            {
+              dimension: 'Organizational Roles',
+              asIs: '',
+              toBe: '',
+              notes: '',
+              barriers: '',
+              plans: '',
+              isSectionLabel: true,
+            },
+            {
+              dimension: 'Communication',
+              asIs: '2',
+              toBe: '3',
+              notes: 'roles note',
+              barriers: '',
+              plans: '',
+            },
+          ],
+        },
+      ]);
+
+    it('should emit a Section label row before each section', () => {
+      const csv = generateMaturityProfileCsv(sectionedProfile());
+
+      expect(csv).toContain('Section: Organizational Outcomes,,,,,');
+      expect(csv).toContain('Section: Organizational Roles,,,,,');
+
+      // Labels appear before their aspects
+      const outcomesIndex = csv.indexOf('Section: Organizational Outcomes');
+      const cultureIndex = csv.indexOf('Culture Mindset');
+      const rolesIndex = csv.indexOf('Section: Organizational Roles');
+      expect(outcomesIndex).toBeLessThan(cultureIndex);
+      expect(cultureIndex).toBeLessThan(rolesIndex);
+    });
+
+    it('should skip Section label rows when parsing (round-trip preserves aspects)', () => {
+      const csv = generateMaturityProfileCsv(sectionedProfile());
+      const parsed = parseMaturityProfileCsv(csv);
+
+      expect(parsed).not.toBeNull();
+      const rows = parsed?.areas[0]?.rows ?? [];
+
+      // Only the two aspect rows survive parsing; labels are structural
+      expect(rows).toHaveLength(2);
+      expect(rows.map((r) => r.dimension)).toEqual(['Culture Mindset', 'Communication']);
+      expect(rows[0]?.asIs).toBe('3');
+      expect(rows[1]?.notes).toBe('roles note');
+    });
+  });
 });

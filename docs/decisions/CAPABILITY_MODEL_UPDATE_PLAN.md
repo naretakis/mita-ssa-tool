@@ -448,19 +448,19 @@ compiles and behaves correctly at the data level.
 
 ### Wave 4 — Export & import
 
-- [ ] `exportService.ts`: `generateOrganizationalAreaProfile` iterates all three
+- [x] `exportService.ts`: `generateOrganizationalAreaProfile` iterates all three
       sections with section label rows
-- [ ] `csvExport.ts`: section labels within the `Aspect` block; parser tolerant of
+- [x] `csvExport.ts`: section labels within the `Aspect` block; parser tolerant of
       section label rows
-- [ ] `pdfExport.ts`: `generateOrganizationalDetails` renders per section
-- [ ] `importService.ts`: area-existence validation per Section 9 — both
+- [x] `pdfExport.ts`: `generateOrganizationalDetails` renders per section
+- [x] `importService.ts`: area-existence validation per Section 9 — both
       `processAssessmentImport` (assessments) and the history-entry loop in
       `processImport`
-- [ ] Update affected tests (`importService.test.ts` has enterprise-governance
+- [x] Update affected tests (`importService.test.ts` has enterprise-governance
       domain and organizational-outcomes/roles fixtures); add: import of a
       v3-shaped export skips removed-area assessments AND history entries with the
       documented reason
-- [ ] Verify: typecheck, lint, tests green
+- [x] Verify: typecheck, lint, tests green
 
 ### Wave 5 — Docs, version, release
 

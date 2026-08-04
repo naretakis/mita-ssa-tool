@@ -137,6 +137,12 @@ export interface MaturityProfileRow {
   notes: string;
   barriers: string;
   plans: string;
+  /**
+   * True for organizational section label rows (e.g., "Organizational
+   * Outcomes"). Label rows group the aspect rows that follow them and carry
+   * no rating data.
+   */
+  isSectionLabel?: boolean;
 }
 
 /**
