@@ -387,33 +387,33 @@ all passing. Check off tasks as completed.
 Everything through the service layer, plus mechanical call-site updates so the app
 compiles and behaves correctly at the data level.
 
-- [ ] Archive sources: move the PPTX and `transcript.md` from the repo root to
+- [x] Archive sources: move the PPTX and `transcript.md` from the repo root to
       `docs/source-documents/2026-07-30/`; add `extracted/capability-model-slides.md`
       (slides 4–6 extraction)
-- [ ] Rebuild `src/data/capabilities.json` exactly per Section 4 (flat domains, no
+- [x] Rebuild `src/data/capabilities.json` exactly per Section 4 (flat domains, no
       `categories` anywhere, placeholder descriptions per 4.5, `informationManagement`
       flags per 4.6)
-- [ ] Update `src/data/orbit-model.json` per Section 5
-- [ ] Types (`src/types/index.ts`): remove `CapabilityCategory`,
+- [x] Update `src/data/orbit-model.json` per Section 5
+- [x] Types (`src/types/index.ts`): remove `CapabilityCategory`,
       `CategorizedCapabilityDomain`, `StandardCapabilityDomain` union,
       `isCategorizedDomain`, `getAreasFromDomain`; `CapabilityDomain` becomes a single
       interface with `areas: CapabilityArea[]`; add `informationManagement?: boolean`
       to `CapabilityArea`
-- [ ] Constants (`src/constants/index.ts`): replace `ORGANIZATIONAL_ASSESSMENT_AREAS`
+- [x] Constants (`src/constants/index.ts`): replace `ORGANIZATIONAL_ASSESSMENT_AREAS`
       map with the single-area model per Section 6; keep `ENTERPRISE_DOMAIN_IDS` /
       `DOMAIN_AGGREGATE_DIMENSIONS` untouched
-- [ ] Services: simplify `capabilities.ts` (drop category functions and category
+- [x] Services: simplify `capabilities.ts` (drop category functions and category
       returns from `getAreaWithDomain` / `searchAreas`); update all
       `getAreasFromDomain` / `getOrganizationalAssessmentType` call sites across the
       app (`grep` for both) to the new helpers
-- [ ] Finalize scoring in `useCapabilityAssessments`: combined-area scoring per
+- [x] Finalize scoring in `useCapabilityAssessments`: combined-area scoring per
       Section 6 (all three sections included; average of section averages)
-- [ ] `db.ts`: add version 4 clean-break migration per Section 7
-- [ ] Update affected tests — known breakages: `capabilities.test.ts` (16 domains /
+- [x] `db.ts`: add version 4 clean-break migration per Section 7
+- [x] Update affected tests — known breakages: `capabilities.test.ts` (16 domains /
       66 areas / category assertions), `orbit.test.ts` (organizationalAssessments
       `capabilityAreaId` assertions), `useScores.test.ts` (66 total,
       `provider-screening` fixture), constants and scoring tests
-- [ ] Verify: typecheck, lint, full test suite green
+- [x] Verify: typecheck, lint, full test suite green
 
 ### Wave 2 — Assessment flow UI
 

@@ -33,7 +33,7 @@ import {
   getAggregatedDimensionForDomain,
   getOrganizationalAspects,
 } from '../services/orbit';
-import { isOrganizationalAssessmentArea, getOrganizationalAssessmentType } from '../constants';
+import { isOrganizationalAssessmentArea, getOrganizationalSections } from '../constants';
 import {
   useOrbitRatings,
   useAttachments,
@@ -86,21 +86,23 @@ interface NavItem {
 }
 
 /**
- * Build navigation items for organizational assessments (Outcomes/Roles)
- * Shows aspects directly in the sidebar instead of dimensions
- * @param orgType - The organizational assessment type
+ * Build navigation items for the combined organizational assessment.
+ * Shows aspects directly in the sidebar instead of dimensions, iterating
+ * all sections (Outcomes, Roles, Enterprise Architecture) in display order.
+ * @param sections - The organizational assessment sections
  */
-function buildOrganizationalNavItems(orgType: OrganizationalAssessmentId): NavItem[] {
-  const aspects = getOrganizationalAspects(orgType);
-  return aspects.map((aspect) => ({
-    organizationalType: orgType,
-    aspectId: aspect.id,
-    name: aspect.name,
-    description: aspect.description,
-    isRequired: true,
-    aspectCount: 1, // Each nav item is one aspect
-    isOrganizational: true,
-  }));
+function buildOrganizationalNavItems(sections: OrganizationalAssessmentId[]): NavItem[] {
+  return sections.flatMap((section) =>
+    getOrganizationalAspects(section).map((aspect) => ({
+      organizationalType: section,
+      aspectId: aspect.id,
+      name: aspect.name,
+      description: aspect.description,
+      isRequired: true,
+      aspectCount: 1, // Each nav item is one aspect
+      isOrganizational: true,
+    }))
+  );
 }
 
 /**
@@ -212,18 +214,18 @@ export default function Assessment(): JSX.Element {
     return isOrganizationalAssessmentArea(assessment.capabilityAreaId);
   }, [assessment]);
 
-  const organizationalType = useMemo(() => {
+  const organizationalSections = useMemo(() => {
     if (!assessment) return null;
-    return getOrganizationalAssessmentType(assessment.capabilityAreaId);
+    return getOrganizationalSections(assessment.capabilityAreaId);
   }, [assessment]);
 
   // Navigation state - depends on assessment type and domain
   const navItems = useMemo(() => {
-    if (organizationalType) {
-      return buildOrganizationalNavItems(organizationalType);
+    if (organizationalSections) {
+      return buildOrganizationalNavItems(organizationalSections);
     }
     return buildStandardNavItems(assessment?.capabilityDomainId);
-  }, [assessment?.capabilityDomainId, organizationalType]);
+  }, [assessment?.capabilityDomainId, organizationalSections]);
 
   const [currentNavIndex, setCurrentNavIndex] = useState(0);
   const [isReviewSelected, setIsReviewSelected] = useState(false);
@@ -631,7 +633,7 @@ export default function Assessment(): JSX.Element {
     (dimensionId: OrbitDimensionId, subDimensionId?: TechnologySubDimensionId) => {
       // For organizational assessments, dimensionId is actually the aspectId
       // Check if we're in organizational mode
-      if (isOrganizationalAssessment && organizationalType) {
+      if (isOrganizationalAssessment) {
         // Find by aspectId (passed as dimensionId from sidebar)
         const index = navItems.findIndex(
           (nav) => nav.isOrganizational && nav.aspectId === (dimensionId as string)
@@ -652,7 +654,7 @@ export default function Assessment(): JSX.Element {
         setIsReviewSelected(false);
       }
     },
-    [navItems, isOrganizationalAssessment, organizationalType]
+    [navItems, isOrganizationalAssessment]
   );
 
   const handleReviewSelect = useCallback(() => {
@@ -702,7 +704,6 @@ export default function Assessment(): JSX.Element {
         areaName={capabilityInfo.area.name}
         areaDescription={capabilityInfo.area.description}
         areaTopics={capabilityInfo.area.topics}
-        categoryName={capabilityInfo.category?.name}
         tags={assessment.tags}
         tagSuggestions={getAllTagNames()}
         onTagAdd={handleTagAdd}

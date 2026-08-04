@@ -38,8 +38,8 @@ import {
   useAttachments,
 } from '../hooks';
 import { getAreaWithDomain } from '../services/capabilities';
-import { getOrganizationalAspects } from '../services/orbit';
-import { getOrganizationalAssessmentType } from '../constants';
+import { getOrganizationalAspects, getOrganizationalAssessment } from '../services/orbit';
+import { getOrganizationalSections } from '../constants';
 import { DimensionScoresTable } from '../components/results';
 import { getScoreColor } from '../utils';
 import {
@@ -104,28 +104,27 @@ export default function AreaResults(): JSX.Element {
   const { ratings } = useOrbitRatings(assessment?.id);
   const { attachments, downloadAttachment } = useAttachments(assessment?.id);
 
-  // Check if this is an organizational assessment
-  const organizationalType = areaId ? getOrganizationalAssessmentType(areaId) : null;
-  const isOrganizationalAssessment = organizationalType !== null;
+  // Check if this is the combined organizational assessment
+  const organizationalSections = areaId ? getOrganizationalSections(areaId) : null;
+  const isOrganizationalAssessment = organizationalSections !== null;
 
-  // Build aspect data for organizational assessments
+  // Build aspect data for the organizational assessment (all sections, in order)
   const aspectChartData = useMemo(() => {
-    if (!isOrganizationalAssessment || !organizationalType || !ratings) return null;
+    if (!organizationalSections || !ratings) return null;
 
-    const aspects = getOrganizationalAspects(organizationalType);
     const labels: string[] = [];
     const scores: number[] = [];
 
-    for (const aspect of aspects) {
-      const rating = ratings.find(
-        (r) => r.dimensionId === organizationalType && r.aspectId === aspect.id
-      );
-      labels.push(aspect.name);
-      scores.push(rating?.currentLevel ?? 0);
+    for (const section of organizationalSections) {
+      for (const aspect of getOrganizationalAspects(section)) {
+        const rating = ratings.find((r) => r.dimensionId === section && r.aspectId === aspect.id);
+        labels.push(aspect.name);
+        scores.push(rating?.currentLevel ?? 0);
+      }
     }
 
     return { labels, scores };
-  }, [isOrganizationalAssessment, organizationalType, ratings]);
+  }, [organizationalSections, ratings]);
 
   // Build dimension data for radar chart - B-I-T dimensions only (standard assessments)
   const dimensionChartData = useMemo(() => {
@@ -434,7 +433,7 @@ export default function AreaResults(): JSX.Element {
             <Box
               sx={{ width: 220, height: 180 }}
               role="img"
-              aria-label={`Bar chart showing maturity levels for ${organizationalType} aspects`}
+              aria-label="Bar chart showing maturity levels for organizational assessment aspects"
             >
               <Bar data={aspectBarChartData} options={aspectBarChartOptions} />
             </Box>
@@ -491,17 +490,17 @@ export default function AreaResults(): JSX.Element {
         />
       )}
 
-      {/* Aspect Scores Table (for organizational assessments) */}
-      {isOrganizationalAssessment && organizationalType && (
-        <Paper sx={{ mb: 4 }}>
+      {/* Aspect Scores Tables (one per organizational section) */}
+      {organizationalSections?.map((section) => (
+        <Paper key={section} sx={{ mb: 4 }}>
           <Box sx={{ p: 2 }}>
             <Typography variant="h6">
-              {organizationalType === 'outcomes' ? 'Outcomes' : 'Roles'} Aspect Scores
+              {getOrganizationalAssessment(section).name} Aspect Scores
             </Typography>
           </Box>
           <Divider />
           <TableContainer>
-            <Table aria-label="Organizational assessment aspect scores">
+            <Table aria-label={`${getOrganizationalAssessment(section).name} aspect scores`}>
               <TableHead>
                 <TableRow>
                   <TableCell component="th" scope="col">
@@ -513,9 +512,9 @@ export default function AreaResults(): JSX.Element {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {getOrganizationalAspects(organizationalType).map((aspect) => {
+                {getOrganizationalAspects(section).map((aspect) => {
                   const rating = ratings.find(
-                    (r) => r.dimensionId === organizationalType && r.aspectId === aspect.id
+                    (r) => r.dimensionId === section && r.aspectId === aspect.id
                   );
                   const score = rating?.currentLevel ?? 0;
                   return (
@@ -550,7 +549,7 @@ export default function AreaResults(): JSX.Element {
             </Table>
           </TableContainer>
         </Paper>
-      )}
+      ))}
 
       {/* History */}
       {historyEntries.length > 0 && (

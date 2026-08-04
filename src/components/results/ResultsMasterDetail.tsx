@@ -33,7 +33,7 @@ import type {
   CapabilityArea,
   CapabilityLayer,
 } from '../../types';
-import { getAreasFromDomain, isCategorizedDomain } from '../../types';
+
 import { getAreaWithDomain } from '../../services/capabilities';
 import { isEnterpriseDomain, getAggregatedDimensionForDomain } from '../../services/orbit';
 import { isOrganizationalAssessmentArea as isOrgArea } from '../../constants';
@@ -116,7 +116,7 @@ function DomainDetailPanel({
   const { getDomainScore, getCapabilityScore, getCapabilityStatus } = useScores();
 
   const domainScore = getDomainScore(domain.id);
-  const allAreas = getAreasFromDomain(domain);
+  const allAreas = domain.areas;
   const finalizedAreas = allAreas.filter((area) => getCapabilityStatus(area.id) === 'finalized');
 
   return (
@@ -729,7 +729,7 @@ function NavigationPanel({
                   const isExpanded = expandedDomains.has(domain.id);
                   const isDomainSelected = selectedDomainId === domain.id;
                   const domainScore = getDomainScore(domain.id);
-                  const allAreas = getAreasFromDomain(domain);
+                  const allAreas = domain.areas;
                   const finalizedAreas = allAreas.filter(
                     (area) => getCapabilityStatus(area.id) === 'finalized'
                   );
@@ -796,106 +796,48 @@ function NavigationPanel({
 
                       <Collapse in={isExpanded} timeout="auto" unmountOnExit>
                         <List disablePadding dense>
-                          {isCategorizedDomain(domain)
-                            ? domain.categories.map((category) => (
-                                <Fragment key={category.id}>
-                                  <Box sx={{ px: 2, py: 0.25, bgcolor: 'grey.100' }}>
+                          {allAreas.map((area) => {
+                            const areaScore = getCapabilityScore(area.id);
+                            const isSelected = selectedAreaId === area.id;
+                            const isFinalized = getCapabilityStatus(area.id) === 'finalized';
+                            return (
+                              <ListItemButton
+                                key={area.id}
+                                selected={isSelected}
+                                onClick={() => onSelectArea(area.id, area.name)}
+                                sx={{
+                                  pl: 3.5,
+                                  py: 0.25,
+                                  minHeight: 28,
+                                  opacity: isFinalized ? 1 : 0.7,
+                                }}
+                              >
+                                <ListItemText
+                                  primary={
                                     <Typography
-                                      variant="caption"
-                                      fontWeight={600}
-                                      color="text.secondary"
-                                      sx={{ fontSize: '0.65rem' }}
+                                      variant="body2"
+                                      sx={{
+                                        fontSize: '0.8rem',
+                                        fontStyle: isFinalized ? 'normal' : 'italic',
+                                      }}
                                     >
-                                      {category.name}
+                                      {area.name}
                                     </Typography>
-                                  </Box>
-                                  {category.areas.map((area) => {
-                                    const areaScore = getCapabilityScore(area.id);
-                                    const isSelected = selectedAreaId === area.id;
-                                    const isFinalized =
-                                      getCapabilityStatus(area.id) === 'finalized';
-                                    return (
-                                      <ListItemButton
-                                        key={area.id}
-                                        selected={isSelected}
-                                        onClick={() => onSelectArea(area.id, area.name)}
-                                        sx={{
-                                          pl: 4,
-                                          py: 0.25,
-                                          minHeight: 28,
-                                          opacity: isFinalized ? 1 : 0.7,
-                                        }}
-                                      >
-                                        <ListItemText
-                                          primary={
-                                            <Typography
-                                              variant="body2"
-                                              sx={{
-                                                fontSize: '0.8rem',
-                                                fontStyle: isFinalized ? 'normal' : 'italic',
-                                              }}
-                                            >
-                                              {area.name}
-                                            </Typography>
-                                          }
-                                          sx={{ my: 0 }}
-                                        />
-                                        {areaScore !== null ? (
-                                          <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                                            {areaScore.toFixed(1)}
-                                          </Typography>
-                                        ) : (
-                                          <Typography variant="caption" color="text.disabled">
-                                            —
-                                          </Typography>
-                                        )}
-                                      </ListItemButton>
-                                    );
-                                  })}
-                                </Fragment>
-                              ))
-                            : allAreas.map((area) => {
-                                const areaScore = getCapabilityScore(area.id);
-                                const isSelected = selectedAreaId === area.id;
-                                const isFinalized = getCapabilityStatus(area.id) === 'finalized';
-                                return (
-                                  <ListItemButton
-                                    key={area.id}
-                                    selected={isSelected}
-                                    onClick={() => onSelectArea(area.id, area.name)}
-                                    sx={{
-                                      pl: 3.5,
-                                      py: 0.25,
-                                      minHeight: 28,
-                                      opacity: isFinalized ? 1 : 0.7,
-                                    }}
-                                  >
-                                    <ListItemText
-                                      primary={
-                                        <Typography
-                                          variant="body2"
-                                          sx={{
-                                            fontSize: '0.8rem',
-                                            fontStyle: isFinalized ? 'normal' : 'italic',
-                                          }}
-                                        >
-                                          {area.name}
-                                        </Typography>
-                                      }
-                                      sx={{ my: 0 }}
-                                    />
-                                    {areaScore !== null ? (
-                                      <Typography variant="caption" sx={{ fontWeight: 600 }}>
-                                        {areaScore.toFixed(1)}
-                                      </Typography>
-                                    ) : (
-                                      <Typography variant="caption" color="text.disabled">
-                                        —
-                                      </Typography>
-                                    )}
-                                  </ListItemButton>
-                                );
-                              })}
+                                  }
+                                  sx={{ my: 0 }}
+                                />
+                                {areaScore !== null ? (
+                                  <Typography variant="caption" sx={{ fontWeight: 600 }}>
+                                    {areaScore.toFixed(1)}
+                                  </Typography>
+                                ) : (
+                                  <Typography variant="caption" color="text.disabled">
+                                    —
+                                  </Typography>
+                                )}
+                              </ListItemButton>
+                            );
+                          })}
                         </List>
                       </Collapse>
                     </Fragment>

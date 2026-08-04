@@ -16,9 +16,10 @@ import {
   getTechnologySubDimension,
   getOrganizationalAspect,
   getOrganizationalAspects,
+  getOrganizationalAssessment,
 } from '../orbit';
 import { getDomainById, getAreaById } from '../capabilities';
-import { getOrganizationalAssessmentType } from '../../constants';
+import { getOrganizationalSections } from '../../constants';
 import {
   PAGE,
   MARGIN,
@@ -473,11 +474,14 @@ function generateCapabilityAreaSection(
   const ratings = data.data.ratings.filter((r) => r.capabilityAssessmentId === assessment.id);
 
   // Check if this is an organizational assessment
-  const orgType = getOrganizationalAssessmentType(assessment.capabilityAreaId);
+  const sections = getOrganizationalSections(assessment.capabilityAreaId);
 
-  if (orgType) {
-    // Organizational assessment: render aspects directly
-    yPos = generateOrganizationalDetails(doc, orgType, ratings, yPos);
+  if (sections) {
+    // Organizational assessment: render each section's aspects directly
+    for (const section of sections) {
+      yPos = checkPageBreak(doc, yPos, 40);
+      yPos = generateOrganizationalDetails(doc, section, ratings, yPos);
+    }
   } else {
     // Standard assessment: group ratings by B-I-T dimension
     const ratingsByDimension = new Map<OrbitDimensionId, OrbitRating[]>();
@@ -698,21 +702,27 @@ function generateDimensionDetails(
 }
 
 /**
- * Generates details for an organizational assessment's aspect ratings.
- * Shows aspects directly in a table (same pattern as dimension details but without dimension grouping).
+ * Generates details for one organizational assessment section's aspect ratings.
+ * Shows aspects directly in a table (same pattern as dimension details but
+ * without dimension grouping), preceded by the section name.
  */
 function generateOrganizationalDetails(
   doc: JsPDFWithAutoTable,
-  orgType: string,
+  orgType: Parameters<typeof getOrganizationalAspects>[0],
   ratings: OrbitRating[],
   startY: number
 ): number {
   let yPos = startY;
 
-  // Get all aspects for this organizational assessment
-  const aspects = getOrganizationalAspects(
-    orgType as Parameters<typeof getOrganizationalAspects>[0]
-  );
+  // Section subheader (e.g., "Organizational Outcomes")
+  doc.setFontSize(10);
+  doc.setFont('helvetica', 'bold');
+  doc.setTextColor(...COLORS.primary);
+  doc.text(getOrganizationalAssessment(orgType).name, MARGIN_LEFT, yPos);
+  yPos += 6;
+
+  // Get all aspects for this organizational assessment section
+  const aspects = getOrganizationalAspects(orgType);
   const orgRatings = ratings.filter((r) => r.dimensionId === orgType);
 
   // Build table data

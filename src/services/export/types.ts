@@ -10,7 +10,6 @@ import type {
   AssessmentHistory,
   Tag,
   OrbitDimensionId,
-  OrganizationalAssessmentId,
 } from '../../types';
 
 /**
@@ -147,10 +146,8 @@ export interface CapabilityAreaProfile {
   domainName: string;
   areaName: string;
   rows: MaturityProfileRow[];
-  /** True if this is an organizational assessment (Outcomes/Roles) */
+  /** True if this is the combined organizational assessment */
   isOrganizationalAssessment?: boolean;
-  /** The organizational assessment type if applicable */
-  organizationalType?: OrganizationalAssessmentId;
 }
 
 /**

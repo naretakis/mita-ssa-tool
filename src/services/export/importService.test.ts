@@ -664,10 +664,10 @@ describe('importService', () => {
         [
           {
             id: assessmentId,
-            capabilityDomainId: 'enterprise-governance',
-            capabilityDomainName: 'Enterprise Governance',
-            capabilityAreaId: 'organizational-outcomes', // Organizational assessment
-            capabilityAreaName: 'Organizational Outcomes',
+            capabilityDomainId: 'enterprise-architecture-domain',
+            capabilityDomainName: 'Enterprise Architecture',
+            capabilityAreaId: 'enterprise-governance', // Combined organizational assessment
+            capabilityAreaName: 'Enterprise Governance',
             status: 'finalized',
             overallScore: 3.5,
           },
@@ -707,10 +707,10 @@ describe('importService', () => {
         [
           {
             id: assessmentId,
-            capabilityDomainId: 'enterprise-governance',
-            capabilityDomainName: 'Enterprise Governance',
-            capabilityAreaId: 'organizational-roles', // Organizational assessment
-            capabilityAreaName: 'Organizational Roles',
+            capabilityDomainId: 'enterprise-architecture-domain',
+            capabilityDomainName: 'Enterprise Architecture',
+            capabilityAreaId: 'enterprise-governance', // Combined organizational assessment
+            capabilityAreaName: 'Enterprise Governance',
             status: 'finalized',
             overallScore: 3.0,
           },

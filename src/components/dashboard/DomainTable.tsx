@@ -27,7 +27,6 @@ import { CapabilityRow } from './CapabilityRow';
 import { TagsDisplay } from './TagsDisplay';
 import { useScores } from '../../hooks';
 import type { CapabilityDomain, CapabilityArea, CapabilityLayer } from '../../types';
-import { getAreasFromDomain, isCategorizedDomain } from '../../types';
 
 /**
  * Layer display configuration
@@ -187,7 +186,7 @@ export function DomainTable({
 
             // Check if any domains in this layer have visible areas after filtering
             const hasVisibleDomains = layerDomains.some((domain) => {
-              const allAreas = getAreasFromDomain(domain);
+              const allAreas = domain.areas;
               const filteredAreas = filterAreas(allAreas);
               return filteredAreas.length > 0 || (!searchQuery && selectedTags.length === 0);
             });
@@ -226,7 +225,7 @@ export function DomainTable({
 
                 {/* Domain Rows for this Layer */}
                 {layerDomains.map((domain) => {
-                  const allAreas = getAreasFromDomain(domain);
+                  const allAreas = domain.areas;
                   const filteredAreas = filterAreas(allAreas);
                   const isExpanded = expandedDomains.has(domain.id);
                   const domainScore = getDomainScore(domain.id);
@@ -323,72 +322,24 @@ export function DomainTable({
 
                       {/* Capability Area Rows */}
                       {isExpanded &&
-                        (isCategorizedDomain(domain)
-                          ? domain.categories.map((category) => {
-                              const categoryAreas = filterAreas(category.areas);
-                              if (
-                                categoryAreas.length === 0 &&
-                                (searchQuery || selectedTags.length > 0)
-                              ) {
-                                return null;
-                              }
-                              return (
-                                <Fragment key={category.id}>
-                                  {/* Category Header */}
-                                  <TableRow>
-                                    <TableCell
-                                      colSpan={6}
-                                      sx={{ bgcolor: 'grey.100', py: 0.5, pl: 6 }}
-                                    >
-                                      <Typography
-                                        variant="caption"
-                                        fontWeight={600}
-                                        color="text.secondary"
-                                      >
-                                        {category.name}
-                                      </Typography>
-                                    </TableCell>
-                                  </TableRow>
-                                  {categoryAreas.map((area) => (
-                                    <CapabilityRow
-                                      key={area.id}
-                                      area={area}
-                                      status={getCapabilityStatus(area.id)}
-                                      score={getCapabilityScore(area.id)}
-                                      tags={getCapabilityTags(area.id)}
-                                      completion={getCapabilityCompletion(area.id)}
-                                      onStart={() => onStartAssessment(area.id)}
-                                      onResume={() => onResumeAssessment(area.id)}
-                                      onEdit={() => onEditAssessment(area.id)}
-                                      onView={() => onViewAssessment(area.id)}
-                                      onExport={() => onExportAssessment(area.id)}
-                                      onDelete={() => onDeleteAssessment(area.id)}
-                                      onViewHistory={onViewHistory}
-                                      onDeleteHistory={onDeleteHistory}
-                                      indentLevel={2}
-                                    />
-                                  ))}
-                                </Fragment>
-                              );
-                            })
-                          : filteredAreas.map((area) => (
-                              <CapabilityRow
-                                key={area.id}
-                                area={area}
-                                status={getCapabilityStatus(area.id)}
-                                score={getCapabilityScore(area.id)}
-                                tags={getCapabilityTags(area.id)}
-                                completion={getCapabilityCompletion(area.id)}
-                                onStart={() => onStartAssessment(area.id)}
-                                onResume={() => onResumeAssessment(area.id)}
-                                onEdit={() => onEditAssessment(area.id)}
-                                onView={() => onViewAssessment(area.id)}
-                                onExport={() => onExportAssessment(area.id)}
-                                onDelete={() => onDeleteAssessment(area.id)}
-                                onViewHistory={onViewHistory}
-                                onDeleteHistory={onDeleteHistory}
-                              />
-                            )))}
+                        filteredAreas.map((area) => (
+                          <CapabilityRow
+                            key={area.id}
+                            area={area}
+                            status={getCapabilityStatus(area.id)}
+                            score={getCapabilityScore(area.id)}
+                            tags={getCapabilityTags(area.id)}
+                            completion={getCapabilityCompletion(area.id)}
+                            onStart={() => onStartAssessment(area.id)}
+                            onResume={() => onResumeAssessment(area.id)}
+                            onEdit={() => onEditAssessment(area.id)}
+                            onView={() => onViewAssessment(area.id)}
+                            onExport={() => onExportAssessment(area.id)}
+                            onDelete={() => onDeleteAssessment(area.id)}
+                            onViewHistory={onViewHistory}
+                            onDeleteHistory={onDeleteHistory}
+                          />
+                        ))}
                     </Fragment>
                   );
                 })}

@@ -13,7 +13,7 @@ import { createHistorySnapshot as createSnapshot } from '../services/history';
 import { incrementTagUsage } from '../services/tags';
 import { calculateDimensionScore } from '../services/scoring';
 import { isEnterpriseDomain, getAggregatedDimensionForDomain } from '../services/orbit';
-import { getOrganizationalAssessmentType } from '../constants';
+import { getOrganizationalSections } from '../constants';
 import type {
   CapabilityAssessment,
   AssessmentStatus,
@@ -171,19 +171,29 @@ export function useCapabilityAssessments(): UseCapabilityAssessmentsReturn {
       .equals(assessmentId)
       .toArray();
 
-    // Check if this is an organizational assessment (Outcomes, Roles, Enterprise Architecture)
-    const orgType = getOrganizationalAssessmentType(assessment.capabilityAreaId);
+    // Check if this is the combined organizational assessment
+    const sections = getOrganizationalSections(assessment.capabilityAreaId);
 
     let overallScore: number | undefined;
 
-    if (orgType) {
-      // Organizational assessments: simple average of all assessed aspect ratings
-      const assessedRatings = ratings.filter(
-        (r) => r.dimensionId === orgType && r.currentLevel > 0
-      );
-      if (assessedRatings.length > 0) {
-        const avg =
-          assessedRatings.reduce((sum, r) => sum + r.currentLevel, 0) / assessedRatings.length;
+    if (sections) {
+      // Combined organizational assessment: average of section averages.
+      // Each section (Outcomes, Roles, Enterprise Architecture) scores as the
+      // mean of its assessed aspects; sections with no assessed aspects are
+      // excluded (mirrors how B-I-T averages only dimensions with scores).
+      const sectionScores: number[] = [];
+      for (const section of sections) {
+        const assessedRatings = ratings.filter(
+          (r) => r.dimensionId === section && r.currentLevel > 0
+        );
+        if (assessedRatings.length > 0) {
+          const sectionAvg =
+            assessedRatings.reduce((sum, r) => sum + r.currentLevel, 0) / assessedRatings.length;
+          sectionScores.push(sectionAvg);
+        }
+      }
+      if (sectionScores.length > 0) {
+        const avg = sectionScores.reduce((sum, s) => sum + s, 0) / sectionScores.length;
         overallScore = Math.round(avg * 10) / 10;
       }
     } else {

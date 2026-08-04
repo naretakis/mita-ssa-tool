@@ -62,13 +62,11 @@ describe('csvExport', () => {
   const createOrganizationalAreaProfile = (
     domainName: string,
     areaName: string,
-    organizationalType: 'outcomes' | 'roles',
     rows: CapabilityAreaProfile['rows'] = []
   ): CapabilityAreaProfile => ({
     domainName,
     areaName,
     isOrganizationalAssessment: true,
-    organizationalType,
     rows:
       rows.length > 0
         ? rows
@@ -273,7 +271,7 @@ describe('csvExport', () => {
   describe('generateMaturityProfileCsv - Organizational Assessments', () => {
     it('should use Aspect column header for organizational assessments', () => {
       const profile = createProfile('Test State', 'Enterprise Governance', [
-        createOrganizationalAreaProfile('Enterprise Governance', 'Outcomes Assessment', 'outcomes'),
+        createOrganizationalAreaProfile('Enterprise Governance', 'Outcomes Assessment'),
       ]);
 
       const csv = generateMaturityProfileCsv(profile);
@@ -284,7 +282,7 @@ describe('csvExport', () => {
 
     it('should include aspect rows for organizational assessments', () => {
       const profile = createProfile('Test State', 'Enterprise Governance', [
-        createOrganizationalAreaProfile('Enterprise Governance', 'Outcomes Assessment', 'outcomes'),
+        createOrganizationalAreaProfile('Enterprise Governance', 'Outcomes Assessment'),
       ]);
 
       const csv = generateMaturityProfileCsv(profile);
@@ -295,7 +293,7 @@ describe('csvExport', () => {
 
     it('should handle organizational assessment notes and barriers', () => {
       const profile = createProfile('Test State', 'Enterprise Governance', [
-        createOrganizationalAreaProfile('Enterprise Governance', 'Roles Assessment', 'roles', [
+        createOrganizationalAreaProfile('Enterprise Governance', 'Roles Assessment', [
           {
             dimension: 'Role Aspect',
             asIs: '2.0',
@@ -360,11 +358,7 @@ describe('csvExport', () => {
           createStandardAreaProfile('Provider Management', 'Provider Enrollment'),
         ]),
         createProfile('Test State', 'Enterprise Governance', [
-          createOrganizationalAreaProfile(
-            'Enterprise Governance',
-            'Outcomes Assessment',
-            'outcomes'
-          ),
+          createOrganizationalAreaProfile('Enterprise Governance', 'Outcomes Assessment'),
         ]),
       ];
 
@@ -559,29 +553,24 @@ Aspect 2,2.5,3.5,,,Plans here`;
 
     it('should preserve data through generate -> parse cycle for organizational assessments', () => {
       const original = createProfile('Round Trip State', 'Enterprise Governance', [
-        createOrganizationalAreaProfile(
-          'Enterprise Governance',
-          'Outcomes Assessment',
-          'outcomes',
-          [
-            {
-              dimension: 'Outcome Aspect 1',
-              asIs: '3.0',
-              toBe: '4.0',
-              notes: 'Important notes',
-              barriers: 'Some barriers',
-              plans: 'Future plans',
-            },
-            {
-              dimension: 'Outcome Aspect 2',
-              asIs: '2.5',
-              toBe: '3.5',
-              notes: '',
-              barriers: '',
-              plans: '',
-            },
-          ]
-        ),
+        createOrganizationalAreaProfile('Enterprise Governance', 'Outcomes Assessment', [
+          {
+            dimension: 'Outcome Aspect 1',
+            asIs: '3.0',
+            toBe: '4.0',
+            notes: 'Important notes',
+            barriers: 'Some barriers',
+            plans: 'Future plans',
+          },
+          {
+            dimension: 'Outcome Aspect 2',
+            asIs: '2.5',
+            toBe: '3.5',
+            notes: '',
+            barriers: '',
+            plans: '',
+          },
+        ]),
       ]);
 
       const csv = generateMaturityProfileCsv(original);

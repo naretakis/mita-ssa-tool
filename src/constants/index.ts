@@ -50,14 +50,22 @@ export const DOMAIN_AGGREGATE_DIMENSIONS: Partial<Record<string, OrbitDimensionI
 // =============================================================================
 
 /**
- * Capability area IDs that use organizational assessment mode.
- * These areas assess Outcomes/Roles aspects directly, not through ORBIT dimensions.
+ * The single capability area that uses organizational assessment mode.
+ * The Enterprise Governance area (under the Enterprise Architecture domain)
+ * hosts all 15 organizational aspects in three sections.
  */
-export const ORGANIZATIONAL_ASSESSMENT_AREAS: Record<string, OrganizationalAssessmentId> = {
-  'organizational-outcomes': 'outcomes',
-  'organizational-roles': 'roles',
-  'organizational-enterprise-architecture': 'enterprise-architecture',
-};
+export const ORGANIZATIONAL_ASSESSMENT_AREA_ID = 'enterprise-governance';
+
+/**
+ * The organizational assessment sections, in display order.
+ * Each section is one organizational assessment type whose aspects are
+ * assessed within the combined Enterprise Governance area.
+ */
+export const ORGANIZATIONAL_SECTIONS: OrganizationalAssessmentId[] = [
+  'outcomes',
+  'roles',
+  'enterprise-architecture',
+];
 
 /**
  * Check if a capability area uses organizational assessment mode.
@@ -65,16 +73,17 @@ export const ORGANIZATIONAL_ASSESSMENT_AREAS: Record<string, OrganizationalAsses
  * @returns True if this area uses organizational assessment mode
  */
 export function isOrganizationalAssessmentArea(areaId: string): boolean {
-  return areaId in ORGANIZATIONAL_ASSESSMENT_AREAS;
+  return areaId === ORGANIZATIONAL_ASSESSMENT_AREA_ID;
 }
 
 /**
- * Get the organizational assessment type for a capability area.
+ * Get the organizational assessment sections for a capability area.
  * @param areaId - The capability area ID
- * @returns The organizational assessment type, or null if not an organizational assessment
+ * @returns The section types (in display order), or null if the area is not
+ *          an organizational assessment
  */
-export function getOrganizationalAssessmentType(areaId: string): OrganizationalAssessmentId | null {
-  return ORGANIZATIONAL_ASSESSMENT_AREAS[areaId] ?? null;
+export function getOrganizationalSections(areaId: string): OrganizationalAssessmentId[] | null {
+  return isOrganizationalAssessmentArea(areaId) ? ORGANIZATIONAL_SECTIONS : null;
 }
 
 // =============================================================================

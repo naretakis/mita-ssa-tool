@@ -527,7 +527,7 @@ describe('useScores', () => {
       const counts = result.current.getStatusCounts();
       expect(counts.inProgress).toBe(1);
       expect(counts.finalized).toBe(2);
-      expect(counts.total).toBe(66); // Total capability areas
+      expect(counts.total).toBe(72); // Total capability areas
     });
   });
 
@@ -550,8 +550,8 @@ describe('useScores', () => {
           id: 'a2',
           capabilityDomainId: 'provider-management',
           capabilityDomainName: 'Provider Management',
-          capabilityAreaId: 'provider-screening',
-          capabilityAreaName: 'Provider Screening',
+          capabilityAreaId: 'provider-eligibility',
+          capabilityAreaName: 'Provider Eligibility',
           status: 'in_progress',
           tags: [],
           createdAt: new Date(),
